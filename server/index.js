@@ -128,7 +128,7 @@ app.get('/status/:sessionId', async (req, res) => {
 });
 
 // ── POST /download ───────────────────────────────────────────────────────────
-document.querySelector('.conteudo-preview')
+
   .style.filter = 'none';
 app.post('/download', async (req, res) => {
   const { token, sessionId, dados } = req.body;
