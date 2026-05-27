@@ -47,25 +47,7 @@ const session = await stripe.checkout.sessions.create({
 
   metadata: { nome1, nome2 }
 });
-    const session = await stripe.checkout.sessions.create({
-      mode: 'payment',
-      customer_email: email,
-      line_items: [{
-        price_data: {
-          currency: 'brl',
-          unit_amount: Number(process.env.PRICE_CENTS) || 1990,
-          product_data: {
-            name: 'LoveBlast — Retrospectiva do Dia dos Namorados',
-            description: `Retrospectiva personalizada de ${nome1} & ${nome2}`,
-          },
-        },
-        quantity: 1,
-      }],
-      payment_method_types: ['card'],
-      success_url: `${process.env.APP_URL}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
-      cancel_url:  `${process.env.APP_URL}/?cancelado=1`,
-      metadata: { nome1, nome2 },
-    });
+
 
     orders.set(session.id, { status: 'pending', downloadToken: null, createdAt: new Date(), nome1, nome2 });
     res.json({ sessionId: session.id, checkoutUrl: session.url });
