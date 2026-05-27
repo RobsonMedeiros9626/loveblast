@@ -22,23 +22,31 @@ function generateDownloadToken(sessionId) {
 }
 
 // ── POST /criar-sessao ───────────────────────────────────────────────────────
-app.post('/criar-sessao', async (req, res) => {
-  try {
-const { nome1, nome2, email } = req.body;
+const session = await stripe.checkout.sessions.create({
+  mode: 'payment',
 
-if (!nome1 || !nome2) {
-  return res.status(400).json({
-    erro: 'Campos obrigatórios ausentes.'
-  });
-}
-// validação de email
-const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  customer_email: email || undefined,
 
-if (!emailValido.test(email)) {
-  return res.status(400).json({
-    erro: 'Digite um e-mail válido.'
-  });
-}
+  line_items: [{
+    price_data: {
+      currency: 'brl',
+      unit_amount: Number(process.env.PRICE_CENTS) || 1990,
+      product_data: {
+        name: 'LoveBlast — Retrospectiva do Dia dos Namorados',
+        description: `Retrospectiva personalizada de ${nome1} & ${nome2}`,
+      },
+    },
+    quantity: 1,
+  }],
+
+  payment_method_types: ['card'],
+
+  success_url: `${process.env.APP_URL}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
+
+  cancel_url: `${process.env.APP_URL}/?cancelado=1`,
+
+  metadata: { nome1, nome2 }
+});
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
