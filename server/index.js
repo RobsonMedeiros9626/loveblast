@@ -36,7 +36,8 @@ app.post('/criar-sessao', async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
 
-      // customer_email removido
+      customer_email: email || undefined, 
+      
       line_items: [{
         price_data: {
           currency: 'brl',
