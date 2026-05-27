@@ -129,7 +129,7 @@ app.get('/status/:sessionId', async (req, res) => {
 
 // ── POST /download ───────────────────────────────────────────────────────────
 
-  .style.filter = 'none';
+
 app.post('/download', async (req, res) => {
   const { token, sessionId, dados } = req.body;
   if (!token || !sessionId) return res.status(400).json({ erro: 'Token ou sessão ausente.' });
