@@ -47,7 +47,6 @@ const session = await stripe.checkout.sessions.create({
 
   metadata: { nome1, nome2 }
 });
-
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
       customer_email: email,
