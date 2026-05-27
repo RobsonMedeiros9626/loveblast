@@ -24,14 +24,13 @@ function generateDownloadToken(sessionId) {
 // ── POST /criar-sessao ───────────────────────────────────────────────────────
 app.post('/criar-sessao', async (req, res) => {
   try {
- const { nome1, nome2, email } = req.body;
+const { nome1, nome2, email } = req.body;
 
-if (!nome1 || !nome2 || !email) {
+if (!nome1 || !nome2) {
   return res.status(400).json({
     erro: 'Campos obrigatórios ausentes.'
   });
 }
-
 // validação de email
 const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
