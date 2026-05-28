@@ -145,12 +145,143 @@ footer p{font-size:.78rem;color:var(--muted)}
 .btn-next-modal{background:linear-gradient(90deg,var(--magenta),var(--orange));color:var(--white);border:none;border-radius:4px;padding:.75rem 2rem;font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;cursor:none;transition:transform .15s,box-shadow .2s}
 .btn-next-modal:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(255,45,120,.4)}
 @media(max-width:600px){nav{padding:1rem 1.2rem}.hero{padding:7rem 1.2rem 4rem}.modal-body{padding:1.2rem}.form-row{grid-template-columns:1fr}.stats-strip{flex-direction:column}.stat-item{border-right:none;border-bottom:1px solid rgba(255,45,120,.15)}.stat-item:last-child{border-bottom:none}}
+  .preview-overlay {
+  font-size: clamp(3rem,8vw,7rem);
+  font-weight: 800;
+  text-align: center;
+  line-height: .9;
+  background: linear-gradient(90deg,#FF2D78,#FF6B1A,#FFD60A);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 700px;
+}
+
+.timeline-item {
+  padding: 24px;
+  border: 1px solid rgba(255,45,120,.2);
+  background: rgba(255,255,255,.03);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+}
+
+.timeline-item h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.music-player {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,.08);
+  padding: 14px 18px;
+  border-radius: 20px;
+}
+
+@media(max-width:768px){
+
+  body {
+    cursor: auto;
+  }
+
+  .cursor,
+  .cursor-ring {
+    display:none;
+  }
+
+  .story-slide {
+    padding: 20px;
+  }
+
+  .cinematic-text {
+    font-size: 3rem;
+  }
+
+  .story-slide img {
+    max-width: 100%;
+  }
+
+}
 </style>
 </head>
+<div id="preview-container"></div>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <div id="cinematic-experience" class="story-wrapper locked-preview">
+
+  <section class="story-slide">
+    <div>
+      <div class="cinematic-text">
+        O PRESENTE MAIS
+        INTENSO QUE EXISTE
+      </div>
+    </div>
+  </section>
+
+  <section class="story-slide">
+    <img id="preview-photo-1" src="" alt="Foto do casal">
+  </section>
+
+  <section class="story-slide">
+    <div class="timeline">
+
+      <div class="timeline-item">
+        <h3>2019 ❤️</h3>
+        <p>Nos conhecemos</p>
+      </div>
+
+      <div class="timeline-item">
+        <h3>2020 ✨</h3>
+        <p>Primeira viagem</p>
+      </div>
+
+      <div class="timeline-item">
+        <h3>2025 🔥</h3>
+        <p>Ainda parece o começo</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="story-slide">
+    <div>
+      <h2 class="cinematic-text">
+        Algumas histórias merecem ser eternizadas.
+      </h2>
+    </div>
+  </section>
+
+</div>
+
+<div id="premium-preview" class="preview-overlay">
+  <h2>Desbloqueie a retrospectiva completa</h2>
+
+  <p>
+    Veja sua história ganhar vida com animações cinematográficas,
+    música e experiência premium.
+  </p>
+
+  <button class="unlock-btn" id="unlock-preview-btn">
+    Desbloquear agora ❤️
+  </button>
+</div>
+
+<div class="music-player">
+  <audio id="bg-music" controls>
+    <source src="" type="audio/mpeg">
+  </audio>
+</div>
 <body>
 <div class="cursor" id="cursor"></div>
 <div class="cursor-ring" id="cursorRing"></div>
@@ -393,6 +524,60 @@ async function downloadRetro(){
     sessionStorage.removeItem('lb_dados');sessionStorage.removeItem('lb_session');
   }catch{alert('Erro ao baixar. Tente novamente.');}
 }
+  // GSAP
+
+gsap.registerPlugin(ScrollTrigger);
+
+// INTRO
+
+gsap.from('.cinematic-text', {
+  opacity: 0,
+  y: 120,
+  duration: 1.4,
+  ease: 'power4.out'
+});
+
+// TIMELINE
+
+gsap.utils.toArray('.timeline-item').forEach((item, i) => {
+
+  gsap.from(item, {
+    scrollTrigger: {
+      trigger: item,
+      start: 'top 85%'
+    },
+    opacity: 0,
+    y: 80,
+    duration: 1,
+    delay: i * .15
+  });
+
+});
+
+// ZOOM NAS FOTOS
+
+gsap.to('#preview-photo-1', {
+  scale: 1.08,
+  duration: 6,
+  repeat: -1,
+  yoyo: true,
+  ease: 'sine.inOut'
+});
+
+// PARALLAX
+
+gsap.utils.toArray('.story-slide').forEach(section => {
+
+  gsap.from(section, {
+    scrollTrigger: {
+      trigger: section,
+      scrub: true
+    },
+    y: 80,
+    opacity: .4
+  });
+
+});
 </script>
 </body>
 </html>
