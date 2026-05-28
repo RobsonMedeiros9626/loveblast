@@ -5,11 +5,10 @@ const crypto   = require('crypto');
 const path     = require('path');
 const Stripe   = require('stripe');
 
-// 1. Inicializar o APP Express (Isso resolve o "ReferenceError: app is not defined")
+// 1. Inicializar o APP Express (Resolve o ReferenceError)
 const app = express();
 
-// 2. Inicializar o Stripe corretamente com a chave secreta enviada por parâmetro
-// (Garante que o objeto 'stripe' minúsculo usado nas suas rotas funcione)
+// 2. Inicializar a instância do Stripe (Garante que o objeto 'stripe' minúsculo funcione)
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // ── Middlewares ──────────────────────────────────────────────────────────────
@@ -26,8 +25,9 @@ app.use((req, res, next) => {
 });
 
 // ── Banco em memória ─────────────────────────────────────────────────────────
-// A partir daqui, o seu código original continua exatamente igual...
+// orders: { sessionId -> { status, downloadToken, retroId, nome1, nome2 } }
 const orders = new Map();
+// retros: { retroId -> { html, dados, audioBuffer, audioMime, createdAt } }
 const retros = new Map();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -178,7 +178,6 @@ body::-webkit-scrollbar{display:none}
 </head>
 <body>
 
-<!-- Side nav -->
 <nav class="sidenav" id="sidenav">
   <div class="sidenav-dot active" data-target="0"></div>
   <div class="sidenav-dot" data-target="1"></div>
@@ -188,7 +187,6 @@ body::-webkit-scrollbar{display:none}
   <div class="sidenav-dot" data-target="5"></div>
 </nav>
 
-<!-- S1: Intro -->
 <div class="slide s-intro" id="s0">
   <div class="particles" id="p0"></div>
   <div class="intro-eyebrow">✦ Uma história de amor</div>
@@ -202,31 +200,26 @@ body::-webkit-scrollbar{display:none}
   </div>
 </div>
 
-<!-- S2: Fotos -->
 <div class="slide s-photos" id="s1">
   <div class="photos-label">📸 Momentos que ficam</div>
   <div class="photos-grid">${photoSlots}</div>
 </div>
 
-<!-- S3: Timeline -->
 <div class="slide s-timeline" id="s2">
   <div class="tl-title">Nossa história ❤️</div>
   <div class="tl-list" id="tl-list"></div>
 </div>
 
-<!-- S4: Mensagem -->
 <div class="slide s-message" id="s3">
   <div class="msg-quote" id="msg-quote"></div>
   <div class="msg-from" id="msg-from">— ${nome1}</div>
 </div>
 
-<!-- S5: Música -->
 <div class="slide s-music" id="s4">
   <div class="music-label">♫ Nossa música</div>
   ${audioSection}
 </div>
 
-<!-- S6: Final -->
 <div class="slide s-final" id="s5">
   <div class="particles" id="p5"></div>
   <div class="final-text">
@@ -357,7 +350,7 @@ function buildTimelineData(data, n1, n2) {
     if (yr + 2 <= now) items.push({ year: String(yr + 2), icon: '💫', text: 'Viraram inseparáveis' });
   } else {
     items.push({ year: 'O início',   icon: '❤️', text: `${n1} & ${n2} se encontraram` });
-    items.push({ year: 'A jornada',  icon: '✨', text: 'Construíram algo único' });
+    items.push({ year: 'A jornada',  icon: '✨', text: 'Construíram algo unique' });
     items.push({ year: 'O presente', icon: '💫', text: 'Cada dia melhor que o anterior' });
   }
   items.push({ year: 'Hoje 🔥', icon: '🎯', text: 'Ainda parece o primeiro dia' });
@@ -373,6 +366,7 @@ app.post('/criar-sessao', async (req, res) => {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
       }
 
+      // Alterado: payment_method_types agora inclui 'pix' para suporte total no Brasil
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         line_items: [{
@@ -386,7 +380,7 @@ app.post('/criar-sessao', async (req, res) => {
           },
           quantity: 1,
         }],
-        payment_method_types: ['card'],
+        payment_method_types: ['card', 'pix'],
         success_url: `${process.env.APP_URL || ('https://' + req.get('host'))}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
         cancel_url:  `${process.env.APP_URL || ('https://' + req.get('host'))}/?cancelado=1`,
         metadata: { nome1, nome2 },
@@ -403,7 +397,7 @@ app.post('/criar-sessao', async (req, res) => {
       res.json({ sessionId: session.id, checkoutUrl: session.url });
 
     } catch (err) {
-      console.error('Erro Stripe:', err.message);
+      console.error('Erro Stripe:', err.message || err);
       res.status(500).json({ erro: 'Erro ao criar sessão de pagamento.' });
     }
   }
@@ -462,13 +456,10 @@ app.get('/status/:sessionId', async (req, res) => {
 });
 
 // ── POST /gerar-retro ────────────────────────────────────────────────────────
-// Frontend envia dados após confirmar pagamento.
-// Gera e persiste a retrospectiva.
 app.post('/gerar-retro', async (req, res) => {
   const { token, sessionId, dados } = req.body;
   if (!token || !sessionId) return res.status(400).json({ erro: 'Token ou sessão ausente.' });
 
-  // Valida pagamento
   let order = orders.get(sessionId);
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -480,20 +471,15 @@ app.post('/gerar-retro', async (req, res) => {
   if (!order) order = orders.get(sessionId) || {};
   if (order.downloadToken && order.downloadToken !== token) return res.status(403).json({ erro: 'Token inválido.' });
 
-  // Já foi gerada?
   const existingRetro = order.retroId ? retros.get(order.retroId) : null;
   if (existingRetro && existingRetro.html) {
     return res.json({ retroId: order.retroId, url: '/view/' + order.retroId });
   }
 
-  // Áudio vem como base64 no campo dados.audioBase64
   const audioDataUrl = (dados && dados.audioBase64) ? dados.audioBase64 : null;
-
-  // Gera HTML
   const retroId = order.retroId || generateRetroId();
   const html = buildRetroHtml(dados || {}, audioDataUrl);
 
-  // Persiste
   retros.set(retroId, { html, dados, createdAt: new Date() });
   orders.set(sessionId, { ...order, retroId });
 
@@ -502,7 +488,6 @@ app.post('/gerar-retro', async (req, res) => {
 });
 
 // ── GET /view/:retroId ────────────────────────────────────────────────────────
-// Rota pública — abre a retrospectiva no browser diretamente
 app.get('/view/:retroId', (req, res) => {
   const retro = retros.get(req.params.retroId);
   if (!retro) {
@@ -517,7 +502,6 @@ app.get('/view/:retroId', (req, res) => {
 });
 
 // ── GET /download/:retroId ────────────────────────────────────────────────────
-// Download do HTML com nome de arquivo correto, sem cache
 app.get('/download/:retroId', (req, res) => {
   const retro = retros.get(req.params.retroId);
   if (!retro) return res.status(404).json({ erro: 'Retrospectiva não encontrada.' });
@@ -530,7 +514,7 @@ app.get('/download/:retroId', (req, res) => {
   res.send(retro.html);
 });
 
-// ── POST /download (legado — mantém compatibilidade) ─────────────────────────
+// ── POST /download (legado) ───────────────────────────────────────────────────
 app.post('/download', async (req, res) => {
   const { token, sessionId, dados } = req.body;
   if (!token || !sessionId) return res.status(400).json({ erro: 'Token ou sessão ausente.' });
@@ -541,12 +525,10 @@ app.post('/download', async (req, res) => {
     const order = orders.get(sessionId);
     if (!order || order.status !== 'paid') return res.status(403).json({ erro: 'Token inválido.' });
   }
-  // Redireciona para o novo fluxo
   const order = orders.get(sessionId);
   if (order && order.retroId && retros.has(order.retroId)) {
     return res.redirect('/download/' + order.retroId);
   }
-  // Gera na hora (fallback)
   const html = buildRetroHtml(dados || {}, null);
   const { nome1='retro', nome2='' } = dados || {};
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
