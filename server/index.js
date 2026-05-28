@@ -140,7 +140,7 @@ body::-webkit-scrollbar{display:none}
 /* S4: Mensagem */
 .s-message{background:radial-gradient(ellipse at 30% 50%,${t.particle}.1),transparent 60%),#0A0708}
 .msg-quote{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(1.05rem,3.5vw,1.5rem);line-height:1.75;max-width:340px;color:#FAF5F0;position:relative}
-.msg-quote::before{content:'\201C';position:absolute;top:-.4rem;left:-.2rem;font-size:3.5rem;color:${t.particle}.15);font-family:'Instrument Serif',serif;line-height:1}
+.msg-quote::before{content:'\u201C';position:absolute;top:-.4rem;left:-.2rem;font-size:3.5rem;color:${t.particle}.15);font-family:'Instrument Serif',serif;line-height:1}
 .msg-word{display:inline-block;opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
 .msg-word.show{opacity:1;transform:translateY(0)}
 .msg-from{margin-top:1.4rem;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${t.accent};opacity:0;transition:opacity .6s .8s ease}
