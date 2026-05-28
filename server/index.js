@@ -5,20 +5,29 @@ const crypto   = require('crypto');
 const path     = require('path');
 const Stripe   = require('stripe');
 
+// 1. Inicializar o APP Express (Isso resolve o "ReferenceError: app is not defined")
+const app = express();
+
+// 2. Inicializar o Stripe corretamente com a chave secreta enviada por parâmetro
+// (Garante que o objeto 'stripe' minúsculo usado nas suas rotas funcione)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 // ── Middlewares ──────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../public')));
+
+// O webhook do Stripe precisa receber o body em formato RAW (Buffer)
 app.use('/webhook', express.raw({ type: 'application/json' }));
-// JSON para rotas normais (fotos em base64 são grandes — mantém 20mb)
+
+// JSON para rotas normais (fotos em base64 são grandes — mantém 25mb)
 app.use((req, res, next) => {
   if (req.path === '/webhook') return next();
   express.json({ limit: '25mb' })(req, res, next);
 });
 
 // ── Banco em memória ─────────────────────────────────────────────────────────
-// orders: { sessionId -> { status, downloadToken, retroId, nome1, nome2 } }
+// A partir daqui, o seu código original continua exatamente igual...
 const orders = new Map();
-// retros: { retroId -> { html, dados, audioBuffer, audioMime, createdAt } }
 const retros = new Map();
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
