@@ -417,8 +417,8 @@ app.post('/criar-sessao',
           quantity: 1,
         }],
         payment_method_types: ['card'],
-        success_url: `${process.env.APP_URL}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
-        cancel_url:  `${process.env.APP_URL}/?cancelado=1`,
+        success_url: `${process.env.APP_URL || ('https://' + req.get('host'))}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
+        cancel_url:  `${process.env.APP_URL || ('https://' + req.get('host'))}/?cancelado=1`,
         metadata: { nome1, nome2, audioTempId: audioTempId || '' },
       });
 
