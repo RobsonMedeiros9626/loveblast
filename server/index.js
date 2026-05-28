@@ -4,21 +4,6 @@ const cors     = require('cors');
 const crypto   = require('crypto');
 const path     = require('path');
 const Stripe   = require('stripe');
-const multer   = require('multer');
-
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-const app    = express();
-
-// ── Multer: MP3 em memória (max 15 MB) ──────────────────────────────────────
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 15 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    const ok = ['audio/mpeg','audio/mp3','audio/wav','audio/ogg','audio/mp4','audio/x-m4a'].includes(file.mimetype)
-               || file.originalname.match(/\.(mp3|wav|ogg|m4a)$/i);
-    cb(null, !!ok);
-  }
-});
 
 // ── Middlewares ──────────────────────────────────────────────────────────────
 app.use(cors());
@@ -371,36 +356,12 @@ function buildTimelineData(data, n1, n2) {
 }
 
 // ── POST /criar-sessao ───────────────────────────────────────────────────────
-// Agora aceita multipart/form-data (com MP3) OU JSON (sem MP3)
-app.post('/criar-sessao',
-  (req, res, next) => {
-    const ct = req.headers['content-type'] || '';
-    if (ct.includes('multipart/form-data')) {
-      upload.single('audio')(req, res, next);
-    } else {
-      next();
-    }
-  },
-  async (req, res) => {
+app.post('/criar-sessao', async (req, res) => {
     try {
-      // Suporta tanto JSON quanto form-data
-      const body = req.body;
-      const nome1 = body.nome1;
-      const nome2 = body.nome2;
+      const { nome1, nome2 } = req.body;
 
       if (!nome1 || !nome2) {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
-      }
-
-      // Salva audio temporariamente se enviado
-      let audioTempId = null;
-      if (req.file) {
-        audioTempId = crypto.randomBytes(8).toString('hex');
-        retros.set('audio_tmp_' + audioTempId, {
-          buffer: req.file.buffer,
-          mime: req.file.mimetype,
-          createdAt: new Date(),
-        });
       }
 
       const session = await stripe.checkout.sessions.create({
@@ -419,7 +380,7 @@ app.post('/criar-sessao',
         payment_method_types: ['card'],
         success_url: `${process.env.APP_URL || ('https://' + req.get('host'))}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
         cancel_url:  `${process.env.APP_URL || ('https://' + req.get('host'))}/?cancelado=1`,
-        metadata: { nome1, nome2, audioTempId: audioTempId || '' },
+        metadata: { nome1, nome2 },
       });
 
       orders.set(session.id, {
@@ -428,7 +389,6 @@ app.post('/criar-sessao',
         retroId: null,
         createdAt: new Date(),
         nome1, nome2,
-        audioTempId,
       });
 
       res.json({ sessionId: session.id, checkoutUrl: session.url });
@@ -517,21 +477,8 @@ app.post('/gerar-retro', async (req, res) => {
     return res.json({ retroId: order.retroId, url: '/view/' + order.retroId });
   }
 
-  // Recupera áudio (se houver)
-  let audioDataUrl = null;
-  const audioTempId = order.audioTempId || (dados && dados.audioTempId);
-  if (audioTempId) {
-    const audioObj = retros.get('audio_tmp_' + audioTempId);
-    if (audioObj) {
-      const b64 = audioObj.buffer.toString('base64');
-      audioDataUrl = `data:${audioObj.mime};base64,${b64}`;
-      retros.delete('audio_tmp_' + audioTempId); // limpa temp
-    }
-  }
-  // Se áudio veio inline no dados (base64)
-  if (!audioDataUrl && dados && dados.audioBase64) {
-    audioDataUrl = dados.audioBase64;
-  }
+  // Áudio vem como base64 no campo dados.audioBase64
+  const audioDataUrl = (dados && dados.audioBase64) ? dados.audioBase64 : null;
 
   // Gera HTML
   const retroId = order.retroId || generateRetroId();
