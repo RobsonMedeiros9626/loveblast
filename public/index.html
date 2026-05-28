@@ -844,25 +844,65 @@ async function iniciarPagamento(){
   const nome1=document.getElementById('name1').value.trim();
   const nome2=document.getElementById('name2').value.trim();
   if(!nome1||!nome2){alert('Preencha seu nome e o nome do seu amor antes de continuar.');jumpToPanel(3);return;}
-  const btn=document.getElementById('btn-pay'),lbl=document.getElementById('pay-label');
-  btn.disabled=true;lbl.innerHTML='<span class="spinner"></span> Criando sessão...';
-  sessionStorage.setItem('lb_dados',JSON.stringify({
+
+  const btn=document.getElementById('btn-pay');
+  const lbl=document.getElementById('pay-label');
+
+  // Garante que o botão volte mesmo em caso de erro
+  function resetBtn(){
+    btn.disabled=false;
+    lbl.textContent='🔒 Pagar R$ 19,90 via Stripe';
+  }
+
+  btn.disabled=true;
+  lbl.innerHTML='<span class="spinner"></span> Criando sessão...';
+
+  // Salva dados no sessionStorage antes de sair da página
+  sessionStorage.setItem('lb_dados', JSON.stringify({
     audioBase64: audioBase64,
-    nome1,nome2,
-    data:document.getElementById('special-date').value,
-    mensagem:document.getElementById('message').value.trim(),
-    musica:document.getElementById('music').value.trim(),
-    fotos:photos,tema:theme,
+    nome1, nome2,
+    data:     document.getElementById('special-date').value,
+    mensagem: document.getElementById('message').value.trim(),
+    musica:   document.getElementById('music').value.trim(),
+    fotos:    photos,
+    tema:     theme,
   }));
-  try{
-    const res=await fetch(`${API}/criar-sessao`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({nome1,nome2})});
-    if(!res.ok)throw new Error();
-    const{sessionId,checkoutUrl}=await res.json();
-    sessionStorage.setItem('lb_session',sessionId);
-    window.location.href=checkoutUrl;
-  }catch{
-    alert('Não foi possível iniciar o pagamento. Tente novamente.');
-    btn.disabled=false;lbl.textContent='🔒 Pagar R$ 19,90 via Stripe';
+
+  // Timeout de 15s para não ficar travado para sempre
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>{
+    controller.abort();
+  }, 15000);
+
+  try {
+    const res = await fetch('/criar-sessao', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome1, nome2 }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) {
+      let msg = 'Erro ao criar sessão de pagamento.';
+      try { const d = await res.json(); msg = d.erro || msg; } catch {}
+      throw new Error(msg);
+    }
+
+    const { sessionId, checkoutUrl } = await res.json();
+    if (!checkoutUrl) throw new Error('URL de checkout não recebida.');
+
+    sessionStorage.setItem('lb_session', sessionId);
+    // Redireciona para o Stripe Checkout
+    window.location.href = checkoutUrl;
+
+  } catch(err) {
+    clearTimeout(timeout);
+    const msg = err.name === 'AbortError'
+      ? 'A requisição demorou muito. Verifique sua conexão e tente novamente.'
+      : (err.message || 'Erro desconhecido. Tente novamente.');
+    alert('Não foi possível iniciar o pagamento:\n' + msg);
+    resetBtn();
   }
 }
 
