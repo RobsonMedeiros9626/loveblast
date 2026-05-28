@@ -158,13 +158,17 @@ app.post('/download', async (req, res) => {
   let dateStr = '';
   if (data) { const d = new Date(data+'T00:00:00'); dateStr = `Juntos desde ${d.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}`; }
 
-  // Identifica se o usuário colou um link válido do YouTube para extrair o ID do vídeo
+  // Extrator ultra preciso de ID do YouTube (Ignora lixo extra na URL de canais/anúncios)
   let youtubeId = '';
   if (musica && (musica.includes('youtube.com') || musica.includes('youtu.be'))) {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\/shorts\/)([^#\&\?]*).*/;
-    const match = musica.match(regExp);
-    if (match && match[2].length === 11) {
-      youtubeId = match[2];
+    try {
+      const regExp = /^.*(?:(?:youtu\.be\/|v\/|vi\/|u\/\w\/|embed\/|shorts\/)|(?:(?:watch)?\?v(?:i)?\=|\&v(?:i)?\=))([^#\&\?]*).*/;
+      const match = musica.match(regExp);
+      if (match && match[1] && match[1].length === 11) {
+        youtubeId = match[1];
+      }
+    } catch (e) {
+      console.error("Erro ao processar link da música:", e);
     }
   }
 
@@ -181,12 +185,12 @@ app.post('/download', async (req, res) => {
   .photos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1.5rem 0}
   .msg{font-family:'Instrument Serif',serif;font-style:italic;font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:.8rem 0}
   
-  /* Botão interativo de áudio */
-  .music-container{margin-top:0.8rem}
-  .music-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:.5rem 1.2rem;font-size:.78rem;color:${t.mc};cursor:pointer;transition:all 0.2s;outline:none}
+  /* Botão de Música */
+  .music-container{margin-top:1.2rem}
+  .music-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:.6rem 1.4rem;font-size:.82rem;color:${t.mc};cursor:pointer;transition:all 0.2s;outline:none;-webkit-tap-highlight-color:transparent}
   .music-btn:hover{background:rgba(255,255,255,.15);transform:scale(1.03)}
   .music-btn.playing{background:${t.accent}20;border-color:${t.accent};color:#fff}
-  #yt-player{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  #yt-player{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px}
 </style>
 </head>
 <body>
@@ -201,7 +205,7 @@ app.post('/download', async (req, res) => {
   ${musica ? `
     <div class="music-container">
       <button class="music-btn" id="playTrigger" onclick="toggleAudio()">
-        <span id="music-icon">▶</span> <span id="music-text">${youtubeId ? 'Carregando música...' : musica}</span>
+        <span id="music-icon">▶</span> <span id="music-text">${youtubeId ? 'Carregando música...' : 'Clique para ouvir'}</span>
       </button>
     </div>
   ` : ''}
@@ -213,18 +217,20 @@ ${youtubeId ? `
   <script>
     let player;
     let isPlaying = false;
+    let apiReady = false;
     
     function onYouTubeIframeAPIReady() {
       player = new YT.Player('yt-player', {
-        height: '0',
-        width: '0',
+        height: '1',
+        width: '1',
         videoId: '${youtubeId}',
         playerVars: {
           'playsinline': 1,
           'controls': 0,
           'disablekb': 1,
           'fs': 0,
-          'rel': 0
+          'rel': 0,
+          'modestbranding': 1
         },
         events: {
           'onReady': onPlayerReady,
@@ -234,10 +240,14 @@ ${youtubeId ? `
     }
 
     function onPlayerReady(event) {
-      document.getElementById('music-text').textContent = "Ouvir música ♫";
-      // Ativa reprodução automática ao primeiro clique na tela caso o usuário interaja fora do botão
-      document.body.addEventListener('click', () => {
-        if(!isPlaying) toggleAudio();
+      apiReady = true;
+      document.getElementById('music-text').textContent = "Dar o Play ♫";
+      
+      // Se o usuário clicar em QUALQUER canto da tela do celular, o áudio já começa sozinho
+      document.body.addEventListener('click', function() {
+        if(!isPlaying) {
+          toggleAudio();
+        }
       }, { once: true });
     }
 
@@ -253,12 +263,12 @@ ${youtubeId ? `
         isPlaying = false;
         btn.classList.remove('playing');
         icon.textContent = '▶';
-        document.getElementById('music-text').textContent = "Ouvir música ♫";
+        document.getElementById('music-text').textContent = "Dar o Play ♫";
       }
     }
 
     function toggleAudio() {
-      if (!player || typeof player.playVideo !== 'function') return;
+      if (!apiReady || !player || typeof player.playVideo !== 'function') return;
       if (!isPlaying) {
         player.playVideo();
       } else {
@@ -269,7 +279,7 @@ ${youtubeId ? `
 ` : `
   <script>
     function toggleAudio() {
-      alert("Música: ${musica}");
+      alert("Tocando: ${musica.replace(/"/g, '&quot;')}");
     }
   </script>
 `}
