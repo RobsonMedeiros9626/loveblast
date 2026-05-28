@@ -361,6 +361,15 @@ footer p{font-size:.75rem;color:var(--muted)}
   .form-row{grid-template-columns:1fr}
   .preview-slides{height:360px}
 }
+
+.audio-upload-box{border:1.5px dashed rgba(139,61,255,.35);border-radius:8px;padding:1rem 1.2rem;display:flex;align-items:center;gap:.9rem;cursor:none;transition:border-color .2s,background .2s;background:rgba(139,61,255,.04)}
+.audio-upload-box:hover{border-color:#8B3DFF;background:rgba(139,61,255,.08)}
+.audio-upload-icon{font-size:1.6rem;flex-shrink:0}
+.audio-upload-text{font-size:.8rem;color:var(--muted);line-height:1.5}
+.audio-upload-text span{color:#8B3DFF;font-weight:500}
+.audio-upload-text small{font-size:.7rem;color:rgba(250,245,240,.25)}
+.audio-upload-name{font-size:.78rem;color:#8B3DFF;font-weight:500;word-break:break-all}
+
 </style>
 </head>
 <body>
@@ -377,7 +386,7 @@ footer p{font-size:.75rem;color:var(--muted)}
 <!-- ══ HERO ══════════════════════════════════════════════════════════════════ -->
 <section class="hero">
   <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
-  <div class="hero-tag">✦ Dia dos Namorados 2026</div>
+  <div class="hero-tag">✦ Dia dos Namorados 2025</div>
   <h1><span class="line-1">O presente</span><span class="line-2">mais intenso</span><span class="line-3">que existe</span></h1>
   <p class="hero-sub">Uma retrospectiva cinematográfica com vocês dois — fotos, mensagem e a música que é só de vocês.</p>
   <div class="hero-actions">
@@ -470,7 +479,16 @@ footer p{font-size:.75rem;color:var(--muted)}
         </div>
         <div class="form-group"><label class="form-label">Data especial</label><input class="form-input" id="special-date" type="date"></div>
         <div class="form-group"><label class="form-label">Sua mensagem</label><textarea class="form-textarea" id="message" placeholder="Escreva do coração..."></textarea></div>
-        <div class="form-group"><label class="form-label">Nossa música ♫</label><input class="form-input" id="music" type="text" placeholder="Ex: Perfect — Ed Sheeran"></div>
+        <div class="form-group">
+          <label class="form-label">Nossa música ♫</label>
+          <input class="form-input" id="music" type="text" placeholder="Nome da música — Ex: Perfect (Ed Sheeran)" style="margin-bottom:.6rem">
+          <div class="audio-upload-box" id="audio-upload-box" onclick="document.getElementById('audio-input').click()">
+            <div class="audio-upload-icon">🎵</div>
+            <div class="audio-upload-text"><span>Clique para fazer upload do MP3</span><br><small>Opcional · MP3, WAV, M4A · até 15 MB</small></div>
+            <div class="audio-upload-name" id="audio-upload-name" style="display:none"></div>
+          </div>
+          <input type="file" id="audio-input" accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a,.ogg" style="display:none">
+        </div>
       </div>
 
       <!-- P4: PRÉVIA PREMIUM (antes do pagamento) -->
@@ -803,6 +821,25 @@ function goToSlide(n){
 }
 
 // ══ PAGAMENTO ════════════════════════════════════════════════════════════════
+// Audio upload state
+let audioFile = null;
+let audioBase64 = null;
+document.getElementById('audio-input').addEventListener('change', function() {
+  const file = this.files[0];
+  if (!file) return;
+  if (file.size > 15 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 15 MB.'); return; }
+  audioFile = file;
+  const nameEl = document.getElementById('audio-upload-name');
+  const textEl = document.getElementById('audio-upload-box').querySelector('.audio-upload-text');
+  nameEl.textContent = '✓ ' + file.name;
+  nameEl.style.display = 'block';
+  textEl.style.display = 'none';
+  // Converte para base64 para salvar no sessionStorage
+  const reader = new FileReader();
+  reader.onload = e => { audioBase64 = e.target.result; };
+  reader.readAsDataURL(file);
+});
+
 async function iniciarPagamento(){
   const nome1=document.getElementById('name1').value.trim();
   const nome2=document.getElementById('name2').value.trim();
@@ -810,6 +847,7 @@ async function iniciarPagamento(){
   const btn=document.getElementById('btn-pay'),lbl=document.getElementById('pay-label');
   btn.disabled=true;lbl.innerHTML='<span class="spinner"></span> Criando sessão...';
   sessionStorage.setItem('lb_dados',JSON.stringify({
+    audioBase64: audioBase64,
     nome1,nome2,
     data:document.getElementById('special-date').value,
     mensagem:document.getElementById('message').value.trim(),
@@ -1032,12 +1070,40 @@ function shareRetro(){
 }
 
 // ══ STATUS BOX (após pagamento) ══════════════════════════════════════════
-function mostrarPago(){
+async function mostrarPago(){
   document.getElementById('status-box').innerHTML=`
     <span class="status-icon">🎉</span>
     <div class="status-title">Pagamento confirmado!</div>
-    <p class="status-msg">Sua retrospectiva cinematográfica está pronta.</p>
-    <button class="dl-btn" style="margin-top:1.2rem" onclick="liberarRetrospectiva()">✨ Abrir minha retrospectiva</button>`;
+    <p class="status-msg">Gerando sua retrospectiva...</p>
+    <div style="margin-top:1rem"><span class="spinner"></span></div>`;
+
+  // Recupera dados
+  let dados = {};
+  try { dados = JSON.parse(sessionStorage.getItem('lb_dados') || '{}'); } catch {}
+
+  // Gera a retrospectiva no servidor e obtém o ID único
+  try {
+    const res = await fetch('/gerar-retro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: downloadToken, sessionId: currentSessionId, dados }),
+    });
+    if (!res.ok) throw new Error('Erro ao gerar');
+    const { retroId, url } = await res.json();
+
+    // Limpa sessionStorage
+    sessionStorage.removeItem('lb_dados');
+    sessionStorage.removeItem('lb_session');
+
+    // Redireciona para /view/:retroId
+    window.location.href = url;
+  } catch(err) {
+    document.getElementById('status-box').innerHTML=`
+      <span class="status-icon">🎉</span>
+      <div class="status-title">Pagamento confirmado!</div>
+      <p class="status-msg">Clique para abrir sua retrospectiva.</p>
+      <button class="dl-btn" style="margin-top:1.2rem" onclick="liberarRetrospectiva()">✨ Abrir retrospectiva</button>`;
+  }
 }
 const _origIniciarPolling=iniciarPolling;
 function iniciarPolling(){
