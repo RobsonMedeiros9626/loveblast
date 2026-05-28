@@ -82,6 +82,7 @@ app.post('/criar-sessao', async (req, res) => {
 
   }
 });
+
 // ── POST /webhook ────────────────────────────────────────────────────────────
 app.post('/webhook', (req, res) => {
   const sig    = req.headers['stripe-signature'];
@@ -128,8 +129,6 @@ app.get('/status/:sessionId', async (req, res) => {
 });
 
 // ── POST /download ───────────────────────────────────────────────────────────
-
-
 app.post('/download', async (req, res) => {
   const { token, sessionId, dados } = req.body;
   if (!token || !sessionId) return res.status(400).json({ erro: 'Token ou sessão ausente.' });
@@ -159,10 +158,124 @@ app.post('/download', async (req, res) => {
   let dateStr = '';
   if (data) { const d = new Date(data+'T00:00:00'); dateStr = `Juntos desde ${d.toLocaleDateString('pt-BR',{day:'numeric',month:'long',year:'numeric'})}`; }
 
+  // Identifica se o usuário colou um link válido do YouTube para extrair o ID do vídeo
+  let youtubeId = '';
+  if (musica && (musica.includes('youtube.com') || musica.includes('youtu.be'))) {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|\/shorts\/)([^#\&\?]*).*/;
+    const match = musica.match(regExp);
+    if (match && match[2].length === 11) {
+      youtubeId = match[2];
+    }
+  }
+
   const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${nome1} & ${nome2} ♥</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Instrument+Serif:ital@1&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
-<style>*{box-sizing:border-box;margin:0;padding:0}body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:${t.bg};font-family:'Space Grotesk',sans-serif;padding:2rem}.card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(20px);border-radius:20px;max-width:400px;width:100%;padding:2.5rem 2rem;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.6)}.heart{font-size:2.5rem;animation:pulse 1.5s ease-in-out infinite;display:block;margin-bottom:.6rem}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}.names{font-family:'Instrument Serif',serif;font-style:italic;font-size:2rem;color:${t.accent}}.date{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.3rem}.photos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1.5rem 0}.msg{font-family:'Instrument Serif',serif;font-style:italic;font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:.8rem 0}.music{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:.35rem .9rem;font-size:.78rem;color:${t.mc};margin-top:.5rem}</style></head>
-<body><div class="card"><span class="heart">🔥</span><div class="names">${nome1} & ${nome2}</div>${dateStr?`<div class="date">${dateStr}</div>`:''}<div class="photos">${slots}</div>${mensagem?`<div class="msg">"${mensagem}"</div>`:''}${musica?`<div><span class="music">♫ ${musica}</span></div>`:''}</div></body></html>`;
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:${t.bg};font-family:'Space Grotesk',sans-serif;padding:2rem}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);backdrop-filter:blur(20px);border-radius:20px;max-width:400px;width:100%;padding:2.5rem 2rem;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,.6)}
+  .heart{font-size:2.5rem;animation:pulse 1.5s ease-in-out infinite;display:block;margin-bottom:.6rem}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+  .names{font-family:'Instrument Serif',serif;font-style:italic;font-size:2rem;color:${t.accent}}
+  .date{font-size:.75rem;color:rgba(255,255,255,.4);margin-top:.3rem}
+  .photos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:1.5rem 0}
+  .msg{font-family:'Instrument Serif',serif;font-style:italic;font-size:1rem;color:rgba(255,255,255,.75);line-height:1.7;margin:.8rem 0}
+  
+  /* Botão interativo de áudio */
+  .music-container{margin-top:0.8rem}
+  .music-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:.5rem 1.2rem;font-size:.78rem;color:${t.mc};cursor:pointer;transition:all 0.2s;outline:none}
+  .music-btn:hover{background:rgba(255,255,255,.15);transform:scale(1.03)}
+  .music-btn.playing{background:${t.accent}20;border-color:${t.accent};color:#fff}
+  #yt-player{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <span class="heart">🔥</span>
+  <div class="names">${nome1} & ${nome2}</div>
+  ${dateStr ? `<div class="date">${dateStr}</div>` : ''}
+  <div class="photos">${slots}</div>
+  ${mensagem ? `<div class="msg">"${mensagem}"</div>` : ''}
+  
+  ${musica ? `
+    <div class="music-container">
+      <button class="music-btn" id="playTrigger" onclick="toggleAudio()">
+        <span id="music-icon">▶</span> <span id="music-text">${youtubeId ? 'Carregando música...' : musica}</span>
+      </button>
+    </div>
+  ` : ''}
+</div>
+
+${youtubeId ? `
+  <div id="yt-player"></div>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    let player;
+    let isPlaying = false;
+    
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('yt-player', {
+        height: '0',
+        width: '0',
+        videoId: '${youtubeId}',
+        playerVars: {
+          'playsinline': 1,
+          'controls': 0,
+          'disablekb': 1,
+          'fs': 0,
+          'rel': 0
+        },
+        events: {
+          'onReady': onPlayerReady,
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerReady(event) {
+      document.getElementById('music-text').textContent = "Ouvir música ♫";
+      // Ativa reprodução automática ao primeiro clique na tela caso o usuário interaja fora do botão
+      document.body.addEventListener('click', () => {
+        if(!isPlaying) toggleAudio();
+      }, { once: true });
+    }
+
+    function onPlayerStateChange(event) {
+      const btn = document.getElementById('playTrigger');
+      const icon = document.getElementById('music-icon');
+      if (event.data == YT.PlayerState.PLAYING) {
+        isPlaying = true;
+        btn.classList.add('playing');
+        icon.textContent = '⏸';
+        document.getElementById('music-text').textContent = "Música tocando";
+      } else {
+        isPlaying = false;
+        btn.classList.remove('playing');
+        icon.textContent = '▶';
+        document.getElementById('music-text').textContent = "Ouvir música ♫";
+      }
+    }
+
+    function toggleAudio() {
+      if (!player || typeof player.playVideo !== 'function') return;
+      if (!isPlaying) {
+        player.playVideo();
+      } else {
+        player.pauseVideo();
+      }
+    }
+  </script>
+` : `
+  <script>
+    function toggleAudio() {
+      alert("Música: ${musica}");
+    }
+  </script>
+`}
+
+</body>
+</html>`;
 
   res.setHeader('Content-Type','text/html; charset=utf-8');
   res.setHeader('Content-Disposition',`attachment; filename="loveblast-${nome1}-${nome2}.html"`);
