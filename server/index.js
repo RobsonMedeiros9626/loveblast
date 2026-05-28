@@ -5,7 +5,7 @@ const crypto  = require('crypto');
 const path    = require('path');
 const Stripe  = require('stripe');
 
-// 1. Inicializar o APP Express (Resolve o erro "app is not defined")
+// 1. Inicializar o APP Express
 const app = express();
 
 // 2. Inicializar a instância do Stripe
@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, '../public')));
 // O webhook do Stripe precisa receber o body em formato RAW (Buffer)
 app.use('/webhook', express.raw({ type: 'application/json' }));
 
-// JSON para rotas normais (fotos e músicas em base64 — mantém 25mb)
+// JSON para rotas normais com limite estendido para aguentar as fotos/músicas
 app.use((req, res, next) => {
   if (req.path === '/webhook') return next();
   express.json({ limit: '25mb' })(req, res, next);
@@ -97,13 +97,12 @@ function buildRetroHtml(dados, audioDataUrl) {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#0A0708">
 <title>${nome1} & ${nome2} ♥ — LoveBlast</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Serif:ital@1&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
-body{font-family:'Space Grotesk',sans-serif;background:#0A0708;color:#FAF5F0;overflow-x:hidden;overscroll-behavior:none}
+body{font-family:'Space Grotesk',sans-serif;background:#0A0708;color:#FAF5F0;overflow-x:hidden}
 body::-webkit-scrollbar{display:none}
 .slide{min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:2rem 1.5rem;text-align:center}
 .particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
@@ -155,7 +154,6 @@ body::-webkit-scrollbar{display:none}
 .s-final{background:${t.bg}}
 .final-text{font-family:'Syne',sans-serif;font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;letter-spacing:-.02em;line-height:1.3;max-width:340px;opacity:0;animation:fadeUp .9s .3s ease forwards}
 .final-text em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:${t.accent};display:block;font-size:1.25em;margin-top:.3rem;animation:glowPulse 3s 1.2s ease-in-out infinite}
-.final-names{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.3rem;color:#FAF5F0;margin-top:1.4rem;opacity:0;animation:fadeUp .8s .6s ease forwards}
 .final-actions{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:280px;margin-top:2rem;opacity:0;animation:fadeUp .8s .9s ease forwards}
 .btn-dl{padding:.9rem;border-radius:8px;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:none;cursor:pointer;transition:transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:.4rem}
 .btn-dl.primary{background:linear-gradient(90deg,${t.accent},${t.mc});color:#0A0708}
@@ -305,6 +303,7 @@ app.post('/criar-sessao', async (req, res) => {
         return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
       }
 
+      // CORREÇÃO: Removido o método 'pix' para evitar o erro de recusa do Stripe
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
         line_items: [{
@@ -318,7 +317,7 @@ app.post('/criar-sessao', async (req, res) => {
           },
           quantity: 1,
         }],
-        payment_method_types: ['card', 'pix'],
+        payment_method_types: ['card'], // Apenas 'card' ativo
         success_url: `${process.env.APP_URL || ('https://' + req.get('host'))}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
         cancel_url:  `${process.env.APP_URL || ('https://' + req.get('host'))}/?cancelado=1`,
         metadata: { nome1, nome2 },
