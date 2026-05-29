@@ -1,481 +1,290 @@
 require('dotenv').config();
+
 const express = require('express');
-const cors    = require('cors');
-const crypto  = require('crypto');
-const path    = require('path');
-const Stripe  = require('stripe');
+const cors = require('cors');
+const crypto = require('crypto');
+const path = require('path');
+const Stripe = require('stripe');
 
-// 1. Inicializar o APP Express
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY || '');
 const app = express();
+const PUBLIC_DIR = path.join(__dirname, '../public');
 
-// 2. Inicializar a instância do Stripe
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// ── Middlewares ──────────────────────────────────────────────────────────────
-app.use(cors());
-app.use(express.static(path.join(__dirname, '../public')));
-
-// O webhook do Stripe precisa receber o body em formato RAW (Buffer)
-app.use('/webhook', express.raw({ type: 'application/json' }));
-
-// JSON para rotas normais com limite estendido para aguentar as fotos/músicas
-app.use((req, res, next) => {
-  if (req.path === '/webhook') return next();
-  express.json({ limit: '25mb' })(req, res, next);
-});
-
-// ── Banco em memória ─────────────────────────────────────────────────────────
+// Banco em memória — para produção forte, trocar por DB depois.
 const orders = new Map();
-const retros = new Map();
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function generateToken(seed) {
-  return crypto.createHash('sha256')
-    .update(`${seed}:${Date.now()}:${process.env.TOKEN_SECRET || 'secret'}`)
-    .digest('hex');
+function generateDownloadToken(sessionId) {
+  const payload = `${sessionId}:${Date.now()}:${process.env.TOKEN_SECRET || 'loveblast'}`;
+  return crypto.createHash('sha256').update(payload).digest('hex');
 }
 
-function generateRetroId() {
-  return crypto.randomBytes(8).toString('hex');
+function validEmail(email = '') {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
 }
 
-function buildTimelineData(data, n1, n2) {
-  const items = [];
-  if (data) {
-    const yr = new Date(data + 'T00:00:00').getFullYear();
-    const now = new Date().getFullYear();
-    items.push({ year: String(yr), icon: '❤️', text: `${n1} & ${n2} se encontraram` });
-    if (yr + 1 <= now) items.push({ year: String(yr + 1), icon: '✨', text: 'Primeira aventura juntos' });
-    if (yr + 2 <= now) items.push({ year: String(yr + 2), icon: '💫', text: 'Viraram inseparáveis' });
-  } else {
-    items.push({ year: 'O início',   icon: '❤️', text: `${n1} & ${n2} se encontraram` });
-    items.push({ year: 'A jornada',  icon: '✨', text: 'Construíram algo único' });
-    items.push({ year: 'O presente', icon: '💫', text: 'Cada dia melhor que o anterior' });
-  }
-  items.push({ year: 'Hoje 🔥', icon: '🎯', text: 'Ainda parece o primeiro dia' });
-  return items.slice(0, 4);
+function safeText(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
-function buildRetroHtml(dados, audioDataUrl) {
-  const { nome1='Você', nome2='Amor', data, mensagem, musica, fotos=[], tema='fire' } = dados;
-
-  const temas = {
-    fire:   { bg:'linear-gradient(135deg,#1A0008 0%,#4D0019 40%,#FF2D78 100%)', accent:'#FF2D78', mc:'#FF6B9D', particle:'rgba(255,45,120,' },
-    cosmos: { bg:'linear-gradient(135deg,#050010 0%,#1A0060 40%,#8B3DFF 100%)', accent:'#8B3DFF', mc:'#B07AFF', particle:'rgba(139,61,255,' },
-    gold:   { bg:'linear-gradient(135deg,#0D0900 0%,#3D2200 40%,#FFD60A 100%)', accent:'#FFD60A', mc:'#FFD60A', particle:'rgba(255,214,10,'  },
-  };
-  const t = temas[tema] || temas.fire;
-
-  let dateStr = '';
-  if (data) {
-    const d = new Date(data + 'T00:00:00');
-    dateStr = `Juntos desde ${d.toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' })}`;
-  }
-
-  const photoSlots = [0,1,2,3].map(i =>
-    fotos[i]
-      ? `<div class="photo-item"><img src="${fotos[i]}" alt="Foto ${i+1}" loading="lazy"></div>`
-      : `<div class="photo-item empty">📷</div>`
-  ).join('');
-
-  const audioSection = audioDataUrl ? `
-  <div class="music-player">
-    <div class="player-track">♫ ${musica || 'Nossa música'}</div>
-    <audio id="audio" src="${audioDataUrl}" preload="metadata" playsinline></audio>
-    <div class="player-bar" id="player-bar">
-      <div class="player-progress" id="player-progress"></div>
-    </div>
-    <div class="player-controls">
-      <button onclick="seek(-10)">⏮</button>
-      <button id="play-btn" onclick="togglePlay()">▶</button>
-      <button onclick="seek(10)">⏭</button>
-    </div>
-  </div>` : musica ? `<div class="music-badge">♫ ${musica}</div>` : '';
-
-  return `<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>${nome1} & ${nome2} ♥ — LoveBlast</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Serif:ital@1&family=Space+Grotesk:wght@300;400&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth;scroll-snap-type:y mandatory}
-body{font-family:'Space Grotesk',sans-serif;background:#0A0708;color:#FAF5F0;overflow-x:hidden}
-body::-webkit-scrollbar{display:none}
-.slide{min-height:100dvh;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;padding:2rem 1.5rem;text-align:center}
-.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
-.particle{position:absolute;border-radius:50%;animation:floatUp linear infinite}
-@keyframes floatUp{0%{transform:translateY(100vh);opacity:0}10%{opacity:.5}90%{opacity:.2}100%{transform:translateY(-20px);opacity:0}}
-.s-intro{background:${t.bg}}
-.intro-eyebrow{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:${t.mc};margin-bottom:1.5rem;opacity:0;animation:fadeUp .8s .3s ease forwards}
-.intro-names{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(2.5rem,10vw,5rem);line-height:1;color:#FAF5F0;opacity:0;animation:fadeUp .9s .5s ease forwards;text-shadow:0 0 40px ${t.particle}.3)}
-.intro-names .amp{color:${t.accent};animation:glowPulse 3s 1.5s ease-in-out infinite}
-.intro-date{font-size:.78rem;color:rgba(250,245,240,.45);margin-top:1.2rem;letter-spacing:.1em;text-transform:uppercase;opacity:0;animation:fadeUp .8s .9s ease forwards}
-.scroll-hint{position:absolute;bottom:1.8rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;opacity:0;animation:fadeUp .8s 1.6s ease forwards}
-.scroll-hint span{font-size:.62rem;color:rgba(250,245,240,.35);letter-spacing:.1em;text-transform:uppercase}
-.scroll-arrow{width:18px;height:18px;border-right:2px solid ${t.accent};border-bottom:2px solid ${t.accent};transform:rotate(45deg);animation:bounce 1.5s ease-in-out infinite}
-@keyframes bounce{0%,100%{transform:rotate(45deg) translate(0,0);opacity:.4}50%{transform:rotate(45deg) translate(4px,4px);opacity:1}}
-.s-photos{background:#0D0008}
-.photos-label{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:${t.accent};margin-bottom:1.4rem}
-.photos-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:320px;width:100%}
-.photo-item{aspect-ratio:1;border-radius:12px;overflow:hidden;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
-.photo-item img{width:100%;height:100%;object-fit:cover;animation:slowZoom 12s ease-in-out infinite alternate}
-.photo-item.empty{display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.15)}
-@keyframes slowZoom{from{transform:scale(1)}to{transform:scale(1.06)}}
-.s-timeline{background:linear-gradient(180deg,#0D0008,#050010)}
-.tl-title{font-family:'Syne',sans-serif;font-size:clamp(1.5rem,5vw,2.4rem);font-weight:800;letter-spacing:-.03em;margin-bottom:2rem}
-.tl-list{display:flex;flex-direction:column;gap:1.2rem;max-width:300px;width:100%;position:relative}
-.tl-list::before{content:'';position:absolute;left:13px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,${t.accent},transparent)}
-.tl-item{display:flex;align-items:flex-start;gap:.9rem;opacity:0;transform:translateX(-20px);transition:opacity .6s ease,transform .6s ease}
-.tl-item.show{opacity:1;transform:translateX(0)}
-.tl-dot{width:26px;height:26px;border-radius:50%;background:${t.accent};display:flex;align-items:center;justify-content:center;font-size:.8rem;flex-shrink:0;box-shadow:0 0 14px ${t.particle}.4)}
-.tl-year{font-family:'Syne',sans-serif;font-size:.65rem;font-weight:700;color:${t.accent};letter-spacing:.1em;text-transform:uppercase}
-.tl-text{font-family:'Instrument Serif',serif;font-style:italic;font-size:1rem;color:#FAF5F0;margin-top:.1rem;line-height:1.4}
-.s-message{background:radial-gradient(ellipse at 30% 50%,${t.particle}.1),transparent 60%),#0A0708}
-.msg-quote{font-family:'Instrument Serif',serif;font-style:italic;font-size:clamp(1.05rem,3.5vw,1.5rem);line-height:1.75;max-width:340px;position:relative}
-.msg-quote::before{content:'\\u201C';position:absolute;top:-.4rem;left:-.2rem;font-size:3.5rem;color:${t.particle}.15);font-family:'Instrument Serif',serif;line-height:1}
-.msg-word{display:inline-block;opacity:0;transform:translateY(6px);transition:opacity .35s ease,transform .35s ease}
-.msg-word.show{opacity:1;transform:translateY(0)}
-.msg-from{margin-top:1.4rem;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:${t.accent};opacity:0;transition:opacity .6s .8s ease}
-.msg-from.show{opacity:1}
-.s-music{background:linear-gradient(180deg,#050010,#0A0708)}
-.music-label{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#8B3DFF;margin-bottom:1.4rem}
-.music-player{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:1.5rem;max-width:290px;width:100%;backdrop-filter:blur(20px)}
-.player-track{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:#FAF5F0;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.player-bar{height:3px;background:rgba(255,255,255,.08);border-radius:100px;margin:1rem 0;cursor:pointer;overflow:hidden}
-.player-progress{height:100%;background:linear-gradient(90deg,#8B3DFF,${t.accent});border-radius:100px;width:0%;transition:width .1s linear}
-.player-controls{display:flex;align-items:center;justify-content:center;gap:1.2rem}
-.player-controls button{background:none;border:none;color:#FAF5F0;font-size:1.2rem;opacity:.6;cursor:pointer;transition:opacity .2s,transform .15s;padding:.3rem}
-.player-controls button:hover{opacity:1;transform:scale(1.1)}
-#play-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#8B3DFF,${t.accent});opacity:1;display:flex;align-items:center;justify-content:center;font-size:1.1rem;box-shadow:0 0 20px rgba(139,61,255,.4)}
-.music-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:100px;padding:.4rem 1rem;font-size:.8rem;color:${t.mc}}
-.s-final{background:${t.bg}}
-.final-text{font-family:'Syne',sans-serif;font-size:clamp(1.1rem,4vw,1.9rem);font-weight:800;letter-spacing:-.02em;line-height:1.3;max-width:340px;opacity:0;animation:fadeUp .9s .3s ease forwards}
-.final-text em{font-family:'Instrument Serif',serif;font-style:italic;font-weight:400;color:${t.accent};display:block;font-size:1.25em;margin-top:.3rem;animation:glowPulse 3s 1.2s ease-in-out infinite}
-.final-actions{display:flex;flex-direction:column;gap:.8rem;width:100%;max-width:280px;margin-top:2rem;opacity:0;animation:fadeUp .8s .9s ease forwards}
-.btn-dl{padding:.9rem;border-radius:8px;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;border:none;cursor:pointer;transition:transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:.4rem}
-.btn-dl.primary{background:linear-gradient(90deg,${t.accent},${t.mc});color:#0A0708}
-.btn-dl.primary:hover{transform:translateY(-2px);box-shadow:0 12px 28px ${t.particle}.4)}
-.btn-dl.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);color:#FAF5F0}
-.btn-dl.secondary:hover{background:rgba(255,255,255,.1)}
-.sidenav{position:fixed;right:1rem;top:50%;transform:translateY(-50%);z-index:100;display:flex;flex-direction:column;gap:.5rem}
-.sidenav-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s}
-.sidenav-dot.active{background:${t.accent};height:18px;border-radius:3px}
-@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-@keyframes glowPulse{0%,100%{text-shadow:0 0 20px ${t.particle}.3)}50%{text-shadow:0 0 50px ${t.particle}.8),0 0 80px ${t.particle}.3)}}
-</style>
-</head>
-<body>
-<nav class="sidenav" id="sidenav">
-  <div class="sidenav-dot active" data-target="0"></div>
-  <div class="sidenav-dot" data-target="1"></div>
-  <div class="sidenav-dot" data-target="2"></div>
-  <div class="sidenav-dot" data-target="3"></div>
-  <div class="sidenav-dot" data-target="4"></div>
-  <div class="sidenav-dot" data-target="5"></div>
-</nav>
-
-<div class="slide s-intro" id="s0">
-  <div class="particles" id="p0"></div>
-  <div class="intro-eyebrow">✦ Uma história de amor</div>
-  <div class="intro-names">${nome1} <span class="amp">& ${nome2}</span></div>
-  ${dateStr ? `<div class="intro-date">${dateStr}</div>` : ''}
-  <div class="scroll-hint"><span>Deslize para baixo</span><div class="scroll-arrow"></div></div>
-</div>
-
-<div class="slide s-photos" id="s1">
-  <div class="photos-label">📸 Momentos que ficam</div>
-  <div class="photos-grid">${photoSlots}</div>
-</div>
-
-<div class="slide s-timeline" id="s2">
-  <div class="tl-title">Nossa história ❤️</div>
-  <div class="tl-list" id="tl-list"></div>
-</div>
-
-<div class="slide s-message" id="s3">
-  <div class="msg-quote" id="msg-quote"></div>
-  <div class="msg-from" id="msg-from">— ${nome1}</div>
-</div>
-
-<div class="slide s-music" id="s4">
-  <div class="music-label">♫ Nossa música</div>
-  ${audioSection}
-</div>
-
-<div class="slide s-final" id="s5">
-  <div class="particles" id="p5"></div>
-  <div class="final-text">Algumas histórias merecem<br>ser eternizadas.<em>${nome1} & ${nome2}</em></div>
-  <div class="final-actions">
-    <button class="btn-dl primary" onclick="window.print()">⬇ Salvar retrospectiva</button>
-    <button class="btn-dl secondary" onclick="copyLink()">🔗 Copiar link</button>
-  </div>
-</div>
-
-<script>
-const tlData = ${JSON.stringify(buildTimelineData(data, nome1, nome2))};
-const tlList = document.getElementById('tl-list');
-tlData.forEach(item => {
-  const div = document.createElement('div');
-  div.className = 'tl-item';
-  div.innerHTML = '<div class="tl-dot">' + item.icon + '</div><div><div class="tl-year">' + item.year + '</div><div class="tl-text">' + item.text + '</div></div>';
-  tlList.appendChild(div);
-});
-
-const msgText = ${JSON.stringify(mensagem ? mensagem : 'Algumas histórias não precisam de palavras.')};
-const msgEl = document.getElementById('msg-quote');
-msgText.split(' ').forEach((w, i) => {
-  const span = document.createElement('span');
-  span.className = 'msg-word';
-  span.style.transitionDelay = (i * 0.06) + 's';
-  span.textContent = w + ' ';
-  msgEl.appendChild(span);
-});
-
-function spawnParticles(id, color, n) {
-  const c = document.getElementById(id); if (!c) return; c.innerHTML = '';
-  for (let i = 0; i < n; i++) {
-    const p = document.createElement('div'); p.className = 'particle';
-    const s = 2 + Math.random() * 5;
-    p.style.cssText = 'width:' + s + 'px;height:' + s + 'px;left:' + (Math.random()*100) + '%;background:' + color + (0.3 + Math.random()*.4) + ');animation-duration:' + (6+Math.random()*10) + 's;animation-delay:' + (Math.random()*6) + 's';
-    c.appendChild(p);
-  }
-}
-spawnParticles('p0', '${t.particle}', 20);
-spawnParticles('p5', '${t.particle}', 20);
-
-const dots = document.querySelectorAll('.sidenav-dot');
-dots.forEach(d => d.addEventListener('click', () => {
-  document.getElementById('s' + d.dataset.target).scrollIntoView({ behavior: 'smooth' });
-}));
-
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    const idx = parseInt(e.target.id.replace('s', ''));
-    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-    e.target.querySelectorAll('.tl-item').forEach(el => el.classList.add('show'));
-    e.target.querySelectorAll('.msg-word').forEach(el => el.classList.add('show'));
-    e.target.querySelectorAll('.msg-from').forEach(el => el.classList.add('show'));
-  });
-}, { threshold: 0.45 });
-document.querySelectorAll('.slide').forEach(s => io.observe(s));
-
-const audio = document.getElementById('audio');
-if (audio) {
-  const btn = document.getElementById('play-btn');
-  const bar = document.getElementById('player-bar');
-  const prog = document.getElementById('player-progress');
-  audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    prog.style.width = ((audio.currentTime / audio.duration) * 100) + '%';
-  });
-  audio.addEventListener('ended', () => { btn.textContent = '▶'; });
-  window.togglePlay = function() {
-    if (audio.paused) { audio.play(); btn.textContent = '⏸'; }
-    else              { audio.pause(); btn.textContent = '▶'; }
-  };
-  window.seek = function(s) { audio.currentTime = Math.max(0, audio.currentTime + s); };
-  bar.addEventListener('click', e => {
-    const r = bar.getBoundingClientRect();
-    audio.currentTime = ((e.clientX - r.left) / r.width) * audio.duration;
-  });
+function getAppUrl(req) {
+  const envUrl = (process.env.APP_URL || '').trim().replace(/\/$/, '');
+  if (envUrl) return envUrl;
+  return `${req.protocol}://${req.get('host')}`;
 }
 
-window.copyLink = function() {
-  const url = window.location.href;
-  if (navigator.share) { navigator.share({ title: '${nome1} & ${nome2} ♥', url }); }
-  else { navigator.clipboard.writeText(url).then(() => alert('Link copiado! ✓')).catch(() => prompt('Copie o link:', url)); }
-};
-</script>
-</body>
-</html>`;
-}
-
-// ── POST /criar-sessao ───────────────────────────────────────────────────────
-app.post('/criar-sessao', async (req, res) => {
-    try {
-      const { nome1, nome2 } = req.body;
-
-      if (!nome1 || !nome2) {
-        return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
-      }
-
-      // CORREÇÃO: Removido o método 'pix' para evitar o erro de recusa do Stripe
-      const session = await stripe.checkout.sessions.create({
-        mode: 'payment',
-        line_items: [{
-          price_data: {
-            currency: 'brl',
-            unit_amount: Number(process.env.PRICE_CENTS) || 1990,
-            product_data: {
-              name: 'LoveBlast — Retrospectiva do Dia dos Namorados',
-              description: `Retrospectiva personalizada de ${nome1} & ${nome2}`,
-            },
-          },
-          quantity: 1,
-        }],
-        payment_method_types: ['card'], // Apenas 'card' ativo
-        success_url: `${process.env.APP_URL || ('https://' + req.get('host'))}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
-        cancel_url:  `${process.env.APP_URL || ('https://' + req.get('host'))}/?cancelado=1`,
-        metadata: { nome1, nome2 },
-      });
-
-      orders.set(session.id, {
-        status: 'pending',
-        downloadToken: null,
-        retroId: null,
-        createdAt: new Date(),
-        nome1, nome2,
-      });
-
-      res.json({ sessionId: session.id, checkoutUrl: session.url });
-
-    } catch (err) {
-      console.error('Erro Stripe:', err.message || err);
-      res.status(500).json({ erro: 'Erro ao criar sessão de pagamento.' });
-    }
-  }
-);
-
-// ── POST /webhook ────────────────────────────────────────────────────────────
-app.post('/webhook', (req, res) => {
-  const sig    = req.headers['stripe-signature'];
+// Webhook precisa vir ANTES do express.json
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   let event;
+
   try {
+    if (!secret) throw new Error('STRIPE_WEBHOOK_SECRET não configurado.');
     event = stripe.webhooks.constructEvent(req.body, sig, secret);
   } catch (err) {
     console.warn('Webhook inválido:', err.message);
-    return res.status(400).send('Webhook Error: ' + err.message);
+    return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
+
     if (session.payment_status === 'paid') {
-      const token = generateToken(session.id);
-      const retroId = generateRetroId();
+      const oldOrder = orders.get(session.id) || {};
+      const token = oldOrder.downloadToken || generateDownloadToken(session.id);
+
       orders.set(session.id, {
-        ...(orders.get(session.id) || {}),
+        ...oldOrder,
         status: 'paid',
         downloadToken: token,
-        retroId,
+        paidAt: new Date(),
       });
-      console.log('✅ Pago. retroId:', retroId);
+
+      console.log(`✅ Pagamento confirmado: ${session.id}`);
     }
   }
+
   res.sendStatus(200);
 });
 
-// ── GET /status/:sessionId ───────────────────────────────────────────────────
-app.get('/status/:sessionId', async (req, res) => {
-  const { sessionId } = req.params;
+app.use(cors());
+app.use(express.json({ limit: '60mb' }));
+app.use(express.urlencoded({ extended: true, limit: '60mb' }));
+app.use(express.static(PUBLIC_DIR));
+
+// ── POST /criar-sessao ─────────────────────────────────────────────────────
+app.post('/criar-sessao', async (req, res) => {
   try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    if (session.payment_status === 'paid') {
-      let order = orders.get(sessionId);
-      if (!order || order.status !== 'paid') {
-        const token   = generateToken(sessionId);
-        const retroId = generateRetroId();
-        orders.set(sessionId, { ...(order || {}), status: 'paid', downloadToken: token, retroId });
-        return res.json({ status: 'paid', token, retroId });
-      }
-      return res.json({ status: 'paid', token: order.downloadToken, retroId: order.retroId });
+    const { nome1, nome2, email, dados = {} } = req.body;
+
+    if (!nome1 || !nome2) {
+      return res.status(400).json({ erro: 'Campos obrigatórios ausentes.' });
     }
-    res.json({ status: session.payment_status });
-  } catch {
-    const order = orders.get(sessionId);
-    if (!order) return res.status(404).json({ erro: 'Sessão não encontrada.' });
-    res.json({ status: order.status, retroId: order.retroId });
+
+    const appUrl = getAppUrl(req);
+
+    const checkoutPayload = {
+      mode: 'payment',
+      payment_method_types: ['card'],
+      line_items: [{
+        price_data: {
+          currency: 'brl',
+          unit_amount: Number(process.env.PRICE_CENTS) || 1990,
+          product_data: {
+            name: 'LoveBlast — Retrospectiva Premium',
+            description: `Retrospectiva personalizada de ${nome1} & ${nome2}`,
+          },
+        },
+        quantity: 1,
+      }],
+      success_url: `${appUrl}/view/{CHECKOUT_SESSION_ID}?pago=1`,
+      cancel_url: `${appUrl}/?cancelado=1`,
+      metadata: { nome1, nome2 },
+    };
+
+    if (validEmail(email)) checkoutPayload.customer_email = String(email).trim();
+
+    const session = await stripe.checkout.sessions.create(checkoutPayload);
+
+    const finalData = {
+      nome1,
+      nome2,
+      email: validEmail(email) ? String(email).trim() : '',
+      data: dados.data || '',
+      mensagem: dados.mensagem || '',
+      musica: dados.musica || '',
+      musicaSrc: dados.musicaSrc || '',
+      musicPreset: dados.musicPreset || '',
+      fotos: Array.isArray(dados.fotos) ? dados.fotos : [],
+      tema: dados.tema || 'fire',
+      insights: dados.insights || null,
+      createdAt: new Date().toISOString(),
+    };
+
+    orders.set(session.id, {
+      status: 'pending',
+      downloadToken: null,
+      createdAt: new Date(),
+      dados: finalData,
+      nome1,
+      nome2,
+    });
+
+    res.json({ sessionId: session.id, checkoutUrl: session.url });
+  } catch (err) {
+    console.error('Erro Stripe:', err.message);
+    res.status(500).json({ erro: 'Erro ao criar sessão de pagamento.' });
   }
 });
 
-// ── POST /gerar-retro ────────────────────────────────────────────────────────
-app.post('/gerar-retro', async (req, res) => {
+// ── GET /status/:sessionId ─────────────────────────────────────────────────
+app.get('/status/:sessionId', async (req, res) => {
+  const { sessionId } = req.params;
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+    if (session.payment_status === 'paid') {
+      const order = orders.get(sessionId) || {};
+      const token = order.downloadToken || generateDownloadToken(sessionId);
+
+      orders.set(sessionId, {
+        ...order,
+        status: 'paid',
+        downloadToken: token,
+      });
+
+      return res.json({ status: 'paid', token, viewUrl: `/view/${sessionId}` });
+    }
+
+    return res.json({ status: session.payment_status || 'pending' });
+  } catch (err) {
+    const order = orders.get(sessionId);
+    if (!order) return res.status(404).json({ erro: 'Sessão não encontrada.' });
+    return res.json({ status: order.status, token: order.downloadToken || null, viewUrl: `/view/${sessionId}` });
+  }
+});
+
+// ── GET /retrospectiva/:sessionId ──────────────────────────────────────────
+app.get('/retrospectiva/:sessionId', async (req, res) => {
+  const { sessionId } = req.params;
+  let order = orders.get(sessionId);
+
+  if (!order) return res.status(404).json({ erro: 'Retrospectiva não encontrada.' });
+
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    if (session.payment_status === 'paid' && order.status !== 'paid') {
+      order = { ...order, status: 'paid', downloadToken: order.downloadToken || generateDownloadToken(sessionId) };
+      orders.set(sessionId, order);
+    }
+  } catch {}
+
+  if (order.status !== 'paid') {
+    return res.status(403).json({ erro: 'Pagamento ainda não confirmado.' });
+  }
+
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.json({
+    status: 'paid',
+    token: order.downloadToken,
+    dados: order.dados || {},
+  });
+});
+
+// Rota pública que mostra a mesma aplicação, mas já abre a retrospectiva
+app.get('/view/:sessionId', (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
+
+function buildDownloadHtml(dados = {}) {
+  const {
+    nome1 = 'Você', nome2 = 'Amor', data = '', mensagem = '', musica = '', musicaSrc = '', fotos = [], tema = 'fire', insights = {},
+  } = dados;
+
+  const temas = {
+    fire: { bg: 'linear-gradient(135deg,#1A0008,#4D0019,#FF2D78)', accent: '#FF2D78', mc: '#FF6B9D' },
+    cosmos: { bg: 'linear-gradient(135deg,#050010,#1A0060,#8B3DFF)', accent: '#8B3DFF', mc: '#B07AFF' },
+    gold: { bg: 'linear-gradient(135deg,#0D0900,#3D2200,#FFD60A)', accent: '#FFD60A', mc: '#FFD60A' },
+  };
+  const t = temas[tema] || temas.fire;
+
+  const cleanNome1 = safeText(nome1);
+  const cleanNome2 = safeText(nome2);
+  const cleanMsg = safeText(mensagem);
+  const cleanMusic = safeText(musica || insights.musicLabel || 'Nossa música especial');
+  const safePhotos = Array.isArray(fotos) ? fotos.slice(0, 8) : [];
+  const topWords = Array.isArray(insights.topWords) ? insights.topWords.slice(0, 3) : [];
+
+  let dateStr = 'Uma história para guardar';
+  if (data) {
+    const d = new Date(`${data}T00:00:00`);
+    if (!Number.isNaN(d.getTime())) {
+      dateStr = `Juntos desde ${d.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+    }
+  }
+
+  const photoSlides = safePhotos.map((src, i) => `
+    <section class="slide photo"><img src="${src}" alt="Foto ${i + 1}"><div class="caption">Momento ${i + 1}</div></section>
+  `).join('');
+
+  const wordsHtml = topWords.length
+    ? topWords.map(w => `<div class="chip">${safeText(w.word)} <b>${w.count}</b></div>`).join('')
+    : `<div class="chip">amor <b>∞</b></div><div class="chip">saudade <b>❤</b></div>`;
+
+  return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${cleanNome1} & ${cleanNome2} ♥</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=Instrument+Serif:ital@1&family=Space+Grotesk:wght@300;400;700&display=swap" rel="stylesheet">
+<style>*{box-sizing:border-box;margin:0;padding:0}html{scroll-snap-type:y mandatory}body{background:#050507;color:#fff;font-family:'Space Grotesk',sans-serif;overflow-x:hidden}.slide{min-height:100vh;scroll-snap-align:start;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:28px;text-align:center;position:relative;background:${t.bg}}.title{font-family:'Syne';font-size:clamp(42px,12vw,120px);line-height:.9;background:linear-gradient(90deg,${t.accent},#FF6B1A,#FFD60A);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.serif{font-family:'Instrument Serif';font-size:clamp(28px,7vw,70px);color:${t.accent}}.sub{color:rgba(255,255,255,.7);margin-top:18px}.photo img{width:min(92vw,480px);max-height:72vh;object-fit:cover;border-radius:28px;box-shadow:0 32px 90px rgba(0,0,0,.55);animation:zoom 7s ease-in-out infinite alternate}.caption{margin-top:18px;color:rgba(255,255,255,.7)}.card{width:min(92vw,620px);padding:30px;border-radius:26px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px)}.num{font-family:'Syne';font-size:clamp(50px,18vw,140px);color:${t.accent}}.chips{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:24px}.chip{border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.08);border-radius:999px;padding:12px 18px}.msg{font-family:'Instrument Serif';font-size:clamp(28px,7vw,68px);line-height:1.12;max-width:850px}.audio{margin-top:22px;width:min(92vw,440px)}@keyframes zoom{from{transform:scale(1)}to{transform:scale(1.06)}}@media(max-width:600px){.slide{padding:20px}.card{padding:22px}}</style></head><body>
+<section class="slide"><div class="title">${cleanNome1}<br><span class="serif">& ${cleanNome2}</span></div><p class="sub">${safeText(dateStr)}</p></section>
+<section class="slide"><div class="card"><div class="num">${safeText(insights.totalMessages || safePhotos.length || '❤')}</div><p>${insights.totalMessages ? 'mensagens analisadas da conversa' : 'memórias escolhidas para essa história'}</p></div></section>
+<section class="slide"><div class="card"><h2 class="serif">Palavras que marcaram vocês</h2><div class="chips">${wordsHtml}</div></div></section>
+${photoSlides}
+<section class="slide"><div class="msg">${cleanMsg || safeText(insights.generatedPhrase || 'Algumas histórias merecem ser eternizadas.')}</div></section>
+<section class="slide"><div class="card"><h2 class="serif">♫ ${cleanMusic}</h2>${musicaSrc ? `<audio class="audio" src="${musicaSrc}" controls></audio>` : ''}<p class="sub">A trilha sonora de vocês</p></div></section>
+<section class="slide"><div class="title">Para sempre</div><p class="sub">${cleanNome1} & ${cleanNome2}</p></section>
+</body></html>`;
+}
+
+// ── POST /download ─────────────────────────────────────────────────────────
+app.post('/download', async (req, res) => {
   const { token, sessionId, dados } = req.body;
   if (!token || !sessionId) return res.status(400).json({ erro: 'Token ou sessão ausente.' });
 
   let order = orders.get(sessionId);
+
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     if (session.payment_status !== 'paid') return res.status(403).json({ erro: 'Pagamento não confirmado.' });
   } catch {
-    if (!order || order.status !== 'paid') return res.status(403).json({ erro: 'Token inválido.' });
+    if (!order || order.status !== 'paid' || order.downloadToken !== token) {
+      return res.status(403).json({ erro: 'Token inválido.' });
+    }
   }
 
-  if (!order) order = orders.get(sessionId) || {};
-  if (order.downloadToken && order.downloadToken !== token) return res.status(403).json({ erro: 'Token inválido.' });
-
-  const existingRetro = order.retroId ? retros.get(order.retroId) : null;
-  if (existingRetro && existingRetro.html) {
-    return res.json({ retroId: order.retroId, url: '/view/' + order.retroId });
+  order = orders.get(sessionId) || order;
+  if (order && order.downloadToken && order.downloadToken !== token) {
+    return res.status(403).json({ erro: 'Token inválido.' });
   }
 
-  const audioDataUrl = (dados && dados.audioBase64) ? dados.audioBase64 : null;
-  const retroId = order.retroId || generateRetroId();
-  const html = buildRetroHtml(dados || {}, audioDataUrl);
+  const finalDados = (order && order.dados) || dados || {};
+  const nome1 = safeText(finalDados.nome1 || 'retrospectiva').replace(/\s+/g, '-').toLowerCase();
+  const nome2 = safeText(finalDados.nome2 || 'loveblast').replace(/\s+/g, '-').toLowerCase();
 
-  retros.set(retroId, { html, dados, createdAt: new Date() });
-  orders.set(sessionId, { ...order, retroId });
+  const html = buildDownloadHtml(finalDados);
 
-  console.log('🎬 Retro gerada:', retroId);
-  res.json({ retroId, url: '/view/' + retroId });
-});
-
-// ── GET /view/:retroId ────────────────────────────────────────────────────────
-app.get('/view/:retroId', (req, res) => {
-  const retro = retros.get(req.params.retroId);
-  if (!retro) {
-    return res.status(404).send(`
-      <html><body style="font-family:sans-serif;background:#0A0708;color:#FAF5F0;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center">
-        <div><h2>Retrospectiva não encontrada</h2><p style="opacity:.5;margin-top:.5rem">O link pode ter expirado.</p><a href="/" style="color:#FF2D78;margin-top:1rem;display:block">← Voltar</a></div>
-      </body></html>`);
-  }
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Cache-Control', 'no-store');
-  res.send(retro.html);
-});
-
-// ── GET /download/:retroId ────────────────────────────────────────────────────
-app.get('/download/:retroId', (req, res) => {
-  const retro = retros.get(req.params.retroId);
-  if (!retro) return res.status(404).json({ erro: 'Retrospectiva não encontrada.' });
-  const { nome1='retro', nome2='' } = retro.dados || {};
-  const filename = `loveblast-${nome1}${nome2 ? '-' + nome2 : ''}-${req.params.retroId.slice(0,6)}.html`;
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.send(retro.html);
-});
-
-// ── POST /download (legado) ───────────────────────────────────────────────────
-app.post('/download', async (req, res) => {
-  const { token, sessionId, dados } = req.body;
-  if (!token || !sessionId) return res.status(400).json({ erro: 'Token ou sessão ausente.' });
-  try {
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-    if (session.payment_status !== 'paid') return res.status(403).json({ erro: 'Pagamento não confirmado.' });
-  } catch {
-    const order = orders.get(sessionId);
-    if (!order || order.status !== 'paid') return res.status(403).json({ erro: 'Token inválido.' });
-  }
-  const order = orders.get(sessionId);
-  if (order && order.retroId && retros.has(order.retroId)) {
-    return res.redirect('/download/' + order.retroId);
-  }
-  const html = buildRetroHtml(dados || {}, null);
-  const { nome1='retro', nome2='' } = dados || {};
-  res.setHeader('Content-Type', 'text/html; charset=utf-8');
-  res.setHeader('Content-Disposition', `attachment; filename="loveblast-${nome1}-${nome2}.html"`);
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Content-Disposition', `attachment; filename="loveblast-${nome1}-${nome2}-${Date.now()}.html"`);
   res.send(html);
 });
 
-// ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log('\n🚀 LoveBlast rodando com sucesso na porta ' + PORT);
+  console.log(`\n🚀 LoveBlast online em http://localhost:${PORT}`);
 });
