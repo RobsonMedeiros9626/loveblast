@@ -362,13 +362,26 @@ footer p{font-size:.75rem;color:var(--muted)}
   .preview-slides{height:360px}
 }
 
-.audio-upload-box{border:1.5px dashed rgba(139,61,255,.35);border-radius:8px;padding:1rem 1.2rem;display:flex;align-items:center;gap:.9rem;cursor:none;transition:border-color .2s,background .2s;background:rgba(139,61,255,.04)}
-.audio-upload-box:hover{border-color:#8B3DFF;background:rgba(139,61,255,.08)}
-.audio-upload-icon{font-size:1.6rem;flex-shrink:0}
-.audio-upload-text{font-size:.8rem;color:var(--muted);line-height:1.5}
-.audio-upload-text span{color:#8B3DFF;font-weight:500}
-.audio-upload-text small{font-size:.7rem;color:rgba(250,245,240,.25)}
-.audio-upload-name{font-size:.78rem;color:#8B3DFF;font-weight:500;word-break:break-all}
+
+/* ── INSIGHTS WHATSAPP + MÚSICA REAL ───────────────────────────────────── */
+.extra-upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem}
+.extra-card{border:1px solid rgba(255,45,120,.18);background:rgba(255,255,255,.035);border-radius:12px;padding:1rem}
+.extra-card label{display:block;font-size:.72rem;text-transform:uppercase;letter-spacing:.12em;color:var(--magenta);font-weight:700;margin-bottom:.55rem}
+.file-mini{width:100%;font-size:.8rem;color:var(--muted)}
+.insight-preview{margin-top:.9rem;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.22);border-radius:10px;padding:.8rem;font-size:.78rem;color:rgba(250,245,240,.72);line-height:1.55}
+.insight-preview strong{color:var(--yellow)}
+.music-choice{display:grid;grid-template-columns:1fr;gap:.7rem}
+.music-choice select{width:100%}
+.rs-insights{background:radial-gradient(ellipse at center,#180012,#050507)}
+.rs-insights-title{font-family:'Syne',sans-serif;font-size:clamp(2rem,8vw,5rem);font-weight:800;text-align:center;margin-bottom:2rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.rs-insights-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;width:min(92vw,780px)}
+.rs-insight-card{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);backdrop-filter:blur(18px);border-radius:22px;padding:1.25rem;min-height:120px;display:flex;flex-direction:column;justify-content:center;transform:translateY(24px);opacity:0;transition:all .7s ease}
+.rs-insight-card.visible{transform:translateY(0);opacity:1}
+.rs-insight-num{font-family:'Syne',sans-serif;font-size:clamp(2rem,8vw,4.5rem);font-weight:800;color:var(--magenta);line-height:.95}
+.rs-insight-label{font-size:.85rem;color:rgba(250,245,240,.66);margin-top:.45rem}
+.rs-music-audio{width:min(84vw,420px);margin-top:1rem;filter:drop-shadow(0 16px 40px rgba(255,45,120,.18))}
+.rs-music-source{font-size:.75rem;color:rgba(250,245,240,.45);margin-top:.8rem}
+@media(max-width:680px){.extra-upload-grid{grid-template-columns:1fr}.rs-insights-grid{grid-template-columns:1fr}.rs-insight-card{min-height:96px}}
 
 </style>
 </head>
@@ -386,7 +399,7 @@ footer p{font-size:.75rem;color:var(--muted)}
 <!-- ══ HERO ══════════════════════════════════════════════════════════════════ -->
 <section class="hero">
   <div class="blob blob-1"></div><div class="blob blob-2"></div><div class="blob blob-3"></div>
-  <div class="hero-tag">✦ Dia dos Namorados 2025</div>
+  <div class="hero-tag">✦ Dia dos Namorados 2026</div>
   <h1><span class="line-1">O presente</span><span class="line-2">mais intenso</span><span class="line-3">que existe</span></h1>
   <p class="hero-sub">Uma retrospectiva cinematográfica com vocês dois — fotos, mensagem e a música que é só de vocês.</p>
   <div class="hero-actions">
@@ -477,17 +490,35 @@ footer p{font-size:.75rem;color:var(--muted)}
           <div class="form-group"><label class="form-label">Seu nome</label><input class="form-input" id="name1" type="text" placeholder="Ex: Ana"></div>
           <div class="form-group"><label class="form-label">Nome do(a) amor</label><input class="form-input" id="name2" type="text" placeholder="Ex: Pedro"></div>
         </div>
+        <div class="form-group"><label class="form-label">E-mail para o pagamento</label><input class="form-input" id="email" type="email" placeholder="exemplo@gmail.com"></div>
         <div class="form-group"><label class="form-label">Data especial</label><input class="form-input" id="special-date" type="date"></div>
         <div class="form-group"><label class="form-label">Sua mensagem</label><textarea class="form-textarea" id="message" placeholder="Escreva do coração..."></textarea></div>
+
         <div class="form-group">
           <label class="form-label">Nossa música ♫</label>
-          <input class="form-input" id="music" type="text" placeholder="Nome da música — Ex: Perfect (Ed Sheeran)" style="margin-bottom:.6rem">
-          <div class="audio-upload-box" id="audio-upload-box" onclick="document.getElementById('audio-input').click()">
-            <div class="audio-upload-icon">🎵</div>
-            <div class="audio-upload-text"><span>Clique para fazer upload do MP3</span><br><small>Opcional · MP3, WAV, M4A · até 15 MB</small></div>
-            <div class="audio-upload-name" id="audio-upload-name" style="display:none"></div>
+          <input class="form-input" id="music" type="text" placeholder="Ex: Perfect — Ed Sheeran">
+        </div>
+
+        <div class="extra-upload-grid">
+          <div class="extra-card">
+            <label>Enviar música real MP3</label>
+            <div class="music-choice">
+              <select class="form-input" id="music-preset">
+                <option value="">Selecionar da biblioteca</option>
+                <option value="romantic-soft">Romantic Soft — instrumental</option>
+                <option value="cinema-love">Cinema Love — instrumental</option>
+                <option value="neon-heart">Neon Heart — instrumental</option>
+              </select>
+              <input class="file-mini" type="file" id="music-file" accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg">
+            </div>
+            <div class="insight-preview" id="music-status">Nenhuma música real enviada ainda.</div>
           </div>
-          <input type="file" id="audio-input" accept="audio/mpeg,audio/mp3,audio/wav,audio/ogg,audio/mp4,audio/x-m4a,.mp3,.wav,.m4a,.ogg" style="display:none">
+
+          <div class="extra-card">
+            <label>Insights da conversa</label>
+            <input class="file-mini" type="file" id="whatsapp-file" accept=".txt,text/plain">
+            <div class="insight-preview" id="whatsapp-insights-preview">Envie o .txt exportado do WhatsApp para gerar insights emocionais.</div>
+          </div>
         </div>
       </div>
 
@@ -629,19 +660,29 @@ footer p{font-size:.75rem;color:var(--muted)}
     <div class="rs-timeline-list" id="rs-timeline-list"></div>
   </div>
 
-  <!-- S4: Mensagem -->
-  <div class="retro-slide rs-message" id="rs-3">
+  <!-- S4: Insights da conversa -->
+  <div class="retro-slide rs-insights" id="rs-3">
+    <div>
+      <div class="rs-insights-title">O retrato de vocês</div>
+      <div class="rs-insights-grid" id="rs-insights-grid"></div>
+    </div>
+  </div>
+
+  <!-- S5: Mensagem -->
+  <div class="retro-slide rs-message" id="rs-4">
     <div class="rs-msg-quote" id="rs-msg-quote"></div>
     <div class="rs-msg-from" id="rs-msg-from"></div>
   </div>
 
-  <!-- S5: Música -->
-  <div class="retro-slide rs-music-slide" id="rs-4">
+  <!-- S6: Música -->
+  <div class="retro-slide rs-music-slide" id="rs-5">
     <div class="rs-music-label">♫ Nossa música</div>
     <div class="rs-music-player" id="rs-music-player">
       <div class="rs-music-icon">🎵</div>
       <div class="rs-music-track" id="rs-music-track">Perfect — Ed Sheeran</div>
       <div class="rs-music-artist">Toca toda vez que penso em você</div>
+      <audio id="real-audio" class="rs-music-audio" preload="metadata"></audio>
+      <div class="rs-music-source" id="rs-music-source">Música simulada até você enviar um MP3</div>
       <div class="rs-music-bar" onclick="seekMusic(event)">
         <div class="rs-music-progress" id="rs-music-progress"></div>
       </div>
@@ -653,9 +694,9 @@ footer p{font-size:.75rem;color:var(--muted)}
     </div>
   </div>
 
-  <!-- S6: Final -->
-  <div class="retro-slide rs-final" id="rs-5">
-    <div class="retro-particles" id="rp-5"></div>
+  <!-- S7: Final -->
+  <div class="retro-slide rs-final" id="rs-6">
+    <div class="retro-particles" id="rp-6"></div>
     <div class="rs-final-text">
       Algumas histórias merecem<br>ser eternizadas.
       <em id="rs-final-names">Ana & Pedro</em>
@@ -691,7 +732,7 @@ const tf=[...tickItems,...tickItems].map(t=>`<span class="ticker-item"><span cla
 tickEl.innerHTML=tf+tf;
 
 // ══ STATE ═══════════════════════════════════════════════════════════════════
-let step=1,theme='fire',photos=[],currentSessionId=null,pollingInterval=null,downloadToken=null,retroData=null;
+let step=1,theme='fire',photos=[],currentSessionId=null,pollingInterval=null,downloadToken=null,retroData=null,musicDataUrl='',musicPreset='',whatsappInsights=null;
 const TOTAL=6;
 const badges=['','01 / 05','02 / 05','03 / 05','04 / 05','05 / 05','05 / 05'];
 const subs=['','Escolha o tema que combina com vocês','Adicione fotos especiais (até 4)','Personalize com sua história','Prévia da sua retrospectiva 👀','Finalize o pagamento via Stripe',''];
@@ -699,14 +740,22 @@ const subs=['','Escolha o tema que combina com vocês','Adicione fotos especiais
 // ══ RETORNO DO STRIPE ═══════════════════════════════════════════════════════
 window.addEventListener('load',()=>{
   const p=new URLSearchParams(window.location.search);
+  const viewMatch=window.location.pathname.match(/^\/view\/([^/]+)/);
+
+  if(viewMatch){
+    currentSessionId=viewMatch[1];
+    abrirRetrospectivaPorLink(currentSessionId);
+    return;
+  }
+
   if(p.get('pago')==='1'&&p.get('session_id')){
     currentSessionId=p.get('session_id');
-    // Recupera dados salvos
     try{retroData=JSON.parse(sessionStorage.getItem('lb_dados')||'null');}catch{}
     openModal();
     jumpToPanel(6);
     iniciarPolling();
   }
+
   if(p.get('cancelado')==='1'){
     openModal();
     jumpToPanel(5);
@@ -783,6 +832,124 @@ function renderThumbs(){
 }
 function rmPhoto(i){photos.splice(i,1);renderThumbs();}
 
+
+// ══ MÚSICA REAL + INSIGHTS WHATSAPP ═══════════════════════════════════════
+const PRESET_TRACKS={
+  'romantic-soft':{label:'Romantic Soft — instrumental',src:''},
+  'cinema-love':{label:'Cinema Love — instrumental',src:''},
+  'neon-heart':{label:'Neon Heart — instrumental',src:''},
+};
+
+document.getElementById('music-preset')?.addEventListener('change',function(){
+  musicPreset=this.value;
+  const preset=PRESET_TRACKS[musicPreset];
+  if(preset){
+    document.getElementById('music').value=preset.label;
+    document.getElementById('music-status').innerHTML=`Biblioteca selecionada: <strong>${preset.label}</strong>`;
+  }
+});
+
+document.getElementById('music-file')?.addEventListener('change',async function(){
+  const file=this.files?.[0];
+  if(!file)return;
+  if(file.size>12*1024*1024){
+    alert('Envie uma música de até 12MB para não travar no celular.');
+    this.value='';
+    return;
+  }
+  if(!file.type.startsWith('audio/')){
+    alert('Envie um arquivo de áudio válido.');
+    this.value='';
+    return;
+  }
+  musicDataUrl=await fileToDataURL(file);
+  document.getElementById('music').value=document.getElementById('music').value.trim()||file.name.replace(/\.[^/.]+$/,'');
+  document.getElementById('music-status').innerHTML=`Música real carregada: <strong>${file.name}</strong>`;
+});
+
+document.getElementById('whatsapp-file')?.addEventListener('change',async function(){
+  const file=this.files?.[0];
+  if(!file)return;
+  if(file.size>4*1024*1024){
+    alert('Envie a conversa sem mídia. O arquivo .txt precisa ter até 4MB.');
+    this.value='';
+    return;
+  }
+  const text=await file.text();
+  whatsappInsights=analisarConversaWhatsApp(text);
+  renderInsightsPreview(whatsappInsights);
+});
+
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function analisarConversaWhatsApp(text){
+  const lines=text.split(/\r?\n/).filter(Boolean);
+  const joined=text.toLowerCase();
+  const messageLines=lines.filter(l=>/\d{1,2}\/\d{1,2}\/\d{2,4}|\d{1,2}:\d{2}/.test(l));
+  const totalMessages=messageLines.length || lines.length;
+  const loveCount=(joined.match(/\b(eu te amo|te amo|amo você|amor)\b/g)||[]).length;
+  const saudadeCount=(joined.match(/saudade|sdds|saudades/g)||[]).length;
+  const laughCount=(joined.match(/kkk+|haha+|rsrs+/g)||[]).length;
+  const lateNight=(text.match(/\b(00|01|02|03|04|23):\d{2}\b/g)||[]).length;
+  const emojis=(text.match(/[❤️💕😍🥰😘😭😂🥺✨💍🔥💖]/g)||[]);
+  const topEmoji=mostCommon(emojis)||'❤️';
+  const stop=new Set('que para com uma você voces voces eu ele ela meu minha teu sua seu das dos por mas nao não sim foi tem estou essa esse aqui ali como porque quando onde ainda isso aquilo amor'.split(' '));
+  const words=(joined.match(/[a-záàâãéèêíïóôõöúçñ]{3,}/gi)||[]).filter(w=>!stop.has(w));
+  const counts={};
+  words.forEach(w=>counts[w]=(counts[w]||0)+1);
+  const topWords=Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([word,count])=>({word,count}));
+  let emotionalTone='carinhoso';
+  if(loveCount>30)emotionalTone='muito romântico';
+  if(laughCount>loveCount && laughCount>20)emotionalTone='leve e divertido';
+  if(saudadeCount>20)emotionalTone='intenso e saudoso';
+  const generatedPhrase=saudadeCount>10
+    ? 'Entre saudades e mensagens simples, vocês criaram presença mesmo de longe.'
+    : loveCount>10
+      ? 'O amor de vocês aparece nos detalhes que se repetem todos os dias.'
+      : 'Algumas conversas não servem apenas para falar. Servem para permanecer.';
+  return {totalMessages,loveCount,saudadeCount,laughCount,lateNight,topEmoji,topWords,emotionalTone,generatedPhrase};
+}
+
+function mostCommon(arr){
+  if(!arr.length)return null;
+  const c={};arr.forEach(x=>c[x]=(c[x]||0)+1);
+  return Object.entries(c).sort((a,b)=>b[1]-a[1])[0][0];
+}
+
+function renderInsightsPreview(ins){
+  const box=document.getElementById('whatsapp-insights-preview');
+  if(!box||!ins)return;
+  box.innerHTML=`
+    <strong>${ins.totalMessages}</strong> mensagens analisadas<br>
+    Palavra forte: <strong>${ins.topWords?.[0]?.word||'amor'}</strong><br>
+    Tom emocional: <strong>${ins.emotionalTone}</strong><br>
+    Frase: ${ins.generatedPhrase}
+  `;
+}
+
+function montarDadosAtuais(){
+  return {
+    nome1:document.getElementById('name1').value.trim(),
+    nome2:document.getElementById('name2').value.trim(),
+    email:document.getElementById('email')?.value.trim()||'',
+    data:document.getElementById('special-date').value,
+    mensagem:document.getElementById('message').value.trim(),
+    musica:document.getElementById('music').value.trim(),
+    musicaSrc:musicDataUrl,
+    musicPreset,
+    fotos:photos,
+    tema:theme,
+    insights:whatsappInsights
+  };
+}
+
 // ══ PREVIEW BUILD ════════════════════════════════════════════════════════════
 let previewInterval=null, currentPreviewSlide=0;
 function buildPreview(){
@@ -821,88 +988,33 @@ function goToSlide(n){
 }
 
 // ══ PAGAMENTO ════════════════════════════════════════════════════════════════
-// Audio upload state
-let audioFile = null;
-let audioBase64 = null;
-document.getElementById('audio-input').addEventListener('change', function() {
-  const file = this.files[0];
-  if (!file) return;
-  if (file.size > 15 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 15 MB.'); return; }
-  audioFile = file;
-  const nameEl = document.getElementById('audio-upload-name');
-  const textEl = document.getElementById('audio-upload-box').querySelector('.audio-upload-text');
-  nameEl.textContent = '✓ ' + file.name;
-  nameEl.style.display = 'block';
-  textEl.style.display = 'none';
-  // Converte para base64 para salvar no sessionStorage
-  const reader = new FileReader();
-  reader.onload = e => { audioBase64 = e.target.result; };
-  reader.readAsDataURL(file);
-});
-
 async function iniciarPagamento(){
-  const nome1=document.getElementById('name1').value.trim();
-  const nome2=document.getElementById('name2').value.trim();
+  const dados=montarDadosAtuais();
+  const {nome1,nome2,email}=dados;
   if(!nome1||!nome2){alert('Preencha seu nome e o nome do seu amor antes de continuar.');jumpToPanel(3);return;}
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Digite um e-mail válido.');jumpToPanel(3);return;}
 
-  const btn=document.getElementById('btn-pay');
-  const lbl=document.getElementById('pay-label');
+  const btn=document.getElementById('btn-pay'),lbl=document.getElementById('pay-label');
+  btn.disabled=true;lbl.innerHTML='<span class="spinner"></span> Criando sessão...';
 
-  // Garante que o botão volte mesmo em caso de erro
-  function resetBtn(){
-    btn.disabled=false;
-    lbl.textContent='🔒 Pagar R$ 19,90 via Stripe';
-  }
+  sessionStorage.setItem('lb_dados',JSON.stringify(dados));
 
-  btn.disabled=true;
-  lbl.innerHTML='<span class="spinner"></span> Criando sessão...';
-
-  // Salva dados no sessionStorage antes de sair da página
-  sessionStorage.setItem('lb_dados', JSON.stringify({
-    audioBase64: audioBase64,
-    nome1, nome2,
-    data:     document.getElementById('special-date').value,
-    mensagem: document.getElementById('message').value.trim(),
-    musica:   document.getElementById('music').value.trim(),
-    fotos:    photos,
-    tema:     theme,
-  }));
-
-  // Timeout de 15s para não ficar travado para sempre
-  const controller = new AbortController();
-  const timeout = setTimeout(()=>{
-    controller.abort();
-  }, 15000);
-
-  try {
-    const res = await fetch('/criar-sessao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome1, nome2 }),
-      signal: controller.signal,
+  try{
+    const res=await fetch(`${API}/criar-sessao`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({nome1,nome2,email,dados})
     });
-    clearTimeout(timeout);
-
-    if (!res.ok) {
-      let msg = 'Erro ao criar sessão de pagamento.';
-      try { const d = await res.json(); msg = d.erro || msg; } catch {}
-      throw new Error(msg);
+    if(!res.ok){
+      const erro=await res.json().catch(()=>({}));
+      throw new Error(erro.erro||'Erro ao criar sessão');
     }
-
-    const { sessionId, checkoutUrl } = await res.json();
-    if (!checkoutUrl) throw new Error('URL de checkout não recebida.');
-
-    sessionStorage.setItem('lb_session', sessionId);
-    // Redireciona para o Stripe Checkout
-    window.location.href = checkoutUrl;
-
-  } catch(err) {
-    clearTimeout(timeout);
-    const msg = err.name === 'AbortError'
-      ? 'A requisição demorou muito. Verifique sua conexão e tente novamente.'
-      : (err.message || 'Erro desconhecido. Tente novamente.');
-    alert('Não foi possível iniciar o pagamento:\n' + msg);
-    resetBtn();
+    const{sessionId,checkoutUrl}=await res.json();
+    sessionStorage.setItem('lb_session',sessionId);
+    window.location.href=checkoutUrl;
+  }catch(err){
+    alert(err.message||'Não foi possível iniciar o pagamento. Tente novamente.');
+    btn.disabled=false;lbl.textContent='🔒 Pagar R$ 19,90 via Stripe';
   }
 }
 
@@ -937,7 +1049,7 @@ function liberarRetrospectiva(){
 
 // ══ RETROSPECTIVA CINEMÁTICA ══════════════════════════════════════════════
 function buildRetroOverlay(d){
-  const{nome1='Você',nome2='Amor',data,mensagem,musica,fotos=[],tema='fire'}=d;
+  const{nome1='Você',nome2='Amor',data,mensagem,musica,musicaSrc='',fotos=[],tema='fire',insights=null}=d;
 
   // Tema cores
   const temaColors={
@@ -988,15 +1100,30 @@ function buildRetroOverlay(d){
   });
   const fromEl=document.getElementById('rs-msg-from');fromEl.textContent=`— ${nome1}`;
 
-  // Música
+  // Insights da conversa
+  renderRetroInsights(insights, fotos);
+
+  // Música real
   document.getElementById('rs-music-track').textContent=musica||'Nossa música especial';
+  const realAudio=document.getElementById('real-audio');
+  const sourceLabel=document.getElementById('rs-music-source');
+  if(musicaSrc){
+    realAudio.src=musicaSrc;
+    realAudio.controls=true;
+    realAudio.style.display='block';
+    sourceLabel.textContent='Música enviada por você';
+  }else{
+    realAudio.removeAttribute('src');
+    realAudio.style.display='none';
+    sourceLabel.textContent='Nome da música salvo na retrospectiva';
+  }
 
   // Partículas
   spawnParticles('rp-0',tc.particle,20);
-  spawnParticles('rp-5',tc.particle,20);
+  spawnParticles('rp-6',tc.particle,20);
 
   // Nav dots
-  buildRetroNav(6);
+  buildRetroNav(7);
 
   // Scroll observer
   setupScrollObserver();
@@ -1050,7 +1177,7 @@ function setupScrollObserver(){
       document.querySelectorAll('.retro-nav-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 
       // Anima elementos dentro do slide
-      slide.querySelectorAll('.rs-photo-label,.rs-timeline-title,.rs-music-label,.rs-music-player').forEach(el=>el.classList.add('visible'));
+      slide.querySelectorAll('.rs-photo-label,.rs-timeline-title,.rs-music-label,.rs-music-player,.rs-insight-card').forEach(el=>el.classList.add('visible'));
       setTimeout(()=>{
         slide.querySelectorAll('.rs-photo-item,.rs-tl-item').forEach(el=>el.classList.add('visible'));
       },200);
@@ -1063,9 +1190,43 @@ function setupScrollObserver(){
   document.querySelectorAll('.retro-slide').forEach(s=>io.observe(s));
 }
 
-// ══ MÚSICA PLAYER (simulado — sem áudio real) ══════════════════════════════
+
+function renderRetroInsights(insights,fotos=[]){
+  const grid=document.getElementById('rs-insights-grid');
+  if(!grid)return;
+  const totalFotos=Array.isArray(fotos)?fotos.length:0;
+  const fallback={
+    totalMessages: totalFotos || '❤',
+    loveCount: '∞',
+    saudadeCount: '✨',
+    lateNight: '🌙',
+    topWords:[{word:'amor',count:'∞'}],
+    emotionalTone:'cinematográfico',
+    generatedPhrase:'Vocês transformaram momentos simples em memória.'
+  };
+  const ins=insights||fallback;
+  const topWord=ins.topWords?.[0]?.word||'amor';
+  const cards=[
+    {num:ins.totalMessages||totalFotos||'❤',label:ins.totalMessages?'mensagens analisadas':'fotos na retrospectiva'},
+    {num:topWord,label:'palavra que marcou vocês'},
+    {num:ins.loveCount||'∞',label:'vezes que o amor apareceu'},
+    {num:ins.saudadeCount||'✨',label:'sinais de saudade'},
+    {num:ins.lateNight||'🌙',label:'momentos de madrugada'},
+    {num:ins.emotionalTone||'carinhoso',label:'clima da relação'}
+  ];
+  grid.innerHTML=cards.map(c=>`<div class="rs-insight-card"><div class="rs-insight-num">${c.num}</div><div class="rs-insight-label">${c.label}</div></div>`).join('');
+}
+
+// ══ MÚSICA PLAYER REAL ═════════════════════════════════════════════════════
 let musicPlaying=false,musicPos=0,musicTimer=null;
+function getRealAudio(){return document.getElementById('real-audio');}
 function toggleMusic(){
+  const audio=getRealAudio();
+  if(audio && audio.src){
+    if(audio.paused){audio.play().catch(()=>{});document.getElementById('rs-play-btn').textContent='⏸';}
+    else{audio.pause();document.getElementById('rs-play-btn').textContent='▶';}
+    return;
+  }
   musicPlaying=!musicPlaying;
   document.getElementById('rs-play-btn').textContent=musicPlaying?'⏸':'▶';
   if(musicPlaying){
@@ -1076,9 +1237,30 @@ function toggleMusic(){
     },100);
   }else{clearInterval(musicTimer);}
 }
-function restartMusic(){musicPos=0;document.getElementById('rs-music-progress').style.width='0%';}
-function forwardMusic(){musicPos=Math.min(musicPos+15,100);document.getElementById('rs-music-progress').style.width=musicPos+'%';}
-function seekMusic(e){const bar=e.currentTarget;const rect=bar.getBoundingClientRect();musicPos=((e.clientX-rect.left)/rect.width)*100;document.getElementById('rs-music-progress').style.width=musicPos+'%';}
+function restartMusic(){
+  const audio=getRealAudio();
+  if(audio && audio.src){audio.currentTime=0;return;}
+  musicPos=0;document.getElementById('rs-music-progress').style.width='0%';
+}
+function forwardMusic(){
+  const audio=getRealAudio();
+  if(audio && audio.src){audio.currentTime=Math.min(audio.currentTime+15,audio.duration||audio.currentTime+15);return;}
+  musicPos=Math.min(musicPos+15,100);document.getElementById('rs-music-progress').style.width=musicPos+'%';
+}
+function seekMusic(e){
+  const audio=getRealAudio();
+  const bar=e.currentTarget;const rect=bar.getBoundingClientRect();
+  const pct=((e.clientX-rect.left)/rect.width);
+  if(audio && audio.src && audio.duration){audio.currentTime=pct*audio.duration;return;}
+  musicPos=pct*100;document.getElementById('rs-music-progress').style.width=musicPos+'%';
+}
+setInterval(()=>{
+  const audio=getRealAudio();
+  if(audio && audio.src && audio.duration){
+    document.getElementById('rs-music-progress').style.width=((audio.currentTime/audio.duration)*100)+'%';
+    document.getElementById('rs-play-btn').textContent=audio.paused?'▶':'⏸';
+  }
+},400);
 
 // ══ FECHAR RETRO ══════════════════════════════════════════════════════════
 function closeRetro(){
@@ -1104,46 +1286,42 @@ async function downloadRetro(){
 
 // ══ COMPARTILHAR ══════════════════════════════════════════════════════════
 function shareRetro(){
-  const url=window.location.href.split('?')[0];
+  const url=currentSessionId?`${window.location.origin}/view/${currentSessionId}`:window.location.href.split('?')[0];
   if(navigator.share){navigator.share({title:'Nossa retrospectiva no LoveBlast',url});}
   else{navigator.clipboard.writeText(url).then(()=>alert('Link copiado! ✓')).catch(()=>alert('Link: '+url));}
 }
 
+
+// ══ ABRIR LINK FINAL /view/:sessionId ══════════════════════════════════════
+async function abrirRetrospectivaPorLink(sessionId){
+  try{
+    const statusRes=await fetch(`${API}/status/${sessionId}`,{cache:'no-store'});
+    const statusData=await statusRes.json();
+    if(statusData.status==='paid'&&statusData.token){
+      downloadToken=statusData.token;
+    }
+    const res=await fetch(`${API}/retrospectiva/${sessionId}?t=${Date.now()}`,{cache:'no-store'});
+    if(!res.ok)throw new Error('Retrospectiva ainda não liberada.');
+    const data=await res.json();
+    downloadToken=data.token||downloadToken;
+    retroData=data.dados;
+    currentSessionId=sessionId;
+    buildRetroOverlay(retroData);
+    document.getElementById('retro-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  }catch(err){
+    alert(err.message||'Não foi possível abrir a retrospectiva.');
+    window.location.href='/';
+  }
+}
+
 // ══ STATUS BOX (após pagamento) ══════════════════════════════════════════
-async function mostrarPago(){
+function mostrarPago(){
   document.getElementById('status-box').innerHTML=`
     <span class="status-icon">🎉</span>
     <div class="status-title">Pagamento confirmado!</div>
-    <p class="status-msg">Gerando sua retrospectiva...</p>
-    <div style="margin-top:1rem"><span class="spinner"></span></div>`;
-
-  // Recupera dados
-  let dados = {};
-  try { dados = JSON.parse(sessionStorage.getItem('lb_dados') || '{}'); } catch {}
-
-  // Gera a retrospectiva no servidor e obtém o ID único
-  try {
-    const res = await fetch('/gerar-retro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: downloadToken, sessionId: currentSessionId, dados }),
-    });
-    if (!res.ok) throw new Error('Erro ao gerar');
-    const { retroId, url } = await res.json();
-
-    // Limpa sessionStorage
-    sessionStorage.removeItem('lb_dados');
-    sessionStorage.removeItem('lb_session');
-
-    // Redireciona para /view/:retroId
-    window.location.href = url;
-  } catch(err) {
-    document.getElementById('status-box').innerHTML=`
-      <span class="status-icon">🎉</span>
-      <div class="status-title">Pagamento confirmado!</div>
-      <p class="status-msg">Clique para abrir sua retrospectiva.</p>
-      <button class="dl-btn" style="margin-top:1.2rem" onclick="liberarRetrospectiva()">✨ Abrir retrospectiva</button>`;
-  }
+    <p class="status-msg">Sua retrospectiva cinematográfica está pronta.</p>
+    <button class="dl-btn" style="margin-top:1.2rem" onclick="liberarRetrospectiva()">✨ Abrir minha retrospectiva</button>`;
 }
 const _origIniciarPolling=iniciarPolling;
 function iniciarPolling(){
