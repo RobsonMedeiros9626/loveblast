@@ -87,7 +87,7 @@ app.post(
           }
         ],
 
-        success_url: `${process.env.APP_URL}/?session_id={CHECKOUT_SESSION_ID}&pago=1`,
+        success_url: `${process.env.APP_URL}/?session_id={CHECKOUT_SESSION_ID}&pago=1#retrospectiva`,
         cancel_url: `${process.env.APP_URL}/?cancelado=1`,
 
         metadata: {
