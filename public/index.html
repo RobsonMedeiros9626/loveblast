@@ -386,6 +386,222 @@ nav a{
     font-size: 28px;
   }
 }
+  .hidden {
+  display: none;
+}
+
+.final-experience {
+  background: #040407;
+  padding: 40px 20px;
+}
+
+.final-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  max-width: 1500px;
+  margin: auto;
+  border: 1px solid rgba(255,45,120,.25);
+}
+
+.final-panel {
+  min-height: 520px;
+  padding: 38px;
+  border: 1px solid rgba(255,45,120,.22);
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255,45,120,.18), transparent 35%),
+    linear-gradient(160deg, #07070d, #14050b);
+  position: relative;
+  overflow: hidden;
+}
+
+.step {
+  font-size: 13px;
+  font-weight: 900;
+  color: white;
+  opacity: .85;
+}
+
+.brand {
+  color: #ff4b8b;
+  font-size: 28px;
+  font-weight: 900;
+  margin-top: 20px;
+}
+
+.abertura h1 {
+  font-size: clamp(54px, 8vw, 110px);
+  font-family: cursive;
+  margin-top: 80px;
+  font-weight: 400;
+}
+
+.abertura h1 b {
+  color: #ff2d78;
+}
+
+.final-panel h2 {
+  font-size: clamp(34px, 5vw, 70px);
+  line-height: 1.1;
+}
+
+.final-panel h2 span,
+.final-panel h3,
+.big-number,
+.insight-card b {
+  color: #ff2d78;
+  text-shadow: 0 0 25px rgba(255,45,120,.7);
+}
+
+.polaroid {
+  width: 300px;
+  background: white;
+  padding: 14px;
+  transform: rotate(-4deg);
+  margin: 40px auto;
+}
+
+.polaroid img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.time-item {
+  margin: 28px 0;
+  font-size: 24px;
+}
+
+.time-item strong {
+  color: #ff2d78;
+  margin-left: 12px;
+}
+
+.time-item p {
+  margin-left: 48px;
+  color: #ddd;
+  font-size: 18px;
+}
+
+.big-number {
+  display: block;
+  font-size: 82px;
+  font-weight: 900;
+  margin: 20px 0;
+}
+
+.insight-card {
+  margin-top: 24px;
+  padding: 24px;
+  border: 1px solid rgba(255,45,120,.35);
+  border-radius: 18px;
+  background: rgba(255,255,255,.04);
+  font-size: 22px;
+}
+
+.galeria-fotos {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  height: 420px;
+}
+
+.galeria-fotos img {
+  width: 30%;
+  height: 330px;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.45);
+}
+
+.galeria-fotos img:nth-child(2) {
+  width: 40%;
+  height: 390px;
+}
+
+.quote {
+  padding: 30px;
+  border: 1px solid rgba(255,45,120,.35);
+  border-radius: 18px;
+  margin-top: 24px;
+  background: rgba(255,255,255,.035);
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.musica-final audio {
+  width: 100%;
+  margin-top: 40px;
+}
+
+.carta {
+  background: #f1d7b4;
+  color: #321;
+  padding: 40px;
+  border-radius: 8px;
+  transform: rotate(-3deg);
+  max-width: 600px;
+  margin: 60px auto;
+  font-family: Georgia, serif;
+}
+
+.carta h2 {
+  color: #b9274f;
+  font-size: 42px;
+  margin-bottom: 24px;
+}
+
+.encerramento {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.encerramento h2 {
+  color: #ff2d78;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+}
+
+.compartilhar {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 22px;
+}
+
+.compartilhar button {
+  padding: 22px;
+  border-radius: 18px;
+  border: 1px solid #ff2d78;
+  background: rgba(255,255,255,.04);
+  color: white;
+  font-size: 20px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+@media(max-width: 800px) {
+  .final-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .final-panel {
+    min-height: 100vh;
+    padding: 28px 20px;
+  }
+
+  .galeria-fotos {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .galeria-fotos img,
+  .galeria-fotos img:nth-child(2) {
+    width: 100%;
+    height: 260px;
+  }
+}
 </style>
 </head>
 
@@ -665,6 +881,172 @@ document.getElementById('payBtn').addEventListener('click', async () => {
     payBtn.textContent = 'Finalizar pagamento';
   }
 });
+</script>
+  <section id="arteFinal" class="final-experience hidden">
+  <div class="final-grid">
+
+    <div class="final-panel abertura">
+      <span class="step">01 ABERTURA</span>
+      <div class="brand">♡ LoveBlast</div>
+      <h1><span id="finalNome1">Robson</span> <b>&</b> <span id="finalNome2">Raa</span></h1>
+      <p>Algumas histórias não cabem em palavras.</p>
+    </div>
+
+    <div class="final-panel comeco">
+      <span class="step">02 COMEÇO DE TUDO</span>
+      <div class="polaroid">
+        <img id="fotoPrincipal" src="" alt="Foto principal">
+      </div>
+      <h2>Tudo começou <span>aqui.</span></h2>
+      <p>E desde então, cada detalhe faz sentido.</p>
+    </div>
+
+    <div class="final-panel timeline-final">
+      <span class="step">03 LINHA DO TEMPO</span>
+      <div class="time-item">❤️ <strong>2023</strong><p>Vocês se conheceram</p></div>
+      <div class="time-item">💬 <strong>2023</strong><p>Primeiras conversas</p></div>
+      <div class="time-item">✈️ <strong>2024</strong><p>Primeira viagem juntos</p></div>
+      <div class="time-item">🔥 <strong>2025</strong><p>E ainda parece o começo</p></div>
+    </div>
+
+    <div class="final-panel insights-final">
+      <span class="step">04 NOSSOS INSIGHTS</span>
+      <h2>Vocês trocaram</h2>
+      <strong class="big-number" id="totalMensagens">18.432</strong>
+      <p>mensagens</p>
+
+      <div class="insight-card">
+        A palavra mais usada foi:<br>
+        <b id="palavraMaisUsada">amor</b> ❤️
+      </div>
+
+      <div class="insight-card">
+        Vocês disseram<br>
+        <b id="saudadeCount">saudade 103 vezes</b>
+      </div>
+    </div>
+
+    <div class="final-panel galeria-final">
+      <span class="step">05 NOSSAS MEMÓRIAS</span>
+      <div id="galeriaFinal" class="galeria-fotos"></div>
+    </div>
+
+    <div class="final-panel frases-final">
+      <span class="step">06 FRASES QUE DEFINEM</span>
+      <div class="quote">“O carinho de vocês aparece mais nos detalhes do que nas declarações.”</div>
+      <div class="quote">“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”</div>
+      <div class="quote">“A saudade foi uma das emoções mais presentes da história de vocês.”</div>
+    </div>
+
+    <div class="final-panel musica-final">
+      <span class="step">07 NOSSA MÚSICA</span>
+      <h2>Nossa música ♡</h2>
+      <h3 id="nomeMusicaFinal">Música escolhida</h3>
+      <audio id="audioFinal" controls></audio>
+    </div>
+
+    <div class="final-panel carta-final">
+      <span class="step">08 MENSAGEM ESPECIAL</span>
+      <div class="carta">
+        <h2>Para <span id="cartaNome">Raa</span>,</h2>
+        <p id="mensagemFinal">Cada mensagem, cada risada, cada momento virou parte da nossa história.</p>
+      </div>
+    </div>
+
+    <div class="final-panel encerramento">
+      <span class="step">09 FINAL ÉPICO</span>
+      <h2>Algumas histórias merecem ser eternizadas.</h2>
+      <p>Obrigado por criar essa retrospectiva.</p>
+    </div>
+
+    <div class="final-panel compartilhar">
+      <span class="step">10 GUARDE & COMPARTILHE</span>
+      <button onclick="baixarArte()">⬇ Baixar</button>
+      <button onclick="compartilharArte()">🔗 Compartilhar</button>
+      <button onclick="location.href='/'">♡ Criar outra</button>
+    </div>
+
+  </div>
+</section>
+  <script>
+function gerarArteFinal() {
+  const nome1 = document.getElementById('nome1')?.value || 'Robson';
+  const nome2 = document.getElementById('nome2')?.value || 'Raa';
+  const mensagem = document.getElementById('mensagem')?.value || 
+    'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+
+  document.getElementById('finalNome1').textContent = nome1;
+  document.getElementById('finalNome2').textContent = nome2;
+  document.getElementById('cartaNome').textContent = nome2;
+  document.getElementById('mensagemFinal').textContent = mensagem;
+
+  const fotos = document.getElementById('photos')?.files || [];
+  const galeria = document.getElementById('galeriaFinal');
+  galeria.innerHTML = '';
+
+  Array.from(fotos).slice(0, 3).forEach((foto, index) => {
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(foto);
+    galeria.appendChild(img);
+
+    if (index === 0) {
+      document.getElementById('fotoPrincipal').src = img.src;
+    }
+  });
+
+  if (fotos.length === 0) {
+    document.getElementById('fotoPrincipal').src =
+      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900';
+
+    ['https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
+     'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
+     'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
+    ].forEach(src => {
+      const img = document.createElement('img');
+      img.src = src;
+      galeria.appendChild(img);
+    });
+  }
+
+  const musica = document.getElementById('music')?.files[0];
+  const audio = document.getElementById('audioFinal');
+
+  if (musica) {
+    audio.src = URL.createObjectURL(musica);
+    document.getElementById('nomeMusicaFinal').textContent = musica.name.replace('.mp3', '');
+  }
+
+  document.getElementById('arteFinal').classList.remove('hidden');
+  document.getElementById('arteFinal').scrollIntoView({ behavior: 'smooth' });
+}
+
+document.getElementById('previewBtn')?.addEventListener('click', gerarArteFinal);
+
+function baixarArte() {
+  window.print();
+}
+
+function compartilharArte() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Minha retrospectiva LoveBlast',
+      text: 'Olha essa retrospectiva que eu criei ❤️',
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copiado!');
+  }
+}
+
+const params = new URLSearchParams(window.location.search);
+
+if (params.get('pago') === '1') {
+  setTimeout(() => {
+    document.getElementById('arteFinal')?.classList.remove('hidden');
+    document.getElementById('arteFinal')?.scrollIntoView({ behavior: 'smooth' });
+  }, 500);
+}
 </script>
 
 </body>
