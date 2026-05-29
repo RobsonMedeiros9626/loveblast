@@ -1,18 +1,15 @@
 {
-  "name": "loveblast-server",
+  "name": "loveblast",
   "version": "1.0.0",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
+    "start": "node server/index.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
-    "stripe": "^14.10.0"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.2"
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "stripe": "^14.25.0"
   }
 }
