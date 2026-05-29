@@ -1,4 +1,4 @@
-[README.md](https://github.com/user-attachments/files/28391720/README.md)
+[README.md](https://github.com/user-attachments/files/28395318/README.md)
 # LoveBlast 🔥 — Backend com Stripe
 
 Retrospectiva do Dia dos Namorados com pagamento real via Stripe.
