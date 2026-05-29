@@ -386,9 +386,7 @@ nav a{
     font-size: 28px;
   }
 }
-  .hidden {
-  display: none;
-}
+  .hidden{display:none!important}
 
 .final-experience {
   background: #040407;
@@ -753,7 +751,7 @@ nav a{
 </div>
 
 <script>
-let categoriaSelecionada = 'casal';
+window.categoriaSelecionada = 'casal';
 
 const modal = document.getElementById('createModal');
 const closeModal = document.getElementById('closeModal');
@@ -853,6 +851,8 @@ document.getElementById('payBtn').addEventListener('click', async () => {
   if (whatsappFile) formData.append('whatsappFile', whatsappFile);
 
   try {
+    await salvarDadosRetrospectivaLocal();
+
     payBtn.disabled = true;
     payBtn.textContent = 'CRIANDO SESSÃO...';
 
@@ -969,10 +969,68 @@ document.getElementById('payBtn').addEventListener('click', async () => {
   </div>
 </section>
   <script>
-function gerarArteFinal() {
+const STORAGE_KEY = 'loveblast_dados_retro';
+
+function fileToDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function salvarDadosRetrospectivaLocal() {
   const nome1 = document.getElementById('nome1')?.value || 'Robson';
   const nome2 = document.getElementById('nome2')?.value || 'Raa';
-  const mensagem = document.getElementById('mensagem')?.value || 
+  const mensagem = document.getElementById('mensagem')?.value ||
+    'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+
+  const fotos = Array.from(document.getElementById('photos')?.files || []).slice(0, 3);
+  const fotosBase64 = [];
+
+  for (const foto of fotos) {
+    try {
+      // Salva apenas as 3 primeiras fotos no navegador para montar a arte depois do retorno da Stripe.
+      fotosBase64.push(await fileToDataURL(foto));
+    } catch (error) {
+      console.warn('Não foi possível salvar uma foto localmente.', error);
+    }
+  }
+
+  const musica = document.getElementById('music')?.files?.[0];
+
+  const dados = {
+    nome1,
+    nome2,
+    mensagem,
+    categoria: window.categoriaSelecionada || 'casal',
+    fotos: fotosBase64,
+    musicaNome: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Música escolhida',
+    criadoEm: Date.now()
+  };
+
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+  } catch (error) {
+    console.warn('LocalStorage cheio ou bloqueado. A arte usará dados padrão.', error);
+  }
+
+  return dados;
+}
+
+function obterDadosRetrospectiva() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function preencherArteFinal(dados = {}) {
+  const nome1 = dados.nome1 || document.getElementById('nome1')?.value || 'Robson';
+  const nome2 = dados.nome2 || document.getElementById('nome2')?.value || 'Raa';
+  const mensagem = dados.mensagem || document.getElementById('mensagem')?.value ||
     'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
 
   document.getElementById('finalNome1').textContent = nome1;
@@ -980,47 +1038,81 @@ function gerarArteFinal() {
   document.getElementById('cartaNome').textContent = nome2;
   document.getElementById('mensagemFinal').textContent = mensagem;
 
-  const fotos = document.getElementById('photos')?.files || [];
   const galeria = document.getElementById('galeriaFinal');
+  const fotoPrincipal = document.getElementById('fotoPrincipal');
   galeria.innerHTML = '';
 
-  Array.from(fotos).slice(0, 3).forEach((foto, index) => {
+  const fallbackFotos = [
+    'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
+    'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
+    'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
+  ];
+
+  const fotos = dados.fotos && dados.fotos.length ? dados.fotos : fallbackFotos;
+
+  fotos.slice(0, 3).forEach((src, index) => {
     const img = document.createElement('img');
-    img.src = URL.createObjectURL(foto);
+    img.src = src;
     galeria.appendChild(img);
 
     if (index === 0) {
-      document.getElementById('fotoPrincipal').src = img.src;
+      fotoPrincipal.src = src;
     }
   });
 
-  if (fotos.length === 0) {
-    document.getElementById('fotoPrincipal').src =
-      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900';
+  document.getElementById('nomeMusicaFinal').textContent = dados.musicaNome || 'Música escolhida';
+}
 
-    ['https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
-     'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
-     'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
-    ].forEach(src => {
+function mostrarArteFinal() {
+  preencherArteFinal(obterDadosRetrospectiva());
+
+  const arteFinal = document.getElementById('arteFinal');
+  arteFinal.classList.remove('hidden');
+
+  setTimeout(() => {
+    arteFinal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 300);
+}
+
+// Prévia: mostra somente o card pequeno do modal, NÃO libera a arte final.
+document.getElementById('previewBtn')?.addEventListener('click', async () => {
+  await salvarDadosRetrospectivaLocal();
+
+  const nome1 = document.getElementById('nome1')?.value || 'Você';
+  const nome2 = document.getElementById('nome2')?.value || 'Pessoa especial';
+  const mensagem = document.getElementById('mensagem')?.value || 'Sua retrospectiva está quase pronta.';
+  const photos = Array.from(document.getElementById('photos')?.files || []);
+
+  const previewText = document.getElementById('previewText');
+  const previewImages = document.getElementById('previewImages');
+  const previewResult = document.getElementById('previewResult');
+  const audio = document.getElementById('previewAudio');
+  const music = document.getElementById('music')?.files?.[0];
+
+  if (previewText) {
+    previewText.textContent = `${nome1} & ${nome2} — ${mensagem}`;
+  }
+
+  if (previewImages) {
+    previewImages.innerHTML = '';
+    photos.slice(0, 4).forEach(file => {
       const img = document.createElement('img');
-      img.src = src;
-      galeria.appendChild(img);
+      img.src = URL.createObjectURL(file);
+      previewImages.appendChild(img);
     });
   }
 
-  const musica = document.getElementById('music')?.files[0];
-  const audio = document.getElementById('audioFinal');
-
-  if (musica) {
-    audio.src = URL.createObjectURL(musica);
-    document.getElementById('nomeMusicaFinal').textContent = musica.name.replace('.mp3', '');
+  if (audio) {
+    if (music) {
+      audio.src = URL.createObjectURL(music);
+      audio.style.display = 'block';
+    } else {
+      audio.style.display = 'none';
+    }
   }
 
-  document.getElementById('arteFinal').classList.remove('hidden');
-  document.getElementById('arteFinal').scrollIntoView({ behavior: 'smooth' });
-}
-
-document.getElementById('previewBtn')?.addEventListener('click', gerarArteFinal);
+  previewResult?.classList.add('active');
+});
 
 function baixarArte() {
   window.print();
@@ -1041,11 +1133,9 @@ function compartilharArte() {
 
 const params = new URLSearchParams(window.location.search);
 
+// A arte final só aparece após voltar da Stripe com pago=1.
 if (params.get('pago') === '1') {
-  setTimeout(() => {
-    document.getElementById('arteFinal')?.classList.remove('hidden');
-    document.getElementById('arteFinal')?.scrollIntoView({ behavior: 'smooth' });
-  }, 500);
+  mostrarArteFinal();
 }
 </script>
 
