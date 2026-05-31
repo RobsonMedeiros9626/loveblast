@@ -87,7 +87,7 @@ app.post(
           }
         ],
 
-        success_url: `${process.env.APP_URL}/?session_id={CHECKOUT_SESSION_ID}&pago=1#arteFinal`,
+        success_url: `${process.env.APP_URL}/view.html?session_id={CHECKOUT_SESSION_ID}&pago=1`,
         cancel_url: `${process.env.APP_URL}/?cancelado=1`,
 
         metadata: {
