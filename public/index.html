@@ -1495,7 +1495,7 @@ async function salvarDadosLoveBlast() {
   const photos = [];
   for (const file of photoFiles) {
     const dataUrl = await loveblastFileToDataURL(file);
-    if (dataUrl) photos.push(dataUrl);
+    if (dataUrl) if(dataUrl && dataUrl.length<1500000) photos.push(dataUrl);
   }
 
   let musicSrc = null;
