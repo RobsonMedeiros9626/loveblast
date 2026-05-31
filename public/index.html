@@ -642,6 +642,14 @@ nav a{
   margin-top:8px;
 }
 
+
+/* INDEX_HIDE_FINAL_ART */
+#arteFinal,
+.final-experience,
+.final-grid,
+.extra {
+  display: none !important;
+}
 </style>
 </head>
 
@@ -1389,7 +1397,9 @@ document.addEventListener('DOMContentLoaded', () => {
       payBtn.disabled = true;
       payBtn.textContent = 'CRIANDO SESSÃO...';
 
-      const response = await fetch('/criar-sessao', {
+      await salvarDadosLoveBlast();
+
+    const response = await fetch('/criar-sessao', {
         method: 'POST',
         body: formData
       });
@@ -1439,6 +1449,102 @@ document.addEventListener('DOMContentLoaded', () => {
 
   aplicarCategoria('casal');
 });
+
+function loveblastFileToDataURL(file) {
+  return new Promise(resolve => {
+    if (!file) return resolve(null);
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
+
+function analisarWhatsAppTexto(texto) {
+  const lower = (texto || '').toLowerCase();
+  const words = lower
+    .replace(/[^\p{L}\p{N}\s❤️😂🥰😍😭🤣💕💖]/gu, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 2);
+
+  const ignore = new Set(['que','com','para','uma','não','sim','por','dos','das','vou','você','voce','ele','ela','mas','meu','minha','seu','sua','tem','estou','estava','isso','aqui','hoje','amanhã','bom','boa']);
+  const counts = {};
+  words.forEach(w => {
+    if (!ignore.has(w)) counts[w] = (counts[w] || 0) + 1;
+  });
+
+  const topWord = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
+  const totalMessages = (texto.match(/\n/g) || []).length || Math.max(1, Math.round(words.length / 8));
+
+  return {
+    totalMessages,
+    topWord,
+    loveCount: (lower.match(/eu te amo|te amo/g) || []).length,
+    saudadeCount: (lower.match(/saudade|saudades/g) || []).length,
+    favoriteTime: '23:47',
+    emoji: '😂'
+  };
+}
+
+async function salvarDadosLoveBlast() {
+  const photosInput = document.getElementById('photos');
+  const musicInput = document.getElementById('music');
+  const whatsappInput = document.getElementById('whatsappFile');
+
+  const photoFiles = Array.from(photosInput?.files || []).slice(0, 6);
+  const photos = [];
+  for (const file of photoFiles) {
+    const dataUrl = await loveblastFileToDataURL(file);
+    if (dataUrl) photos.push(dataUrl);
+  }
+
+  let musicSrc = null;
+  let musicName = 'Trilha sonora da história';
+  const musicFile = musicInput?.files?.[0];
+  if (musicFile) {
+    musicSrc = await loveblastFileToDataURL(musicFile);
+    musicName = musicFile.name.replace(/\.[^/.]+$/, '');
+  }
+
+  let insights = {
+    totalMessages: 18432,
+    topWord: 'amor',
+    loveCount: 82,
+    saudadeCount: 103,
+    favoriteTime: '23:47',
+    emoji: '😂'
+  };
+
+  const whatsFile = whatsappInput?.files?.[0];
+  if (whatsFile) {
+    const text = await whatsFile.text();
+    insights = analisarWhatsAppTexto(text);
+  }
+
+  const data = {
+    nome1: document.getElementById('nome1')?.value?.trim() || 'Robson',
+    nome2: document.getElementById('nome2')?.value?.trim() || 'Raa',
+    email: document.getElementById('email')?.value?.trim() || '',
+    mensagem: document.getElementById('mensagem')?.value?.trim() || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
+    categoria: typeof categoriaSelecionada !== 'undefined' ? categoriaSelecionada : 'casal',
+    photos,
+    musicSrc,
+    musicName,
+    insights
+  };
+
+  try {
+    localStorage.setItem('loveblastData', JSON.stringify(data));
+  } catch (err) {
+    console.warn('Não foi possível salvar todos os dados localmente:', err);
+    delete data.photos;
+    delete data.musicSrc;
+    localStorage.setItem('loveblastData', JSON.stringify(data));
+  }
+
+  return data;
+}
+
 </script>
 
 </body>
