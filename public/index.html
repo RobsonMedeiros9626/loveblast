@@ -600,6 +600,48 @@ nav a{
     height: 260px;
   }
 }
+
+.category-description{
+  margin-top:10px;
+  padding:14px;
+  border:1px solid rgba(255,45,120,.25);
+  background:rgba(255,45,120,.07);
+  color:rgba(255,255,255,.78);
+  border-radius:14px;
+  font-size:14px;
+  line-height:1.4;
+}
+.card.active::after{
+  content:"✓";
+  position:absolute;
+  top:14px;
+  right:14px;
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  color:#fff;
+  font-weight:900;
+  z-index:2;
+  box-shadow:0 0 24px rgba(255,45,120,.55);
+}
+.final-panel::after{
+  content:"";
+  position:absolute;
+  inset:auto -20% -40% -20%;
+  height:45%;
+  background:radial-gradient(circle, rgba(255,45,120,.22), transparent 60%);
+  pointer-events:none;
+}
+.final-panel > *{position:relative;z-index:1}
+.notice-ok{
+  color:#ff7aa9;
+  font-size:13px;
+  margin-top:8px;
+}
+
 </style>
 </head>
 
@@ -608,15 +650,15 @@ nav a{
 <header>
   <div class="logo">♡ LoveBlast</div>
   <nav>
-    <a href="#">INÍCIO</a>
-    <a href="#">COMO FUNCIONA</a>
-    <a href="#">EXEMPLOS</a>
-    <a href="#">PREÇOS</a>
+    <a href="#inicio">INÍCIO</a>
+    <a href="#como-funciona">COMO FUNCIONA</a>
+    <a href="#exemplos">EXEMPLOS</a>
+    <a href="#precos">PREÇOS</a>
   </nav>
   <button class="btn js-open-modal">CRIAR RETROSPECTIVA</button>
 </header>
 
-<section class="hero">
+<section id="inicio" class="hero">
   <div>
     <h1>Todas as suas histórias merecem ser <span>eternizadas.</span></h1>
     <p>Crie retrospectivas emocionantes para qualquer pessoa especial na sua vida.</p>
@@ -651,7 +693,7 @@ nav a{
   </div>
 </section>
 
-<h2 class="section-title">EXEMPLO DE RETROSPECTIVA — TEMA <span class="neon">CASAL</span> ♡</h2>
+<h2 id="exemplos" class="section-title">EXEMPLO DE RETROSPECTIVA — TEMA <span id="temaExemplo" class="neon">CASAL</span> ♡</h2>
 
 <section class="phones">
   <div class="phone"><div class="phone-content"><h2>A história de vocês<br><span class="neon">como nunca antes.</span></h2><div class="progress"><span></span></div></div></div>
@@ -662,7 +704,7 @@ nav a{
   <div class="phone"><div class="phone-content"><h2>Nossa <span class="neon">música</span></h2><p>trilha sonora da história</p><button class="btn js-open-modal" type="button">▶</button><div class="progress"><span></span></div></div></div>
 </section>
 
-<section class="preview">
+<section id="como-funciona" class="preview">
   <div>
     <h2>PRÉVIA ANTES DO PAGAMENTO</h2>
     <p style="color:#ccc;margin:10px 0 20px">Mostramos apenas uma parte da retrospectiva para aumentar a curiosidade.</p>
@@ -682,7 +724,7 @@ nav a{
   </div>
 </section>
 
-<section class="insights">
+<section id="precos" class="insights">
   <div class="panel">
     <h2>INSIGHTS DA SUA CONVERSA <span class="neon">IA LoveBlast</span></h2>
     <div class="insight-grid">
@@ -715,6 +757,8 @@ nav a{
 
     <label>Categoria escolhida</label>
     <input id="categoriaInput" type="text" value="casal" readonly>
+
+    <div id="categoriaDescricao" class="category-description">Celebre seu amor com uma retrospectiva cinematográfica.</div>
 
     <label>Seu nome</label>
     <input id="nome1" type="text" placeholder="Ex: Robson">
@@ -749,140 +793,7 @@ nav a{
     <button id="payBtn" class="btn-full secondary" type="button">Finalizar pagamento</button>
   </div>
 </div>
-
-<script>
-window.categoriaSelecionada = 'casal';
-
-const modal = document.getElementById('createModal');
-const closeModal = document.getElementById('closeModal');
-const categoriaInput = document.getElementById('categoriaInput');
-const previewResult = document.getElementById('previewResult');
-
-function abrirFormulario() {
-  modal.classList.add('active');
-  categoriaInput.value = categoriaSelecionada;
-}
-
-function fecharFormulario() {
-  modal.classList.remove('active');
-}
-
-document.querySelectorAll('.card').forEach(card => {
-  card.addEventListener('click', () => {
-    document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-
-    categoriaSelecionada = card.dataset.category || 'casal';
-    categoriaInput.value = categoriaSelecionada;
-
-    abrirFormulario();
-  });
-});
-
-document.querySelectorAll('.js-open-modal').forEach(btn => {
-  btn.addEventListener('click', abrirFormulario);
-});
-
-closeModal.addEventListener('click', fecharFormulario);
-
-modal.addEventListener('click', e => {
-  if (e.target === modal) fecharFormulario();
-});
-
-document.getElementById('previewBtn').addEventListener('click', () => {
-  const nome1 = document.getElementById('nome1').value.trim() || 'Você';
-  const nome2 = document.getElementById('nome2').value.trim() || 'Pessoa especial';
-  const mensagem = document.getElementById('mensagem').value.trim();
-  const photos = Array.from(document.getElementById('photos').files || []);
-  const music = document.getElementById('music').files[0];
-
-  document.getElementById('previewText').textContent =
-    `${nome1} & ${nome2} — categoria ${categoriaSelecionada}. ${mensagem || 'Sua retrospectiva está quase pronta.'}`;
-
-  const previewImages = document.getElementById('previewImages');
-  previewImages.innerHTML = '';
-
-  photos.slice(0, 4).forEach(file => {
-    const img = document.createElement('img');
-    img.src = URL.createObjectURL(file);
-    previewImages.appendChild(img);
-  });
-
-  const audio = document.getElementById('previewAudio');
-
-  if (music) {
-    audio.src = URL.createObjectURL(music);
-    audio.style.display = 'block';
-  } else {
-    audio.style.display = 'none';
-  }
-
-  previewResult.classList.add('active');
-});
-
-document.getElementById('payBtn').addEventListener('click', async () => {
-  const payBtn = document.getElementById('payBtn');
-
-  const nome1 = document.getElementById('nome1').value.trim();
-  const nome2 = document.getElementById('nome2').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const mensagem = document.getElementById('mensagem').value.trim();
-
-  if (!nome1 || !nome2 || !email) {
-    alert('Preencha nome, nome da pessoa e e-mail.');
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('nome1', nome1);
-  formData.append('nome2', nome2);
-  formData.append('email', email);
-  formData.append('mensagem', mensagem);
-  formData.append('categoria', categoriaSelecionada);
-
-  Array.from(document.getElementById('photos').files || []).forEach(file => {
-    formData.append('photos', file);
-  });
-
-  const music = document.getElementById('music').files[0];
-  if (music) formData.append('music', music);
-
-  const whatsappFile = document.getElementById('whatsappFile').files[0];
-  if (whatsappFile) formData.append('whatsappFile', whatsappFile);
-
-  try {
-    await salvarDadosRetrospectivaLocal();
-
-    payBtn.disabled = true;
-    payBtn.textContent = 'CRIANDO SESSÃO...';
-
-    const response = await fetch('/criar-sessao', {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.erro || 'Erro ao iniciar pagamento.');
-    }
-
-    if (data.checkoutUrl) {
-      window.location.href = data.checkoutUrl;
-      return;
-    }
-
-    alert('Não foi possível iniciar o pagamento.');
-
-  } catch (error) {
-    console.error(error);
-    alert(error.message || 'Erro ao iniciar pagamento.');
-    payBtn.disabled = false;
-    payBtn.textContent = 'Finalizar pagamento';
-  }
-});
-</script>
-  <section id="arteFinal" class="final-experience hidden">
+<section id="arteFinal" class="final-experience hidden">
   <div class="final-grid">
 
     <div class="final-panel abertura">
@@ -968,175 +879,566 @@ document.getElementById('payBtn').addEventListener('click', async () => {
 
   </div>
 </section>
-  <script>
-const STORAGE_KEY = 'loveblast_dados_retro';
 
-function fileToDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const STORAGE_KEY = 'loveblast_dados_retro';
 
-async function salvarDadosRetrospectivaLocal() {
-  const nome1 = document.getElementById('nome1')?.value || 'Robson';
-  const nome2 = document.getElementById('nome2')?.value || 'Raa';
-  const mensagem = document.getElementById('mensagem')?.value ||
-    'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
-
-  const fotos = Array.from(document.getElementById('photos')?.files || []).slice(0, 3);
-  const fotosBase64 = [];
-
-  for (const foto of fotos) {
-    try {
-      // Salva apenas as 3 primeiras fotos no navegador para montar a arte depois do retorno da Stripe.
-      fotosBase64.push(await fileToDataURL(foto));
-    } catch (error) {
-      console.warn('Não foi possível salvar uma foto localmente.', error);
+  const CATEGORY_CONFIG = {
+    casal: {
+      label: 'CASAL',
+      modal: 'Celebre o amor de vocês com fotos, música, conversa do WhatsApp e insights emocionais.',
+      title: 'A história de vocês como nunca antes.',
+      intro: 'Algumas histórias não cabem em palavras.',
+      timeline: [
+        ['❤️', '2023', 'Vocês se conheceram'],
+        ['💬', '2023', 'Primeiras conversas'],
+        ['✈️', '2024', 'Primeira viagem juntos'],
+        ['🔥', '2025', 'E ainda parece o começo']
+      ],
+      quotes: [
+        'O carinho de vocês aparece mais nos detalhes do que nas declarações.',
+        'Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.',
+        'A saudade foi uma das emoções mais presentes da história de vocês.'
+      ],
+      final: 'Algumas histórias merecem ser eternizadas.'
+    },
+    mae: {
+      label: 'MÃE',
+      modal: 'Crie uma homenagem emocionante para quem sempre cuidou, protegeu e esteve presente.',
+      title: 'Uma homenagem para quem sempre foi lar.',
+      intro: 'Amor de mãe não cabe em palavras.',
+      timeline: [
+        ['🌷', 'Sempre', 'Ela esteve presente'],
+        ['🤍', 'Cuidado', 'Cada gesto virou memória'],
+        ['🏠', 'Lar', 'O abraço que acalma tudo'],
+        ['✨', 'Hoje', 'Uma homenagem para eternizar']
+      ],
+      quotes: [
+        'Algumas pessoas não apenas cuidam. Elas viram abrigo.',
+        'O amor dela aparece nos detalhes que ninguém vê.',
+        'Mãe é a primeira forma de amor que a vida ensina.'
+      ],
+      final: 'Alguns amores merecem ser eternizados.'
+    },
+    pai: {
+      label: 'PAI',
+      modal: 'Monte uma retrospectiva para celebrar histórias, conselhos, força e presença.',
+      title: 'Uma história feita de exemplo e presença.',
+      intro: 'Alguns heróis não usam capa.',
+      timeline: [
+        ['🛡️', 'Proteção', 'Sempre esteve por perto'],
+        ['🧭', 'Exemplo', 'Ensinou mais por atitudes'],
+        ['💬', 'Conselhos', 'Palavras que ficaram'],
+        ['🔥', 'Hoje', 'Uma homenagem para guardar']
+      ],
+      quotes: [
+        'Pai é presença que guia, mesmo em silêncio.',
+        'Alguns ensinamentos ficam para sempre.',
+        'O amor também mora no cuidado silencioso.'
+      ],
+      final: 'Heróis de verdade merecem ser lembrados.'
+    },
+    familia: {
+      label: 'FAMÍLIA',
+      modal: 'Crie uma retrospectiva familiar com momentos, gerações, fotos e mensagens especiais.',
+      title: 'A história de uma família inteira.',
+      intro: 'Tudo que importa começa em casa.',
+      timeline: [
+        ['🏠', 'Raízes', 'Onde tudo começou'],
+        ['📸', 'Memórias', 'Momentos que uniram todos'],
+        ['🫶', 'Presença', 'Cada pessoa faz parte'],
+        ['✨', 'Hoje', 'Uma história de gerações']
+      ],
+      quotes: [
+        'Família é onde a vida ganha significado.',
+        'Cada foto guarda um pedaço de todos vocês.',
+        'Algumas memórias atravessam gerações.'
+      ],
+      final: 'Histórias de família merecem durar para sempre.'
+    },
+    amigos: {
+      label: 'AMIGOS',
+      modal: 'Transforme amizade, risadas, surtos e conversas em um recap estilo Spotify Wrapped.',
+      title: 'A amizade de vocês como nunca antes.',
+      intro: 'Algumas amizades viram família.',
+      timeline: [
+        ['😂', 'Risadas', 'Momentos impossíveis de esquecer'],
+        ['💬', 'Conversas', 'Assuntos que só vocês entendem'],
+        ['🤝', 'Parceria', 'Um pelo outro sempre'],
+        ['🔥', 'Hoje', 'Mais histórias para viver']
+      ],
+      quotes: [
+        'Vocês transformaram dias comuns em histórias boas.',
+        'A amizade aparece nas piadas, nos conselhos e na presença.',
+        'Algumas pessoas chegam e ficam para sempre.'
+      ],
+      final: 'Amizades verdadeiras merecem ser eternizadas.'
+    },
+    formatura: {
+      label: 'FORMATURA',
+      modal: 'Crie uma retrospectiva de conquista, esforço, superação e orgulho.',
+      title: 'Uma conquista que merece ser lembrada.',
+      intro: 'Todo esforço conta uma história.',
+      timeline: [
+        ['📚', 'Começo', 'O primeiro passo foi dado'],
+        ['☕', 'Rotina', 'Dias difíceis também fizeram parte'],
+        ['🎓', 'Conquista', 'O sonho virou realidade'],
+        ['✨', 'Hoje', 'Uma nova fase começa']
+      ],
+      quotes: [
+        'A conquista de hoje carrega todo esforço de ontem.',
+        'Cada etapa difícil também fez parte da vitória.',
+        'O diploma é só o começo de uma história maior.'
+      ],
+      final: 'Conquistas grandes merecem ser eternizadas.'
+    },
+    bebe: {
+      label: 'BEBÊ',
+      modal: 'Registre as primeiras fases, descobertas, sorrisos e momentos mais fofos.',
+      title: 'Pequenos momentos, memórias gigantes.',
+      intro: 'Cada descoberta virou amor.',
+      timeline: [
+        ['🍼', 'Começo', 'Tudo era novidade'],
+        ['👶', 'Sorrisos', 'Cada risada mudou o dia'],
+        ['🐾', 'Passinhos', 'Cada fase uma emoção'],
+        ['✨', 'Hoje', 'Um amor que só cresce']
+      ],
+      quotes: [
+        'Alguns pequenos momentos viram memórias enormes.',
+        'Cada sorriso conta uma nova descoberta.',
+        'O amor cresceu junto com cada fase.'
+      ],
+      final: 'Infâncias merecem ser guardadas com carinho.'
+    },
+    pet: {
+      label: 'PET',
+      modal: 'Crie uma homenagem fofa para seu melhor amigo de quatro patas.',
+      title: 'Uma história de amor em quatro patas.',
+      intro: 'Alguns amores deixam pegadas.',
+      timeline: [
+        ['🐾', 'Chegada', 'A casa nunca mais foi igual'],
+        ['🎾', 'Bagunça', 'Cada travessura virou memória'],
+        ['❤️', 'Companhia', 'Sempre perto, sempre amor'],
+        ['✨', 'Hoje', 'Um melhor amigo para sempre']
+      ],
+      quotes: [
+        'Alguns anjos chegam com patas.',
+        'O amor deles é simples, puro e infinito.',
+        'Cada olhar parecia dizer: estou aqui.'
+      ],
+      final: 'Amores de quatro patas também merecem eternidade.'
     }
-  }
-
-  const musica = document.getElementById('music')?.files?.[0];
-
-  const dados = {
-    nome1,
-    nome2,
-    mensagem,
-    categoria: window.categoriaSelecionada || 'casal',
-    fotos: fotosBase64,
-    musicaNome: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Música escolhida',
-    criadoEm: Date.now()
   };
 
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
-  } catch (error) {
-    console.warn('LocalStorage cheio ou bloqueado. A arte usará dados padrão.', error);
+  let categoriaSelecionada = 'casal';
+  window.categoriaSelecionada = categoriaSelecionada;
+
+  const modal = document.getElementById('createModal');
+  const closeModal = document.getElementById('closeModal');
+  const categoriaInput = document.getElementById('categoriaInput');
+  const categoriaDescricao = document.getElementById('categoriaDescricao');
+
+  function setText(selector, value) {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = value;
   }
 
-  return dados;
-}
+  function aplicarCategoria(cat) {
+    categoriaSelecionada = cat || 'casal';
+    window.categoriaSelecionada = categoriaSelecionada;
 
-function obterDadosRetrospectiva() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
+    const config = CATEGORY_CONFIG[categoriaSelecionada] || CATEGORY_CONFIG.casal;
+
+    document.querySelectorAll('.card').forEach(c => {
+      c.classList.toggle('active', c.dataset.category === categoriaSelecionada);
+    });
+
+    if (categoriaInput) categoriaInput.value = categoriaSelecionada;
+    if (categoriaDescricao) categoriaDescricao.textContent = config.modal;
+
+    setText('#temaExemplo', config.label);
+
+    const firstPhone = document.querySelector('.phones .phone:first-child h2');
+    if (firstPhone) firstPhone.innerHTML = config.title.replace(' ', '<br><span class="neon">') + '</span>';
+
+    const finalTitle = document.querySelector('.encerramento h2');
+    if (finalTitle) finalTitle.textContent = config.final;
+
+    const quotes = document.querySelectorAll('.frases-final .quote');
+    config.quotes.forEach((q, i) => {
+      if (quotes[i]) quotes[i].textContent = '“' + q + '”';
+    });
+
+    const timeItems = document.querySelectorAll('.timeline-final .time-item');
+    config.timeline.forEach((item, i) => {
+      if (!timeItems[i]) return;
+      timeItems[i].innerHTML = `${item[0]} <strong>${item[1]}</strong><p>${item[2]}</p>`;
+    });
   }
-}
 
-function preencherArteFinal(dados = {}) {
-  const nome1 = dados.nome1 || document.getElementById('nome1')?.value || 'Robson';
-  const nome2 = dados.nome2 || document.getElementById('nome2')?.value || 'Raa';
-  const mensagem = dados.mensagem || document.getElementById('mensagem')?.value ||
-    'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+  function abrirFormulario() {
+    if (!modal) return;
+    aplicarCategoria(categoriaSelecionada);
+    modal.classList.add('active');
+  }
 
-  document.getElementById('finalNome1').textContent = nome1;
-  document.getElementById('finalNome2').textContent = nome2;
-  document.getElementById('cartaNome').textContent = nome2;
-  document.getElementById('mensagemFinal').textContent = mensagem;
+  function fecharFormulario() {
+    modal?.classList.remove('active');
+  }
 
-  const galeria = document.getElementById('galeriaFinal');
-  const fotoPrincipal = document.getElementById('fotoPrincipal');
-  galeria.innerHTML = '';
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      aplicarCategoria(card.dataset.category || 'casal');
+      abrirFormulario();
+    });
+  });
 
-  const fallbackFotos = [
-    'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
-    'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
-    'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
-  ];
+  document.querySelectorAll('.js-open-modal').forEach(btn => {
+    btn.addEventListener('click', abrirFormulario);
+  });
 
-  const fotos = dados.fotos && dados.fotos.length ? dados.fotos : fallbackFotos;
+  closeModal?.addEventListener('click', fecharFormulario);
 
-  fotos.slice(0, 3).forEach((src, index) => {
-    const img = document.createElement('img');
-    img.src = src;
-    galeria.appendChild(img);
+  modal?.addEventListener('click', e => {
+    if (e.target === modal) fecharFormulario();
+  });
 
-    if (index === 0) {
-      fotoPrincipal.src = src;
+  document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      const target = document.querySelector(link.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function analisarConversaWhatsApp(texto) {
+    const clean = (texto || '').toLowerCase();
+    const linhas = clean.split(/\r?\n/).filter(Boolean);
+    const totalMessages = Math.max(linhas.length, 0);
+
+    const loveCount = (clean.match(/eu te amo|te amo|amo você|amo vc/g) || []).length;
+    const saudadeCount = (clean.match(/saudade|sdds|saudades/g) || []).length;
+    const kkkCount = (clean.match(/kkk+/g) || []).length;
+
+    const emojis = clean.match(/[\u{1F300}-\u{1FAFF}❤️💕💖💘💝😍😂😭🥺🔥✨]/gu) || [];
+    const emojiMap = {};
+    emojis.forEach(e => emojiMap[e] = (emojiMap[e] || 0) + 1);
+    const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '❤️';
+
+    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro','amor']);
+    const words = clean.normalize('NFD').replace(/[\u0300-\u036f]/g,'').match(/\b[a-z]{4,}\b/g) || [];
+    const wordMap = {};
+    words.forEach(w => {
+      if (!stop.has(w)) wordMap[w] = (wordMap[w] || 0) + 1;
+    });
+
+    let topWord = Object.entries(wordMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
+    if ((clean.match(/amor/g) || []).length >= 2) topWord = 'amor';
+
+    const hourMap = {};
+    const hourMatches = texto.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g) || [];
+    hourMatches.forEach(h => {
+      const hour = h.split(':')[0].padStart(2,'0');
+      hourMap[hour] = (hourMap[hour] || 0) + 1;
+    });
+    const favoriteHour = Object.entries(hourMap).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const favoriteTime = favoriteHour ? `${favoriteHour}:00` : '23:47';
+
+    const emotionalLevel = loveCount + saudadeCount + kkkCount > 40 ? 'Muito alto' : loveCount + saudadeCount > 10 ? 'Alto' : 'Especial';
+
+    return {
+      totalMessages: totalMessages || 18432,
+      topWord,
+      loveCount: loveCount || 82,
+      saudadeCount: saudadeCount || 103,
+      favoriteTime,
+      topEmoji,
+      emotionalLevel,
+      generatedPhrases: [
+        `A palavra que mais marcou essa história foi: ${topWord}.`,
+        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — sinal de presença mesmo na distância.` : 'Mesmo nas mensagens simples, vocês criaram presença.',
+        kkkCount > 0 ? `O humor também fez parte: foram muitas risadas no caminho.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.'
+      ]
+    };
+  }
+
+  async function lerArquivoTexto(file) {
+    if (!file) return null;
+    return await file.text();
+  }
+
+  function formatNumber(n) {
+    return Number(n || 0).toLocaleString('pt-BR');
+  }
+
+  function obterDadosRetrospectiva() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch {
+      return {};
+    }
+  }
+
+  async function salvarDadosRetrospectivaLocal() {
+    const nome1 = document.getElementById('nome1')?.value || 'Robson';
+    const nome2 = document.getElementById('nome2')?.value || 'Raa';
+    const mensagem = document.getElementById('mensagem')?.value ||
+      'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+
+    const fotos = Array.from(document.getElementById('photos')?.files || []).slice(0, 6);
+    const fotosBase64 = [];
+
+    for (const foto of fotos.slice(0, 3)) {
+      try {
+        fotosBase64.push(await fileToDataURL(foto));
+      } catch (error) {
+        console.warn('Não foi possível salvar uma foto localmente.', error);
+      }
+    }
+
+    const musica = document.getElementById('music')?.files?.[0];
+    const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
+    const textoWhats = await lerArquivoTexto(whatsappFile);
+    const insights = textoWhats ? analisarConversaWhatsApp(textoWhats) : {
+      totalMessages: 18432,
+      topWord: 'amor',
+      loveCount: 82,
+      saudadeCount: 103,
+      favoriteTime: '23:47',
+      topEmoji: '😂',
+      emotionalLevel: 'Alto',
+      generatedPhrases: [
+        'Vocês transformaram mensagens simples em uma história extraordinária.',
+        'O carinho aparece mais nos detalhes do que nas grandes frases.',
+        'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
+      ]
+    };
+
+    const dados = {
+      nome1,
+      nome2,
+      mensagem,
+      categoria: categoriaSelecionada,
+      fotos: fotosBase64,
+      musicaNome: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Música escolhida',
+      insights,
+      criadoEm: Date.now()
+    };
+
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
+    } catch (error) {
+      console.warn('LocalStorage cheio ou bloqueado. A arte usará dados padrão.', error);
+    }
+
+    return dados;
+  }
+
+  function preencherArteFinal(dados = {}) {
+    const config = CATEGORY_CONFIG[dados.categoria || categoriaSelecionada] || CATEGORY_CONFIG.casal;
+    aplicarCategoria(dados.categoria || categoriaSelecionada);
+
+    const nome1 = dados.nome1 || document.getElementById('nome1')?.value || 'Robson';
+    const nome2 = dados.nome2 || document.getElementById('nome2')?.value || 'Raa';
+    const mensagem = dados.mensagem || document.getElementById('mensagem')?.value ||
+      'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+
+    setText('#finalNome1', nome1);
+    setText('#finalNome2', nome2);
+    setText('#cartaNome', nome2);
+    setText('#mensagemFinal', mensagem);
+
+    const insights = dados.insights || {};
+    setText('#totalMensagens', formatNumber(insights.totalMessages || 18432));
+    setText('#palavraMaisUsada', insights.topWord || 'amor');
+    setText('#saudadeCount', `saudade ${insights.saudadeCount || 103} vezes`);
+
+    const quotes = document.querySelectorAll('.frases-final .quote');
+    const generated = insights.generatedPhrases || config.quotes;
+    generated.slice(0, 3).forEach((q, i) => {
+      if (quotes[i]) quotes[i].textContent = '“' + q + '”';
+    });
+
+    const galeria = document.getElementById('galeriaFinal');
+    const fotoPrincipal = document.getElementById('fotoPrincipal');
+    if (galeria) galeria.innerHTML = '';
+
+    const fallbackFotos = [
+      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
+      'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
+      'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
+    ];
+
+    const fotos = dados.fotos && dados.fotos.length ? dados.fotos : fallbackFotos;
+
+    fotos.slice(0, 3).forEach((src, index) => {
+      const img = document.createElement('img');
+      img.src = src;
+      galeria?.appendChild(img);
+
+      if (index === 0 && fotoPrincipal) fotoPrincipal.src = src;
+    });
+
+    setText('#nomeMusicaFinal', dados.musicaNome || 'Música escolhida');
+  }
+
+  function mostrarArteFinal() {
+    preencherArteFinal(obterDadosRetrospectiva());
+
+    const arteFinal = document.getElementById('arteFinal');
+    arteFinal?.classList.remove('hidden');
+
+    setTimeout(() => {
+      arteFinal?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 300);
+  }
+
+  document.getElementById('previewBtn')?.addEventListener('click', async () => {
+    const dados = await salvarDadosRetrospectivaLocal();
+
+    const nome1 = dados.nome1 || 'Você';
+    const nome2 = dados.nome2 || 'Pessoa especial';
+    const mensagem = dados.mensagem || 'Sua retrospectiva está quase pronta.';
+    const photos = Array.from(document.getElementById('photos')?.files || []);
+
+    setText('#previewText', `${nome1} & ${nome2} — ${CATEGORY_CONFIG[dados.categoria]?.label || 'CASAL'}. ${mensagem}`);
+
+    const previewImages = document.getElementById('previewImages');
+    if (previewImages) {
+      previewImages.innerHTML = '';
+      photos.slice(0, 4).forEach(file => {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        previewImages.appendChild(img);
+      });
+    }
+
+    const audio = document.getElementById('previewAudio');
+    const music = document.getElementById('music')?.files?.[0];
+
+    if (audio) {
+      if (music) {
+        audio.src = URL.createObjectURL(music);
+        audio.style.display = 'block';
+      } else {
+        audio.style.display = 'none';
+      }
+    }
+
+    const pr = document.getElementById('previewResult');
+    pr?.classList.add('active');
+
+    const miniText = dados.insights
+      ? `Insight: ${formatNumber(dados.insights.totalMessages)} mensagens analisadas. Palavra marcante: ${dados.insights.topWord}.`
+      : '';
+    if (miniText && pr) {
+      let notice = pr.querySelector('.notice-ok');
+      if (!notice) {
+        notice = document.createElement('div');
+        notice.className = 'notice-ok';
+        pr.appendChild(notice);
+      }
+      notice.textContent = miniText;
     }
   });
 
-  document.getElementById('nomeMusicaFinal').textContent = dados.musicaNome || 'Música escolhida';
-}
+  document.getElementById('payBtn')?.addEventListener('click', async () => {
+    const payBtn = document.getElementById('payBtn');
 
-function mostrarArteFinal() {
-  preencherArteFinal(obterDadosRetrospectiva());
+    const nome1 = document.getElementById('nome1')?.value.trim();
+    const nome2 = document.getElementById('nome2')?.value.trim();
+    const email = document.getElementById('email')?.value.trim();
+    const mensagem = document.getElementById('mensagem')?.value.trim();
 
-  const arteFinal = document.getElementById('arteFinal');
-  arteFinal.classList.remove('hidden');
-
-  setTimeout(() => {
-    arteFinal.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 300);
-}
-
-// Prévia: mostra somente o card pequeno do modal, NÃO libera a arte final.
-document.getElementById('previewBtn')?.addEventListener('click', async () => {
-  await salvarDadosRetrospectivaLocal();
-
-  const nome1 = document.getElementById('nome1')?.value || 'Você';
-  const nome2 = document.getElementById('nome2')?.value || 'Pessoa especial';
-  const mensagem = document.getElementById('mensagem')?.value || 'Sua retrospectiva está quase pronta.';
-  const photos = Array.from(document.getElementById('photos')?.files || []);
-
-  const previewText = document.getElementById('previewText');
-  const previewImages = document.getElementById('previewImages');
-  const previewResult = document.getElementById('previewResult');
-  const audio = document.getElementById('previewAudio');
-  const music = document.getElementById('music')?.files?.[0];
-
-  if (previewText) {
-    previewText.textContent = `${nome1} & ${nome2} — ${mensagem}`;
-  }
-
-  if (previewImages) {
-    previewImages.innerHTML = '';
-    photos.slice(0, 4).forEach(file => {
-      const img = document.createElement('img');
-      img.src = URL.createObjectURL(file);
-      previewImages.appendChild(img);
-    });
-  }
-
-  if (audio) {
-    if (music) {
-      audio.src = URL.createObjectURL(music);
-      audio.style.display = 'block';
-    } else {
-      audio.style.display = 'none';
+    if (!nome1 || !nome2 || !email) {
+      alert('Preencha nome, nome da pessoa e e-mail.');
+      return;
     }
-  }
 
-  previewResult?.classList.add('active');
-});
+    const formData = new FormData();
+    formData.append('nome1', nome1);
+    formData.append('nome2', nome2);
+    formData.append('email', email);
+    formData.append('mensagem', mensagem || '');
+    formData.append('categoria', categoriaSelecionada);
 
-function baixarArte() {
-  window.print();
-}
-
-function compartilharArte() {
-  if (navigator.share) {
-    navigator.share({
-      title: 'Minha retrospectiva LoveBlast',
-      text: 'Olha essa retrospectiva que eu criei ❤️',
-      url: window.location.href
+    Array.from(document.getElementById('photos')?.files || []).forEach(file => {
+      formData.append('photos', file);
     });
-  } else {
-    navigator.clipboard.writeText(window.location.href);
-    alert('Link copiado!');
+
+    const music = document.getElementById('music')?.files?.[0];
+    if (music) formData.append('music', music);
+
+    const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
+    if (whatsappFile) formData.append('whatsappFile', whatsappFile);
+
+    try {
+      await salvarDadosRetrospectivaLocal();
+
+      payBtn.disabled = true;
+      payBtn.textContent = 'CRIANDO SESSÃO...';
+
+      const response = await fetch('/criar-sessao', {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.erro || 'Erro ao iniciar pagamento.');
+      }
+
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      alert('Não foi possível iniciar o pagamento.');
+
+    } catch (error) {
+      console.error(error);
+      alert(error.message || 'Erro ao iniciar pagamento.');
+      payBtn.disabled = false;
+      payBtn.textContent = 'Finalizar pagamento';
+    }
+  });
+
+  window.baixarArte = function baixarArte() {
+    window.print();
+  };
+
+  window.compartilharArte = function compartilharArte() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Minha retrospectiva LoveBlast',
+        text: 'Olha essa retrospectiva que eu criei ❤️',
+        url: window.location.href
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copiado!');
+    }
+  };
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('pago') === '1') {
+    mostrarArteFinal();
   }
-}
 
-const params = new URLSearchParams(window.location.search);
-
-// A arte final só aparece após voltar da Stripe com pago=1.
-if (params.get('pago') === '1') {
-  mostrarArteFinal();
-}
+  aplicarCategoria('casal');
+});
 </script>
 
 </body>
