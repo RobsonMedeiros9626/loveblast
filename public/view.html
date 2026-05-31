@@ -468,6 +468,8 @@ body::after{
 </main>
 
 <script>
+function analisarWhatsAppTexto(texto){return {totalMessages:(texto||'').split('\n').length,topWord:'amor',loveCount:0,saudadeCount:0,favoriteTime:'23:47',emoji:'❤️'};}
+
 const defaultPhotos = [
   'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1000',
   'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=1000',
@@ -603,7 +605,7 @@ function hydrate(){
   palavraMaisUsada.textContent = insights.topWord || 'amor';
   saudadeCount.textContent = `saudade ${insights.saudadeCount || 103} vezes`;
 
-  const photos = Array.isArray(data.photos) && data.photos.length ? data.photos : defaultPhotos;
+  const photos=(Array.isArray(data.photos)&&data.photos.filter(Boolean).length)?data.photos.filter(Boolean):defaultPhotos;
   fotoPrincipal.src = photos[0];
 
   galeriaFinal.innerHTML = '';
