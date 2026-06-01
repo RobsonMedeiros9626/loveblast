@@ -15,8 +15,7 @@ body{
 }
 body::before{
   content:"";
-  position:fixed;
-  inset:0;
+  position:fixed;inset:0;
   background:
     radial-gradient(circle at 20% 5%,rgba(255,45,120,.22),transparent 35%),
     radial-gradient(circle at 90% 20%,rgba(255,107,26,.16),transparent 35%),
@@ -25,328 +24,307 @@ body::before{
 }
 body::after{
   content:"";
-  position:fixed;
-  inset:0;
-  background-image:
-    radial-gradient(rgba(255,45,120,.55) 1px, transparent 1px);
+  position:fixed;inset:0;
+  background-image:radial-gradient(rgba(255,45,120,.55) 1px,transparent 1px);
   background-size:38px 38px;
-  opacity:.06;
+  opacity:.05;
   z-index:-1;
 }
 .topbar{
-  height:72px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 30px;
-  background:rgba(3,3,6,.75);
+  height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;
+  background:rgba(3,3,6,.82);
   backdrop-filter:blur(18px);
   border-bottom:1px solid rgba(255,45,120,.2);
-  position:sticky;
-  top:0;
-  z-index:10;
+  position:sticky;top:0;z-index:10;
 }
 .logo{
-  font-size:26px;
-  font-weight:900;
+  font-size:24px;font-weight:900;
   background:linear-gradient(90deg,#ff2d78,#ff8a00);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-.actions{display:flex;gap:12px;align-items:center}
+.actions{display:flex;gap:10px;align-items:center}
 .action-btn{
-  border:1px solid rgba(255,45,120,.75);
-  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,45,120,.7);
+  background:rgba(255,255,255,.05);
   color:#fff;
-  padding:12px 18px;
-  border-radius:14px;
-  font-weight:900;
+  padding:10px 16px;
+  border-radius:12px;
+  font-weight:900;font-size:13px;
   cursor:pointer;
+  transition:.2s;
 }
+.action-btn:hover{background:rgba(255,45,120,.15)}
 .action-btn.primary{
   background:linear-gradient(90deg,#ff2d78,#ff6b1a);
   box-shadow:0 0 28px rgba(255,45,120,.35);
+  border-color:transparent;
 }
-.final-experience{
-  padding:42px 18px 80px;
-}
+.action-btn.primary:hover{box-shadow:0 0 40px rgba(255,45,120,.5)}
+.final-experience{padding:36px 16px 80px}
 .final-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   max-width:1500px;
   margin:auto;
-  border:1px solid rgba(255,45,120,.24);
-  box-shadow:0 0 70px rgba(255,45,120,.08);
+  border:1px solid rgba(255,45,120,.22);
+  box-shadow:0 0 80px rgba(255,45,120,.1);
+  border-radius:2px;
+  overflow:hidden;
 }
 .final-panel{
-  min-height:530px;
-  padding:38px;
-  border:1px solid rgba(255,45,120,.24);
+  min-height:520px;
+  padding:42px;
+  border:1px solid rgba(255,45,120,.2);
   background:
-    radial-gradient(circle at 80% 20%, rgba(255,45,120,.18), transparent 35%),
-    linear-gradient(160deg, rgba(7,7,13,.96), rgba(20,5,11,.96));
+    radial-gradient(circle at 80% 20%,rgba(255,45,120,.16),transparent 38%),
+    linear-gradient(160deg,rgba(7,7,13,.97),rgba(20,5,11,.97));
   position:relative;
   overflow:hidden;
 }
 .final-panel::before{
   content:"";
-  position:absolute;
-  inset:-20%;
-  background:radial-gradient(circle,rgba(255,255,255,.08),transparent 30%);
-  opacity:.12;
-  pointer-events:none;
+  position:absolute;inset:-20%;
+  background:radial-gradient(circle,rgba(255,255,255,.07),transparent 30%);
+  opacity:.1;pointer-events:none;
 }
 .final-panel > *{position:relative;z-index:1}
 .step{
-  font-size:13px;
-  font-weight:900;
-  color:white;
-  opacity:.85;
-  letter-spacing:.08em;
+  font-size:12px;font-weight:900;
+  color:white;opacity:.7;
+  letter-spacing:.1em;
+  text-transform:uppercase;
 }
-.brand{
-  color:#ff4b8b;
-  font-size:28px;
-  font-weight:900;
-  margin-top:24px;
-}
-.abertura{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+.brand{color:#ff4b8b;font-size:26px;font-weight:900;margin-top:22px}
+.abertura{display:flex;flex-direction:column;justify-content:center}
 .abertura h1{
-  font-size:clamp(54px,8vw,110px);
+  font-size:clamp(50px,7vw,100px);
   font-family:"Brush Script MT","Segoe Script",cursive;
-  margin-top:60px;
-  font-weight:400;
-  line-height:1;
+  margin-top:50px;font-weight:400;line-height:1.05;
 }
 .abertura h1 b{color:#ff2d78}
-.abertura p{margin-top:22px;color:#eee;font-size:18px}
-.final-panel h2{
-  font-size:clamp(34px,5vw,70px);
-  line-height:1.05;
-}
-.highlight,
-.final-panel h2 span,
-.final-panel h3,
-.big-number,
-.insight-card b{
-  color:#ff2d78;
-  text-shadow:0 0 25px rgba(255,45,120,.7);
+.abertura p{margin-top:20px;color:#eee;font-size:17px}
+.final-panel h2{font-size:clamp(30px,4.5vw,64px);line-height:1.05}
+.highlight,.final-panel h2 span,.final-panel h3,.big-number,.insight-card b{
+  color:#ff2d78;text-shadow:0 0 25px rgba(255,45,120,.7);
 }
 .polaroid{
-  width:310px;
-  background:#fff;
-  padding:14px;
-  transform:rotate(-5deg);
-  margin:42px auto 36px;
-  box-shadow:0 30px 60px rgba(0,0,0,.4);
+  width:clamp(200px,50%,300px);
+  background:#fff;padding:12px;
+  transform:rotate(-4deg);
+  margin:38px auto 30px;
+  box-shadow:0 24px 55px rgba(0,0,0,.45);
 }
-.polaroid img{
-  width:100%;
-  height:300px;
-  object-fit:cover;
-  display:block;
-}
-.comeco h2{margin-top:12px}
-.comeco p{font-size:18px;margin-top:16px;color:#eee;max-width:420px}
-.timeline-final{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+.polaroid img{width:100%;height:260px;object-fit:cover;display:block}
+.comeco p{font-size:17px;margin-top:14px;color:#eee;max-width:420px}
+.timeline-final{display:flex;flex-direction:column;justify-content:center}
 .time-item{
-  margin:18px 0;
+  margin:16px 0;
   display:grid;
-  grid-template-columns:42px 90px 1fr;
-  gap:12px;
-  align-items:center;
-  font-size:22px;
+  grid-template-columns:44px 90px 1fr;
+  gap:12px;align-items:center;font-size:20px;
 }
 .time-item .emoji{
-  width:38px;height:38px;border:1px solid rgba(255,45,120,.6);
-  display:flex;align-items:center;justify-content:center;border-radius:50%;
-  background:rgba(255,45,120,.09)
+  width:40px;height:40px;
+  border:1px solid rgba(255,45,120,.55);
+  display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:rgba(255,45,120,.1);
+  font-size:18px;
 }
-.time-item strong{color:#ff2d78}
-.time-item p{color:#ddd;font-size:17px}
-.insights-final h2{font-size:42px}
+.time-item strong{color:#ff2d78;font-size:20px}
+.time-item p{color:#ddd;font-size:16px}
+.insights-final h2{font-size:38px}
 .big-number{
   display:block;
-  font-size:84px;
-  font-weight:900;
-  margin:18px 0 0;
+  font-size:80px;font-weight:900;
+  margin:16px 0 0;
+  line-height:1;
 }
-.insights-final > p{font-size:28px;font-weight:900;margin-bottom:20px}
+.insights-final > p{font-size:26px;font-weight:900;margin-bottom:18px}
 .insight-card{
-  margin-top:18px;
-  padding:24px;
-  border:1px solid rgba(255,45,120,.35);
-  border-radius:18px;
+  margin-top:16px;padding:22px;
+  border:1px solid rgba(255,45,120,.32);
+  border-radius:16px;
   background:rgba(255,255,255,.04);
-  font-size:21px;
+  font-size:20px;
 }
-.insight-card b{font-size:34px}
-.galeria-final{
-  display:flex;
-  flex-direction:column;
-}
+.insight-card b{font-size:32px}
+.galeria-final{display:flex;flex-direction:column}
 .galeria-fotos{
-  display:flex;
-  gap:18px;
-  align-items:center;
-  justify-content:center;
-  flex:1;
-  min-height:400px;
+  display:flex;gap:14px;align-items:center;justify-content:center;
+  height:380px;margin-top:30px;
 }
 .galeria-fotos img{
-  width:30%;
-  height:330px;
-  object-fit:cover;
-  border-radius:20px;
-  box-shadow:0 20px 60px rgba(0,0,0,.45);
-  transform:rotate(-2deg);
+  width:30%;height:320px;
+  object-fit:cover;border-radius:18px;
+  box-shadow:0 16px 50px rgba(0,0,0,.45);
+  flex-shrink:0;
 }
-.galeria-fotos img:nth-child(2){
-  width:40%;
-  height:390px;
-  transform:rotate(1deg) scale(1.03);
-}
+.galeria-fotos img:nth-child(2){width:38%;height:360px}
+.galeria-fotos.single img{width:60%;height:360px}
 .quote{
-  padding:30px;
-  border:1px solid rgba(255,45,120,.35);
-  border-radius:18px;
-  margin-top:24px;
-  background:rgba(255,255,255,.035);
-  font-size:20px;
-  line-height:1.5;
+  padding:24px;
+  border:1px solid rgba(255,45,120,.3);
+  border-radius:16px;
+  margin:14px 0;
+  background:rgba(255,255,255,.03);
+  font-size:18px;line-height:1.55;color:#eee;
 }
-.musica-final{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+/* Music section */
 .music-card{
-  display:flex;
-  align-items:center;
-  gap:28px;
-  margin-top:36px;
+  margin-top:32px;
+  display:flex;align-items:center;gap:24px;
 }
 .disc{
-  width:190px;
-  height:190px;
+  width:90px;height:90px;
   border-radius:50%;
-  background:
-    radial-gradient(circle at center,#111 0 20%,#222 21% 24%,#080808 25% 100%);
-  border:1px solid rgba(255,255,255,.12);
-  box-shadow:0 0 60px rgba(255,45,120,.2);
+  border:3px solid #ff2d78;
+  background:radial-gradient(circle,#1a0610,#050508);
+  position:relative;flex-shrink:0;
+  box-shadow:0 0 30px rgba(255,45,120,.4);
+  animation:spin 8s linear infinite paused;
 }
-.musica-final audio{width:100%;margin-top:28px}
+.disc::after{content:"";position:absolute;inset:35%;border-radius:50%;background:#ff2d78}
+.disc.playing{animation-play-state:running}
+@keyframes spin{to{transform:rotate(360deg)}}
+#audioFinal{
+  width:100%;margin-top:14px;
+  filter:hue-rotate(300deg) saturate(1.5);
+}
 .carta{
-  background:#f1d7b4;
-  color:#321;
-  padding:40px;
-  border-radius:8px;
-  transform:rotate(-3deg);
-  max-width:600px;
-  margin:60px auto;
+  background:linear-gradient(135deg,#f5e6c8,#f0d5a0);
+  color:#2a1505;
+  padding:36px;border-radius:10px;
+  transform:rotate(-2deg);
+  margin:28px auto;
+  max-width:540px;
   font-family:Georgia,serif;
-  box-shadow:0 30px 80px rgba(0,0,0,.35);
+  box-shadow:0 14px 40px rgba(0,0,0,.5);
 }
-.carta h2{
-  color:#b9274f;
-  font-size:42px;
-  margin-bottom:24px;
-  font-family:"Brush Script MT","Segoe Script",cursive;
-}
-.carta p{font-size:19px;line-height:1.65}
+.carta h2{color:#9e2244;font-size:38px;margin-bottom:18px;font-family:cursive}
+.carta p{font-size:17px;line-height:1.7;color:#3a1a08}
 .encerramento{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  text-align:center;
+  display:flex;flex-direction:column;justify-content:center;
+  text-align:center;align-items:center;
 }
-.encerramento .heart{
-  font-size:76px;
-  color:#ff2d78;
-  text-shadow:0 0 32px rgba(255,45,120,.8);
-  margin-bottom:28px;
-}
+.heart{font-size:72px;color:#ff2d78;margin-bottom:22px;animation:pulse 1.5s ease infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 .encerramento h2{
-  color:#ff2d78;
-  text-transform:uppercase;
-  letter-spacing:4px;
+  color:#ff2d78;text-transform:uppercase;letter-spacing:3px;
+  font-size:clamp(20px,3vw,36px);line-height:1.3;
 }
-.encerramento p{margin-top:22px;color:#eee;font-size:20px}
-.compartilhar{
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  gap:22px;
-}
+.encerramento p{color:#aaa;margin-top:18px;font-size:16px}
+.compartilhar{display:flex;flex-direction:column;justify-content:center;gap:16px}
+.compartilhar h2{font-size:clamp(24px,3.5vw,52px);margin-bottom:10px}
 .share-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-  margin-top:36px;
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:12px;margin-top:10px;
 }
-.compartilhar button{
-  padding:22px;
-  min-height:110px;
-  border-radius:18px;
-  border:1px solid #ff2d78;
-  background:rgba(255,255,255,.04);
-  color:white;
-  font-size:16px;
-  font-weight:900;
-  cursor:pointer;
+.share-grid button{
+  padding:20px 12px;min-height:100px;
+  border-radius:16px;
+  border:1px solid rgba(255,45,120,.55);
+  background:rgba(255,255,255,.05);
+  color:white;font-size:14px;font-weight:900;
+  cursor:pointer;transition:.2s;line-height:1.5;
+}
+.share-grid button:hover{
+  background:rgba(255,45,120,.15);
+  border-color:#ff2d78;
+  transform:translateY(-2px);
 }
 .extra{
-  max-width:1500px;
-  margin:0 auto;
-  padding:26px;
-  border:1px solid rgba(255,45,120,.24);
-  border-top:0;
-  background:rgba(255,255,255,.025);
-}
-.extra h3{font-size:16px;letter-spacing:.08em;margin-bottom:18px}
-.extra-grid{
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  gap:14px;
-}
-.extra-item{
-  padding:20px;
+  max-width:1500px;margin:0 auto;padding:24px;
   border:1px solid rgba(255,45,120,.22);
-  border-radius:16px;
-  background:rgba(255,255,255,.035);
-  text-align:center;
+  border-top:0;
+  background:rgba(255,255,255,.02);
 }
-.extra-item strong{
-  display:block;
-  color:#ff2d78;
-  font-size:18px;
-  margin-top:8px;
+.extra h3{font-size:14px;letter-spacing:.08em;margin-bottom:16px;font-weight:900;color:#bbb}
+.extra-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.extra-item{
+  padding:18px 12px;
+  border:1px solid rgba(255,45,120,.2);
+  border-radius:14px;
+  background:rgba(255,255,255,.03);
+  text-align:center;font-size:13px;color:#ccc;
 }
+.extra-item strong{display:block;color:#ff2d78;font-size:17px;margin-top:8px;font-weight:900}
 .fade-in{animation:fadeUp .9s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+
+/* DOWNLOAD BUTTON OVERLAY */
+.download-loading{
+  position:fixed;inset:0;background:rgba(3,3,6,.95);
+  z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;
+}
+.download-loading.active{display:flex}
+.download-loading p{color:#ff7aa9;font-size:18px;font-weight:700}
+.spinner{
+  width:50px;height:50px;border-radius:50%;
+  border:4px solid rgba(255,45,120,.25);
+  border-top-color:#ff2d78;
+  animation:spinAnim .8s linear infinite;
+}
+@keyframes spinAnim{to{transform:rotate(360deg)}}
+
+/* PRINT STYLES — Clean PDF */
+@media print{
+  body::before,body::after{display:none!important}
+  .topbar,.download-loading{display:none!important}
+  body{background:#030306!important}
+  .final-experience{padding:0!important}
+  .final-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,1fr)!important;
+    break-inside:avoid;
+    border:none!important;
+    box-shadow:none!important;
+  }
+  .final-panel{
+    min-height:auto!important;
+    padding:30px!important;
+    page-break-inside:avoid;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    background:#0a020a!important;
+    border:1px solid #3a0a1a!important;
+  }
+  .final-panel::before{display:none!important}
+  audio,video{display:none!important}
+  .extra{display:block!important}
+  .share-grid button,
+  .action-btn{display:none!important}
+}
+
+/* RESPONSIVE */
 @media(max-width:900px){
-  .topbar{padding:0 16px;height:64px}
+  .topbar{padding:0 16px;height:60px}
   .actions{gap:8px}
-  .action-btn{padding:10px 12px;font-size:12px}
+  .action-btn{padding:9px 12px;font-size:12px}
   .final-grid{grid-template-columns:1fr}
-  .final-panel{min-height:100vh;padding:28px 20px}
-  .abertura h1{font-size:64px}
-  .time-item{grid-template-columns:36px 70px 1fr;font-size:18px}
-  .time-item p{font-size:15px}
+  .final-panel{min-height:auto;padding:28px 20px}
+  .abertura h1{font-size:clamp(48px,12vw,72px)}
+  .time-item{grid-template-columns:38px 70px 1fr;font-size:17px}
   .galeria-fotos{flex-direction:column;height:auto}
   .galeria-fotos img,
-  .galeria-fotos img:nth-child(2){width:100%;height:260px;transform:none}
+  .galeria-fotos img:nth-child(2){width:100%;height:240px;transform:none}
   .music-card{flex-direction:column;align-items:flex-start}
   .share-grid{grid-template-columns:1fr}
-  .extra-grid{grid-template-columns:1fr}
+  .extra-grid{grid-template-columns:repeat(2,1fr)}
+  .carta{transform:none;padding:24px}
+  .polaroid{transform:none;margin:24px auto 20px}
+}
+@media(max-width:480px){
+  .final-panel{padding:22px 16px}
+  .abertura h1{font-size:clamp(38px,12vw,56px)}
+  .final-panel h2{font-size:clamp(24px,7vw,38px)}
+  .big-number{font-size:60px}
+  .insight-card{font-size:16px}
+  .insight-card b{font-size:24px}
+  .quote{font-size:15px;padding:18px}
+  .extra-grid{grid-template-columns:1fr 1fr}
+  .disc{width:70px;height:70px}
 }
 </style>
 </head>
@@ -356,9 +334,15 @@ body::after{
   <div class="logo">♡ LoveBlast</div>
   <div class="actions">
     <button class="action-btn" onclick="compartilharArte()">Compartilhar</button>
-    <button class="action-btn primary" onclick="baixarArte()">Baixar</button>
+    <button class="action-btn primary" onclick="iniciarDownload()">⬇ Baixar</button>
   </div>
 </header>
+
+<!-- Download overlay -->
+<div class="download-loading" id="downloadLoading">
+  <div class="spinner"></div>
+  <p>Preparando sua retrospectiva...</p>
+</div>
 
 <main class="final-experience">
   <section id="arteFinal" class="final-grid fade-in">
@@ -381,23 +365,18 @@ body::after{
 
     <div class="final-panel timeline-final">
       <span class="step">03 LINHA DO TEMPO</span>
-      <div class="time-item"><span class="emoji">💖</span><strong>2023</strong><p id="timeline1">Vocês se conheceram</p></div>
-      <div class="time-item"><span class="emoji">💬</span><strong>2023</strong><p>Primeiras conversas</p></div>
-      <div class="time-item"><span class="emoji">✈️</span><strong>2024</strong><p id="timeline2">Primeira viagem juntos</p></div>
-      <div class="time-item"><span class="emoji">🔥</span><strong>2025</strong><p>E ainda parece o começo</p></div>
+      <div id="timelineItems"></div>
     </div>
 
     <div class="final-panel insights-final">
       <span class="step">04 NOSSOS INSIGHTS</span>
       <h2>Vocês trocaram</h2>
       <strong class="big-number" id="totalMensagens">18.432</strong>
-      <p>mensagens</p>
-
+      <p id="mensagensLabel">mensagens</p>
       <div class="insight-card">
         A palavra mais usada foi:<br>
         <b id="palavraMaisUsada">amor</b> ❤️
       </div>
-
       <div class="insight-card">
         Vocês disseram<br>
         <b id="saudadeCount">saudade 103 vezes</b>
@@ -411,20 +390,23 @@ body::after{
 
     <div class="final-panel frases-final">
       <span class="step">06 FRASES QUE DEFINEM</span>
-      <div class="quote" id="quote1">“O carinho aparece mais nos detalhes do que nas grandes declarações.”</div>
-      <div class="quote" id="quote2">“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”</div>
-      <div class="quote" id="quote3">“A saudade foi uma das emoções mais presentes dessa história.”</div>
+      <div class="quote" id="quote1"></div>
+      <div class="quote" id="quote2"></div>
+      <div class="quote" id="quote3"></div>
     </div>
 
     <div class="final-panel musica-final">
       <span class="step">07 NOSSA MÚSICA</span>
       <h2>Nossa <span>música</span> ♡</h2>
       <h3 id="nomeMusicaFinal">Trilha sonora da história</h3>
+      <p style="color:#aaa;font-size:15px;margin-top:12px">Toque para reviver esse momento.</p>
       <div class="music-card">
-        <div class="disc"></div>
+        <div class="disc" id="disc"></div>
         <div style="flex:1">
-          <p>Toque para reviver esse momento.</p>
           <audio id="audioFinal" controls></audio>
+          <p id="semMusicaMsg" style="color:#888;font-size:14px;margin-top:8px;display:none">
+            Nenhuma música foi adicionada.
+          </p>
         </div>
       </div>
     </div>
@@ -446,13 +428,14 @@ body::after{
 
     <div class="final-panel compartilhar">
       <span class="step">10 GUARDE & COMPARTILHE</span>
-      <h2>Sua retrospectiva está pronta.</h2>
+      <h2>Sua retrospectiva<br>está pronta.</h2>
       <div class="share-grid">
-        <button onclick="baixarArte()">⬇<br>Baixar<br><small>sua retrospectiva</small></button>
+        <button onclick="iniciarDownload()">⬇<br>Baixar<br><small>sua retrospectiva</small></button>
         <button onclick="compartilharArte()">🔗<br>Compartilhar<br><small>com quem ama</small></button>
         <button onclick="location.href='/'">♡<br>Criar outra<br><small>retrospectiva</small></button>
       </div>
     </div>
+
   </section>
 
   <section class="extra">
@@ -468,180 +451,254 @@ body::after{
 </main>
 
 <script>
-function analisarWhatsAppTexto(texto){return {totalMessages:(texto||'').split('\n').length,topWord:'amor',loveCount:0,saudadeCount:0,favoriteTime:'23:47',emoji:'❤️'};}
+// ===== CATEGORY CONFIGS (mirroring index.html) =====
+const CATEGORY_CONFIG = {
+  casal:{
+    label:'CASAL',
+    abertura:'Algumas histórias não cabem em palavras.',
+    comeco:'E desde então, cada detalhe faz sentido.',
+    mensagensLabel:'mensagens',
+    timeline:[['❤️','2023','Vocês se conheceram'],['💬','2023','Primeiras conversas'],['✈️','2024','Primeira viagem juntos'],['🔥','2025','E ainda parece o começo']],
+    q1:'"O carinho aparece mais nos detalhes do que nas grandes declarações."',
+    q2:'"Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos."',
+    q3:'"A saudade foi uma das emoções mais presentes nessa história."',
+    final:'Algumas histórias merecem ser eternizadas.'
+  },
+  mae:{
+    label:'MÃE',
+    abertura:'O amor mais constante da vida.',
+    comeco:'Tudo começou com cuidado, colo e presença.',
+    mensagensLabel:'momentos especiais',
+    timeline:[['🌷','Sempre','Ela esteve presente'],['🤍','Cuidado','Cada gesto virou memória'],['🏠','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
+    q1:'"Mãe é quem transforma cuidado em amor todos os dias."',
+    q2:'"Alguns abraços carregam a força de uma vida inteira."',
+    q3:'"Essa homenagem existe porque algumas presenças são eternas."',
+    final:'Alguns amores merecem ser homenageados para sempre.'
+  },
+  pai:{
+    label:'PAI',
+    abertura:'Alguns heróis não usam capa.',
+    comeco:'Tudo começou com exemplo, proteção e presença.',
+    mensagensLabel:'momentos especiais',
+    timeline:[['🛡️','Proteção','Sempre esteve por perto'],['🧭','Exemplo','Ensinou mais por atitudes'],['💬','Conselhos','Palavras que ficaram'],['🔥','Hoje','Uma homenagem para guardar']],
+    q1:'"Pai é presença que guia, mesmo em silêncio."',
+    q2:'"O exemplo dele virou parte de quem você é."',
+    q3:'"Alguns gestos simples carregam amor gigante."',
+    final:'Heróis de verdade merecem ser lembrados.'
+  },
+  familia:{
+    label:'FAMÍLIA',
+    abertura:'Família é onde a história começa.',
+    comeco:'Cada encontro virou parte de uma memória maior.',
+    mensagensLabel:'memórias compartilhadas',
+    timeline:[['🏠','Raízes','Onde tudo começou'],['📸','Memórias','Momentos que uniram todos'],['🫶','Presença','Cada pessoa faz parte'],['✨','Hoje','Uma história de gerações']],
+    q1:'"Família é feita de risadas, apoio e lembranças que ficam."',
+    q2:'"O lar não é só um lugar, é quem caminha com você."',
+    q3:'"Cada foto guarda uma parte da história de vocês."',
+    final:'Histórias de família atravessam gerações.'
+  },
+  amigos:{
+    label:'AMIGOS',
+    abertura:'Algumas amizades viram família.',
+    comeco:'Tudo começou com risadas e virou parceria.',
+    mensagensLabel:'mensagens e memórias',
+    timeline:[['😂','Risadas','Momentos impossíveis de esquecer'],['💬','Conversas','Assuntos que só vocês entendem'],['🤝','Parceria','Um pelo outro sempre'],['🔥','Hoje','Mais histórias para viver']],
+    q1:'"Vocês transformaram dias comuns em histórias boas."',
+    q2:'"A amizade aparece nas piadas, nos conselhos e na presença."',
+    q3:'"Algumas pessoas chegam e ficam para sempre."',
+    final:'Amizades verdadeiras merecem ser eternizadas.'
+  },
+  formatura:{
+    label:'FORMATURA',
+    abertura:'Todo esforço merece ser lembrado.',
+    comeco:'Tudo começou com um sonho e muita coragem.',
+    mensagensLabel:'dias de dedicação',
+    timeline:[['📚','Começo','O primeiro passo foi dado'],['☕','Rotina','Dias difíceis também fizeram parte'],['🎓','Conquista','O sonho virou realidade'],['✨','Hoje','Uma nova fase começa']],
+    q1:'"A conquista de hoje carrega todo esforço de ontem."',
+    q2:'"Cada etapa difícil também fez parte da vitória."',
+    q3:'"O diploma é só o começo de uma história maior."',
+    final:'Conquistas grandes merecem ser eternizadas.'
+  },
+  bebe:{
+    label:'BEBÊ',
+    abertura:'Cada descoberta virou amor.',
+    comeco:'Tudo começou com amor, cuidado e encanto.',
+    mensagensLabel:'momentos registrados',
+    timeline:[['🍼','Começo','Tudo era novidade'],['👶','Sorrisos','Cada risada mudou o dia'],['🐾','Passinhos','Cada fase uma emoção'],['✨','Hoje','Um amor que só cresce']],
+    q1:'"Cada sorriso pequeno virou uma memória gigante."',
+    q2:'"O tempo passa rápido, mas esses momentos ficam."',
+    q3:'"Essa história é feita de amor em sua forma mais pura."',
+    final:'Infâncias merecem ser guardadas com carinho.'
+  },
+  pet:{
+    label:'PET',
+    abertura:'Amor também tem quatro patas.',
+    comeco:'Tudo começou com bagunça, carinho e companhia.',
+    mensagensLabel:'memórias com o pet',
+    timeline:[['🐾','Chegada','A casa nunca mais foi igual'],['🎾','Bagunça','Cada travessura virou memória'],['❤️','Companhia','Sempre perto, sempre amor'],['✨','Hoje','Um melhor amigo para sempre']],
+    q1:'"Alguns animais chegam e viram parte da família."',
+    q2:'"O amor mais sincero às vezes vem com patas."',
+    q3:'"Cada brincadeira virou uma memória feliz."',
+    final:'Alguns companheiros deixam marcas eternas.'
+  }
+};
 
+// Default photos fallback
 const defaultPhotos = [
   'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1000',
   'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=1000',
   'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=1000'
 ];
 
-const categoryTexts = {
-  casal: {
-    abertura: 'Algumas histórias não cabem em palavras.',
-    comeco: 'E desde então, cada detalhe faz sentido.',
-    t1: 'Vocês se conheceram',
-    t2: 'Primeira viagem juntos',
-    q1: '“O carinho aparece mais nos detalhes do que nas grandes declarações.”',
-    q2: '“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”',
-    q3: '“A saudade foi uma das emoções mais presentes dessa história.”',
-    final: 'Algumas histórias merecem ser eternizadas.'
-  },
-  mae: {
-    abertura: 'O amor mais constante da vida.',
-    comeco: 'Tudo começou com cuidado, colo e presença.',
-    t1: 'Ela esteve presente',
-    t2: 'Momentos que viraram memória',
-    q1: '“Mãe é quem transforma cuidado em amor todos os dias.”',
-    q2: '“Alguns abraços carregam a força de uma vida inteira.”',
-    q3: '“Essa homenagem existe porque algumas presenças são eternas.”',
-    final: 'Alguns amores merecem ser homenageados para sempre.'
-  },
-  pai: {
-    abertura: 'Alguns heróis não usam capa.',
-    comeco: 'Tudo começou com exemplo, proteção e presença.',
-    t1: 'Ele esteve ao seu lado',
-    t2: 'Lições que ficaram',
-    q1: '“Pai é quem ensina até quando está em silêncio.”',
-    q2: '“O exemplo dele virou parte de quem você é.”',
-    q3: '“Alguns gestos simples carregam amor gigante.”',
-    final: 'Algumas histórias começam com um herói chamado pai.'
-  },
-  familia: {
-    abertura: 'Família é onde a história começa.',
-    comeco: 'Cada encontro virou parte de uma memória maior.',
-    t1: 'A família cresceu em histórias',
-    t2: 'Momentos juntos',
-    q1: '“Família é feita de risadas, apoio e lembranças que ficam.”',
-    q2: '“O lar não é só um lugar, é quem caminha com você.”',
-    q3: '“Cada foto guarda uma parte da história de vocês.”',
-    final: 'Histórias de família atravessam gerações.'
-  },
-  amigos: {
-    abertura: 'Algumas amizades viram família.',
-    comeco: 'Tudo começou com risadas e virou parceria.',
-    t1: 'A amizade começou',
-    t2: 'Momentos inesquecíveis',
-    q1: '“Vocês transformaram dias comuns em histórias absurdas.”',
-    q2: '“A amizade de vocês tem riso, parceria e presença.”',
-    q3: '“Algumas pessoas chegam e deixam a vida mais leve.”',
-    final: 'Amizades verdadeiras também merecem ser eternizadas.'
-  },
-  formatura: {
-    abertura: 'Todo esforço merece ser lembrado.',
-    comeco: 'Tudo começou com um sonho e muita coragem.',
-    t1: 'A jornada começou',
-    t2: 'Desafios superados',
-    q1: '“Cada dificuldade fez parte da conquista.”',
-    q2: '“Esse momento carrega noites, esforço e superação.”',
-    q3: '“Não é só um diploma. É uma história de vitória.”',
-    final: 'Algumas conquistas merecem ser eternizadas.'
-  },
-  bebe: {
-    abertura: 'Cada fase é uma descoberta.',
-    comeco: 'Tudo começou com amor, cuidado e encanto.',
-    t1: 'Primeiros momentos',
-    t2: 'Primeiras descobertas',
-    q1: '“Cada sorriso pequeno virou uma memória gigante.”',
-    q2: '“O tempo passa rápido, mas esses momentos ficam.”',
-    q3: '“Essa história é feita de amor em sua forma mais pura.”',
-    final: 'Algumas fases passam, mas ficam para sempre no coração.'
-  },
-  pet: {
-    abertura: 'Amor também tem quatro patas.',
-    comeco: 'Tudo começou com bagunça, carinho e companhia.',
-    t1: 'A amizade começou',
-    t2: 'Muitas aventuras',
-    q1: '“Alguns animais chegam e viram parte da família.”',
-    q2: '“O amor mais sincero às vezes vem com patas.”',
-    q3: '“Cada brincadeira virou uma memória feliz.”',
-    final: 'Alguns companheiros deixam marcas eternas.'
-  }
-};
-
-function getData(){
+function getData() {
   const saved = localStorage.getItem('loveblastData');
-  if(saved){
-    try { return JSON.parse(saved); } catch(e){}
-  }
+  if (saved) { try { return JSON.parse(saved); } catch(e) {} }
   return {
-    nome1:'Robson',
-    nome2:'Raa',
-    categoria:'casal',
+    nome1:'Robson', nome2:'Raa', categoria:'casal',
     mensagem:'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
-    insights:{
-      totalMessages:18432,
-      topWord:'amor',
-      saudadeCount:103,
-      loveCount:82,
-      favoriteTime:'23:47',
-      emoji:'😂'
-    },
-    photos:[],
-    musicName:'Trilha sonora da história'
+    insights:{ totalMessages:18432, topWord:'amor', saudadeCount:103, loveCount:82, favoriteTime:'23:47', topEmoji:'😂', emotionalLevel:'Alto' },
+    photos:[], musicSrc:null, musicName:'Trilha sonora da história'
   };
 }
 
-function hydrate(){
+function hydrate() {
   const data = getData();
-  const cat = categoryTexts[data.categoria] || categoryTexts.casal;
+  const cat = CATEGORY_CONFIG[data.categoria] || CATEGORY_CONFIG.casal;
   const insights = data.insights || {};
 
-  finalNome1.textContent = data.nome1 || 'Robson';
-  finalNome2.textContent = data.nome2 || 'Raa';
-  cartaNome.textContent = data.nome2 || 'Raa';
-  mensagemFinal.textContent = data.mensagem || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+  // Names
+  document.getElementById('finalNome1').textContent = data.nome1 || 'Robson';
+  document.getElementById('finalNome2').textContent = data.nome2 || 'Raa';
+  document.getElementById('cartaNome').textContent = data.nome2 || 'Raa';
+  document.getElementById('mensagemFinal').textContent = data.mensagem || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
 
-  fraseAbertura.textContent = cat.abertura;
-  textoCategoria.textContent = cat.comeco;
-  timeline1.textContent = cat.t1;
-  timeline2.textContent = cat.t2;
-  quote1.textContent = cat.q1;
-  quote2.textContent = cat.q2;
-  quote3.textContent = cat.q3;
-  fraseFinal.textContent = cat.final;
+  // Category texts
+  document.getElementById('fraseAbertura').textContent = cat.abertura;
+  document.getElementById('textoCategoria').textContent = cat.comeco;
+  document.getElementById('mensagensLabel').textContent = cat.mensagensLabel;
+  document.getElementById('quote1').textContent = cat.q1;
+  document.getElementById('quote2').textContent = cat.q2;
+  document.getElementById('quote3').textContent = cat.q3;
+  document.getElementById('fraseFinal').textContent = cat.final;
 
-  totalMensagens.textContent = Number(insights.totalMessages || 18432).toLocaleString('pt-BR');
-  palavraMaisUsada.textContent = insights.topWord || 'amor';
-  saudadeCount.textContent = `saudade ${insights.saudadeCount || 103} vezes`;
+  // Timeline
+  const timelineEl = document.getElementById('timelineItems');
+  timelineEl.innerHTML = '';
+  cat.timeline.forEach(([emoji, year, desc]) => {
+    timelineEl.innerHTML += `
+      <div class="time-item">
+        <span class="emoji">${emoji}</span>
+        <strong>${year}</strong>
+        <p>${desc}</p>
+      </div>`;
+  });
 
-  const photos=(Array.isArray(data.photos)&&data.photos.filter(Boolean).length)?data.photos.filter(Boolean):defaultPhotos;
-  fotoPrincipal.src = photos[0];
+  // Insights
+  document.getElementById('totalMensagens').textContent = Number(insights.totalMessages || 18432).toLocaleString('pt-BR');
+  document.getElementById('palavraMaisUsada').textContent = insights.topWord || 'amor';
+  document.getElementById('saudadeCount').textContent = `saudade ${insights.saudadeCount || 103} vezes`;
 
+  // Extra
+  document.getElementById('nivelCarinho').textContent = insights.emotionalLevel || 'Muito alto';
+  document.getElementById('humor').textContent = insights.loveCount > 50 ? 'Muito presente' : 'Presente';
+  document.getElementById('comunicacao').textContent = insights.totalMessages > 10000 ? 'Muito frequente' : 'Frequente';
+  document.getElementById('intensidade').textContent = insights.emotionalLevel || 'Alta';
+  document.getElementById('conexao').textContent = 'Forte';
+
+  // Photos
+  const photos = (Array.isArray(data.photos) && data.photos.filter(Boolean).length)
+    ? data.photos.filter(Boolean) : defaultPhotos;
+  const fotoPrincipal = document.getElementById('fotoPrincipal');
+  if (fotoPrincipal) fotoPrincipal.src = photos[0];
+
+  const galeriaFinal = document.getElementById('galeriaFinal');
   galeriaFinal.innerHTML = '';
-  photos.slice(0,3).forEach(src=>{
+  const photoSlice = photos.slice(0, 3);
+  if (photoSlice.length === 1) galeriaFinal.classList.add('single');
+  photoSlice.forEach(src => {
     const img = document.createElement('img');
     img.src = src;
+    img.alt = 'Memória';
     galeriaFinal.appendChild(img);
   });
 
-  nomeMusicaFinal.textContent = data.musicName || 'Trilha sonora da história';
-
-  if(data.musicSrc){
+  // Music
+  document.getElementById('nomeMusicaFinal').textContent = data.musicName || 'Trilha sonora da história';
+  const audioFinal = document.getElementById('audioFinal');
+  const semMusicaMsg = document.getElementById('semMusicaMsg');
+  const disc = document.getElementById('disc');
+  if (data.musicSrc) {
     audioFinal.src = data.musicSrc;
+    audioFinal.style.display = 'block';
+    semMusicaMsg.style.display = 'none';
+    audioFinal.addEventListener('play', () => disc.classList.add('playing'));
+    audioFinal.addEventListener('pause', () => disc.classList.remove('playing'));
+    audioFinal.addEventListener('ended', () => disc.classList.remove('playing'));
+  } else {
+    audioFinal.style.display = 'none';
+    semMusicaMsg.style.display = 'block';
   }
 }
 
-function baixarArte(){
-  window.print();
+// ===== DOWNLOAD (html2canvas) =====
+function iniciarDownload() {
+  const overlay = document.getElementById('downloadLoading');
+  overlay.classList.add('active');
+
+  // Use html2canvas for screenshot-based PDF/PNG
+  if (typeof html2canvas !== 'undefined') {
+    gerarDownloadComCanvas(overlay);
+  } else {
+    // Load html2canvas dynamically
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    script.onload = () => gerarDownloadComCanvas(overlay);
+    script.onerror = () => {
+      overlay.classList.remove('active');
+      window.print(); // fallback
+    };
+    document.head.appendChild(script);
+  }
 }
 
-function compartilharArte(){
-  if(navigator.share){
-    navigator.share({
-      title:'Minha retrospectiva LoveBlast',
-      text:'Olha essa retrospectiva que eu criei ❤️',
-      url:window.location.href
+async function gerarDownloadComCanvas(overlay) {
+  try {
+    const arteFinal = document.getElementById('arteFinal');
+    const canvas = await html2canvas(arteFinal, {
+      backgroundColor: '#030306',
+      scale: 1.5,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      windowWidth: 1400,
     });
-  }else{
-    navigator.clipboard.writeText(window.location.href);
-    alert('Link copiado!');
+    const link = document.createElement('a');
+    link.download = 'retrospectiva-loveblast.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } catch(e) {
+    window.print();
+  } finally {
+    overlay.classList.remove('active');
   }
 }
 
+function compartilharArte() {
+  if (navigator.share) {
+    navigator.share({
+      title: 'Minha retrospectiva LoveBlast',
+      text: 'Olha essa retrospectiva que eu criei ❤️',
+      url: window.location.href
+    });
+  } else {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => alert('Link copiado! Compartilhe com quem ama. ❤️'))
+      .catch(() => alert('Copie o link da barra de endereço para compartilhar.'));
+  }
+}
+
+// Init
 hydrate();
 </script>
-<link rel="stylesheet" href="/loveblast-fixes.css">
-<script src="/loveblast-fixes.js"></script>
 </body>
 </html>
