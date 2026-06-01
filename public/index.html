@@ -1,1551 +1,1093 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>LoveBlast</title>
-
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LoveBlast — Retrospectivas Emocionantes</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+/* ── RESET ───────────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  font-family:Arial,sans-serif;
-  background:#050508;
-  color:#fff;
-  overflow-x:hidden;
-}
-body::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  background:
-    radial-gradient(circle at 20% 20%,rgba(255,45,120,.25),transparent 30%),
-    radial-gradient(circle at 80% 30%,rgba(255,107,26,.18),transparent 30%),
-    radial-gradient(circle at 50% 90%,rgba(255,45,120,.18),transparent 35%);
-  z-index:-1;
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:24px 40px;
-  position:sticky;
-  top:0;
-  z-index:20;
-  background:rgba(5,5,8,.72);
-  backdrop-filter:blur(14px);
-  border-bottom:1px solid rgba(255,45,120,.15);
-}
-.logo{
-  font-size:30px;
-  font-weight:900;
-  background:linear-gradient(90deg,#ff2d78,#ff8a00);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-}
-nav a{
-  color:#fff;
-  text-decoration:none;
-  margin:0 14px;
-  font-size:14px;
-  font-weight:700;
-}
-.btn{
-  border:1px solid #ff2d78;
-  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color:#fff;
-  padding:16px 26px;
-  border-radius:12px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:0 0 30px rgba(255,45,120,.35);
-}
-.btn:disabled{opacity:.65;cursor:not-allowed}
-.hero{
-  display:grid;
-  grid-template-columns:1fr 1.7fr;
-  gap:40px;
-  padding:60px 40px;
-  align-items:center;
-}
-.hero h1{
-  font-size:52px;
-  line-height:1.05;
-}
-.hero h1 span{color:#ff3b7d}
-.hero p{
-  margin:28px 0;
-  color:#d7d7d7;
-  font-size:20px;
-  line-height:1.5;
-}
-.categories{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-}
-.card{
-  min-height:210px;
-  border:1px solid rgba(255,45,120,.6);
-  border-radius:16px;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-end;
-  background-size:cover;
-  background-position:center;
-  position:relative;
-  overflow:hidden;
-  cursor:pointer;
-  transition:.25s ease;
-}
-.card:hover,.card.active{
-  transform:translateY(-4px);
-  box-shadow:0 0 35px rgba(255,45,120,.32);
-  border-color:#ff6b1a;
-}
-.card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.15));
-}
-.card *{position:relative}
-.card .icon{font-size:32px;margin-bottom:10px;color:#ff2d78}
-.card h3{font-size:22px}
-.card p{font-size:14px;margin-top:6px;color:#ddd}
+body{font-family:'DM Sans',sans-serif;background:#07070d;color:#fff;overflow-x:hidden}
+img{display:block;max-width:100%}
+button{cursor:pointer;font-family:inherit}
+a{text-decoration:none;color:inherit}
 
-.section-title{
-  text-align:center;
-  margin:40px 0 25px;
-  letter-spacing:3px;
-  font-size:22px;
-}
-.phones{
-  display:grid;
-  grid-template-columns:repeat(6,1fr);
-  gap:18px;
-  padding:0 28px;
-}
-.phone{
-  height:430px;
-  border:2px solid rgba(255,255,255,.18);
-  border-radius:28px;
-  background:#07070d;
-  padding:18px;
-  position:relative;
-  overflow:hidden;
-  box-shadow:0 0 40px rgba(255,45,120,.15);
-}
-.phone::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:radial-gradient(circle at 50% 80%,rgba(255,45,120,.25),transparent 45%);
-}
-.phone-content{
-  position:relative;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-}
-.phone h2{font-size:26px;line-height:1.15}
-.neon{color:#ff3b8d;text-shadow:0 0 20px #ff2d78}
-.big{font-size:72px!important;color:#ff2d78;text-shadow:0 0 25px #ff2d78}
-.progress{
-  position:absolute;
-  bottom:18px;
-  left:18px;
-  right:18px;
-  height:5px;
-  background:rgba(255,255,255,.15);
-  border-radius:99px;
-}
-.progress span{
-  display:block;
-  height:100%;
-  width:35%;
-  background:#ff2d78;
-  border-radius:99px;
-}
-.preview{
-  margin:60px 28px;
-  border:1px solid rgba(255,45,120,.45);
-  border-radius:22px;
-  padding:24px;
-  display:grid;
-  grid-template-columns:1.5fr .7fr;
-  gap:20px;
-  background:rgba(255,255,255,.03);
-}
-.preview-list{
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  gap:10px;
-}
-.preview-item{
-  height:120px;
-  border:1px solid rgba(255,45,120,.5);
-  border-radius:12px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  padding:10px;
-  font-size:13px;
-  background:rgba(0,0,0,.35);
-}
-.locked{filter:blur(1px);opacity:.65}
-.insights{
-  display:grid;
-  grid-template-columns:1fr 1.4fr;
-  gap:24px;
-  padding:0 28px 60px;
-}
-.panel{
-  border:1px solid rgba(255,45,120,.4);
-  border-radius:20px;
-  padding:24px;
-  background:rgba(255,255,255,.03);
-}
-.insight-grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-top:20px;
-}
-.mini{
-  border:1px solid rgba(255,45,120,.4);
-  border-radius:16px;
-  padding:18px;
-  text-align:center;
-}
-.mini strong{
-  display:block;
-  color:#ff3b8d;
-  font-size:26px;
-  margin-bottom:6px;
-}
-.phrase{
-  border:1px solid rgba(255,45,120,.5);
-  border-radius:14px;
-  padding:18px;
-  margin:14px 0;
-  background:rgba(255,45,120,.08);
+/* ── VARS ───────────────────────────────────────────────────────────────── */
+:root{
+  --pink:#ff2d78;--orange:#ff6b1a;--yellow:#ffd60a;
+  --purple:#8b3dff;--white:#faf5f0;--muted:rgba(255,255,255,.45);
+  --deep:#07070d;--card:#0f0f1a;
+  --grad:linear-gradient(90deg,var(--pink),var(--orange));
 }
 
-/* MODAL */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at top left, rgba(255,45,120,.25), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(255,107,26,.18), transparent 35%),
-    rgba(0,0,0,.86);
-  backdrop-filter: blur(22px);
-  z-index: 9999;
-  padding: 18px;
+/* ── GRAIN ──────────────────────────────────────────────────────────────── */
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(circle at 15% 25%,rgba(255,45,120,.18),transparent 35%),
+             radial-gradient(circle at 85% 20%,rgba(255,107,26,.14),transparent 30%),
+             radial-gradient(circle at 50% 85%,rgba(139,61,255,.12),transparent 35%);}
+
+/* ── NAV ────────────────────────────────────────────────────────────────── */
+header{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;
+  padding:18px 48px;background:rgba(7,7,13,.82);backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,45,120,.15)}
+.logo{display:flex;align-items:center;gap:8px;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-heart{color:var(--pink);-webkit-text-fill-color:var(--pink);font-size:20px}
+nav{display:flex;align-items:center;gap:32px}
+nav a{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.7);
+  transition:color .2s}
+nav a:hover{color:#fff}
+.btn-nav{background:var(--grad);color:#fff;border:none;border-radius:8px;
+  padding:12px 22px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  transition:transform .15s,box-shadow .2s}
+.btn-nav:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,45,120,.4)}
+
+/* ── HERO ───────────────────────────────────────────────────────────────── */
+#inicio{display:grid;grid-template-columns:1fr 1.65fr;gap:48px;padding:64px 48px;align-items:center;
+  position:relative;z-index:1}
+.hero-text h1{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,3.5vw,3.2rem);font-weight:800;
+  line-height:1.08;letter-spacing:-.03em}
+.hero-text h1 em{color:var(--pink);font-style:normal}
+.hero-sub{margin:24px 0 32px;color:rgba(255,255,255,.65);font-size:18px;line-height:1.6}
+.btn-hero{display:inline-flex;align-items:center;gap:8px;background:var(--grad);color:#fff;
+  border:none;border-radius:10px;padding:16px 28px;font-size:14px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;transition:transform .15s,box-shadow .2s}
+.btn-hero:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(255,45,120,.45)}
+.hero-tag{margin-top:20px;display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.4)}
+.hero-tag span{color:var(--pink)}
+
+/* ── CATEGORY GRID ──────────────────────────────────────────────────────── */
+.categories{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.cat-card{min-height:170px;border:1.5px solid rgba(255,45,120,.35);border-radius:14px;
+  padding:16px;display:flex;flex-direction:column;justify-content:flex-end;
+  background-size:cover;background-position:center;position:relative;overflow:hidden;
+  cursor:pointer;transition:transform .25s,box-shadow .25s,border-color .25s}
+.cat-card:hover{transform:translateY(-4px);box-shadow:0 12px 36px rgba(255,45,120,.3);border-color:var(--orange)}
+.cat-card.active{border-color:var(--pink);box-shadow:0 0 28px rgba(255,45,120,.5)}
+.cat-card::before{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.88) 0%,rgba(0,0,0,.2) 60%,transparent 100%)}
+.cat-card > *{position:relative;z-index:1}
+.cat-icon{font-size:20px;margin-bottom:8px;color:var(--pink)}
+.cat-card h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700}
+.cat-card p{font-size:12px;margin-top:3px;color:rgba(255,255,255,.6)}
+
+/* ── PHONES DEMO ────────────────────────────────────────────────────────── */
+#exemplos{padding:72px 48px;position:relative;z-index:1}
+.section-label{text-align:center;font-family:'Syne',sans-serif;font-size:11px;font-weight:700;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--pink);margin-bottom:10px}
+.section-title{text-align:center;font-family:'Syne',sans-serif;font-size:clamp(1.4rem,2.5vw,2rem);
+  font-weight:800;letter-spacing:-.02em;margin-bottom:36px}
+.section-title .accent{color:var(--pink)}
+.phones-scroll{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.phone-mock{height:400px;border:1.5px solid rgba(255,255,255,.12);border-radius:24px;
+  background:#0b0b16;padding:18px 14px;position:relative;overflow:hidden;
+  box-shadow:0 0 32px rgba(255,45,120,.1);transition:transform .2s,box-shadow .2s}
+.phone-mock:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(255,45,120,.22)}
+.phone-mock::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 85%,rgba(255,45,120,.22),transparent 50%)}
+.phone-inner{position:relative;height:100%;display:flex;flex-direction:column;justify-content:center;
+  align-items:center;text-align:center;gap:10px}
+.phone-brand{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;
+  font-size:10px;color:rgba(255,255,255,.35);padding:4px 0}
+.phone-num{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:space-between;
+  align-items:center;font-size:10px;color:rgba(255,255,255,.3)}
+.phone-num .bar{height:2px;flex:1;background:rgba(255,255,255,.08);border-radius:2px;margin-left:8px;overflow:hidden}
+.phone-num .bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--pink),var(--orange))}
+.phone-big{font-family:'Syne',sans-serif;font-size:clamp(2.2rem,4vw,3.5rem);font-weight:800;
+  color:var(--pink);line-height:1;text-shadow:0 0 30px rgba(255,45,120,.5)}
+.phone-big-label{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.8)}
+.phone-italic{font-family:'Instrument Serif',serif;font-style:italic;
+  font-size:clamp(1.4rem,2.5vw,2.2rem);color:var(--pink)}
+.phone-text{font-size:13px;color:rgba(255,255,255,.6);line-height:1.5}
+.phone-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:#fff}
+.phone-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:4px;letter-spacing:.08em;text-transform:uppercase}
+.yt-btn{width:48px;height:48px;border-radius:50%;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 0 20px rgba(255,45,120,.4)}
+.phone-year{font-family:'Syne',sans-serif;font-size:clamp(2.8rem,4.5vw,4rem);font-weight:800;
+  color:var(--pink);text-shadow:0 0 30px rgba(255,45,120,.4)}
+.phone-year-sub{font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;color:var(--pink)}
+.btn-demo{margin:28px auto 0;display:flex;align-items:center;gap:8px;
+  background:rgba(255,45,120,.1);border:1.5px solid rgba(255,45,120,.4);color:var(--pink);
+  border-radius:8px;padding:12px 24px;font-size:13px;font-weight:700;width:fit-content;
+  transition:background .2s,transform .15s}
+.btn-demo:hover{background:rgba(255,45,120,.2);transform:translateY(-2px)}
+
+/* ── PREÇOS ─────────────────────────────────────────────────────────────── */
+#precos{padding:72px 48px;position:relative;z-index:1}
+.price-grid{display:grid;grid-template-columns:1fr 1.2fr 1fr;gap:20px;max-width:900px;margin:0 auto}
+.price-card{background:var(--card);border:1.5px solid rgba(255,255,255,.08);border-radius:16px;
+  padding:28px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.price-card:hover{transform:translateY(-4px);border-color:rgba(255,45,120,.3)}
+.price-card.featured{border-color:var(--pink);box-shadow:0 0 40px rgba(255,45,120,.15)}
+.price-card.featured::before{content:'MAIS POPULAR';position:absolute;top:16px;right:16px;
+  background:var(--grad);color:#fff;font-size:9px;font-weight:700;letter-spacing:.1em;
+  padding:4px 8px;border-radius:100px}
+.price-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:12px}
+.price-val{font-family:'Syne',sans-serif;font-size:2.4rem;font-weight:800;color:#fff}
+.price-val span{font-size:14px;font-weight:400;color:rgba(255,255,255,.4)}
+.price-desc{font-size:13px;color:rgba(255,255,255,.5);margin:8px 0 20px;line-height:1.5}
+.price-feat{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+.price-feat li{font-size:13px;color:rgba(255,255,255,.7);display:flex;align-items:center;gap:7px}
+.price-feat li::before{content:'✓';color:var(--pink);font-weight:700;flex-shrink:0}
+.btn-price{width:100%;background:var(--grad);color:#fff;border:none;border-radius:8px;
+  padding:13px;font-size:13px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  transition:transform .15s,box-shadow .2s}
+.btn-price:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,45,120,.4)}
+.btn-price.outline{background:transparent;border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.7)}
+.btn-price.outline:hover{border-color:var(--pink);color:#fff;box-shadow:none}
+
+/* ── COMO FUNCIONA ──────────────────────────────────────────────────────── */
+#como-funciona{padding:72px 48px;position:relative;z-index:1;background:rgba(255,255,255,.02)}
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;max-width:1000px;margin:0 auto}
+.step-item{background:var(--card);border:1.5px solid rgba(255,255,255,.07);border-radius:14px;
+  padding:24px;transition:border-color .2s,transform .2s}
+.step-item:hover{border-color:rgba(255,45,120,.3);transform:translateY(-3px)}
+.step-num{font-family:'Syne',sans-serif;font-size:2.5rem;font-weight:800;
+  color:rgba(255,45,120,.2);line-height:1;margin-bottom:12px}
+.step-icon{font-size:1.8rem;margin-bottom:10px}
+.step-item h3{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px}
+.step-item p{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6}
+
+/* ── FOOTER ─────────────────────────────────────────────────────────────── */
+footer{border-top:1px solid rgba(255,45,120,.1);padding:28px 48px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+  position:relative;z-index:1}
+.footer-logo{font-family:'Syne',sans-serif;font-weight:800;
+  background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+footer p{font-size:12px;color:rgba(255,255,255,.35)}
+
+/* ── MODAL OVERLAY ──────────────────────────────────────────────────────── */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.88);backdrop-filter:blur(10px);
+  align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:#0f0f1a;border:1.5px solid rgba(255,45,120,.25);border-radius:14px;
+  width:100%;max-width:580px;overflow:hidden;
+  box-shadow:0 0 80px rgba(255,45,120,.15),0 32px 80px rgba(0,0,0,.6);
+  max-height:94vh;overflow-y:auto;scrollbar-width:none}
+.modal::-webkit-scrollbar{display:none}
+
+/* Modal header muda cor por categoria */
+.modal-header{padding:24px 28px;position:relative;border-bottom:1px solid rgba(255,255,255,.07)}
+.modal-header h2{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;letter-spacing:-.02em}
+.modal-header p{font-size:13px;color:rgba(255,255,255,.5);margin-top:4px}
+.modal-cat-badge{position:absolute;top:20px;right:52px;
+  font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+  border-radius:100px;padding:4px 10px;border:1px solid}
+.modal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.1);color:#fff;border-radius:6px;
+  width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px}
+
+.modal-body{padding:24px 28px;display:flex;flex-direction:column;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-label{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.form-input,.form-textarea,.form-select{
+  background:rgba(255,255,255,.04);border:1.5px solid rgba(255,45,120,.18);
+  border-radius:8px;padding:11px 14px;font-family:'DM Sans',sans-serif;
+  font-size:14px;color:#fff;outline:none;transition:border-color .2s,background .2s;width:100%}
+.form-input::placeholder,.form-textarea::placeholder{color:rgba(255,255,255,.2)}
+.form-input:focus,.form-textarea:focus,.form-select:focus{
+  border-color:var(--pink);background:rgba(255,45,120,.04)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-select option{background:#0f0f1a;color:#fff}
+
+/* Upload boxes */
+.upload-box{border:1.5px dashed rgba(255,45,120,.3);border-radius:10px;
+  padding:18px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;
+  background:rgba(255,45,120,.03)}
+.upload-box:hover{border-color:var(--pink);background:rgba(255,45,120,.07)}
+.upload-icon{font-size:2rem;margin-bottom:6px}
+.upload-box p{font-size:13px;color:rgba(255,255,255,.4)}
+.upload-box p span{color:var(--pink);font-weight:500}
+.upload-box small{font-size:11px;color:rgba(255,255,255,.2)}
+.file-hidden{display:none}
+.upload-name{font-size:12px;color:var(--pink);font-weight:500;margin-top:6px;
+  word-break:break-all;display:none}
+
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px}
+.photo-thumb{aspect-ratio:1;border-radius:6px;overflow:hidden;
+  background:rgba(255,45,120,.06);border:1px solid rgba(255,45,120,.15);
+  position:relative}
+.photo-thumb img{width:100%;height:100%;object-fit:cover}
+.photo-rm{position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);
+  border:none;color:#fff;border-radius:3px;width:16px;height:16px;
+  font-size:8px;display:flex;align-items:center;justify-content:center}
+
+/* Divisor de seção no modal */
+.modal-divider{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.25);
+  display:flex;align-items:center;gap:10px}
+.modal-divider::before,.modal-divider::after{content:'';flex:1;
+  height:1px;background:rgba(255,255,255,.07)}
+
+.modal-footer{padding:16px 28px;border-top:1px solid rgba(255,255,255,.07);
+  display:flex;gap:10px;align-items:center}
+.btn-preview{flex:1;background:rgba(255,255,255,.05);border:1.5px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.6);border-radius:8px;padding:11px;
+  font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  transition:border-color .2s,color .2s}
+.btn-preview:hover{border-color:var(--pink);color:#fff}
+.btn-pay{flex:2;background:var(--grad);color:#fff;border:none;border-radius:8px;
+  padding:13px;font-size:13px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  transition:transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-pay:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 10px 28px rgba(255,45,120,.4)}
+.btn-pay:disabled{opacity:.5;cursor:not-allowed}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);
+  border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── PRÉVIA MODAL ───────────────────────────────────────────────────────── */
+#previewResult{display:none;margin-top:4px}
+#previewResult.active{display:block}
+.preview-card{background:rgba(255,45,120,.06);border:1px solid rgba(255,45,120,.2);
+  border-radius:10px;padding:16px}
+.preview-names{font-family:'Instrument Serif',serif;font-style:italic;font-size:1.4rem;
+  color:var(--pink);margin-bottom:8px}
+#previewImages{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0}
+#previewImages img{aspect-ratio:1;object-fit:cover;border-radius:6px}
+#previewText{font-size:13px;color:rgba(255,255,255,.6);font-style:italic;line-height:1.5;margin-bottom:8px}
+#previewAudio{width:100%;margin-top:6px;display:none}
+.preview-blur-msg{font-size:11px;color:rgba(255,255,255,.3);text-align:center;margin-top:8px}
+
+/* ── ARTE FINAL ─────────────────────────────────────────────────────────── */
+.hidden{display:none!important}
+#arteFinal{position:relative;z-index:1}
+.final-experience{padding:48px;background:rgba(0,0,0,.3)}
+.final-header{text-align:center;margin-bottom:40px}
+.final-header h2{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;letter-spacing:-.03em}
+.final-header p{font-size:15px;color:rgba(255,255,255,.5);margin-top:8px}
+
+/* Grid de painéis da arte final */
+.final-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto}
+.final-panel{border:1.5px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;
+  position:relative;overflow:hidden;min-height:240px;display:flex;flex-direction:column;justify-content:center}
+.final-panel::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(circle at 80% 20%,var(--panel-glow,rgba(255,45,120,.12)),transparent 55%)}
+.step{position:absolute;top:16px;left:16px;font-size:9px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.3)}
+.brand{font-family:'Syne',sans-serif;font-size:13px;color:rgba(255,45,120,.7);margin-bottom:8px}
+.big-number{font-family:'Syne',sans-serif;font-size:3.5rem;font-weight:800;
+  color:var(--pink);line-height:1;text-shadow:0 0 30px rgba(255,45,120,.4)}
+.insight-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+  border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;line-height:1.5}
+.insight-card b{color:var(--pink)}
+.galeria-fotos{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.galeria-fotos img{aspect-ratio:1;object-fit:cover;border-radius:6px}
+.quote{font-family:'Instrument Serif',serif;font-style:italic;font-size:15px;
+  line-height:1.7;color:rgba(255,255,255,.8);border-left:3px solid var(--pink);
+  padding-left:12px;margin-bottom:12px}
+.carta{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);
+  border-radius:10px;padding:20px;font-size:14px;line-height:1.8}
+.carta h2{font-size:16px;margin-bottom:8px}
+.carta h2 span{color:var(--pink)}
+.time-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px}
+.time-item strong{color:var(--pink)}
+.time-item p{color:rgba(255,255,255,.6);font-size:13px;margin-top:1px}
+.polaroid{background:#fff;padding:8px 8px 24px;border-radius:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:160px;margin:0 auto 16px}
+.polaroid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:2px}
+.final-panel h1{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;margin-bottom:8px}
+.final-panel h1 b{background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.final-panel h2{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:8px}
+.final-panel h2 span{color:var(--pink)}
+.final-actions{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.btn-action{padding:11px;border-radius:8px;font-size:13px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;border:none;transition:all .15s;
+  display:flex;align-items:center;justify-content:center;gap:6px;width:100%}
+.btn-action.primary{background:var(--grad);color:#fff}
+.btn-action.primary:hover{box-shadow:0 8px 24px rgba(255,45,120,.4);transform:translateY(-1px)}
+.btn-action.secondary{background:rgba(255,255,255,.06);border:1.5px solid rgba(255,255,255,.15);color:#fff}
+.btn-action.secondary:hover{background:rgba(255,255,255,.1)}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  header{padding:14px 20px}
+  nav{display:none}
+  #inicio{grid-template-columns:1fr;padding:40px 20px}
+  .categories{grid-template-columns:repeat(2,1fr)}
+  .phones-scroll{grid-template-columns:repeat(3,1fr)}
+  #como-funciona,#exemplos,#precos{padding:48px 20px}
+  .steps-grid{grid-template-columns:repeat(2,1fr)}
+  .price-grid{grid-template-columns:1fr}
+  .final-grid{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  footer{padding:20px}
+}
+@media(max-width:560px){
+  .phones-scroll{grid-template-columns:repeat(2,1fr)}
+  .categories{grid-template-columns:repeat(2,1fr)}
 }
 
-.modal-overlay.active {
-  display: flex;
-}
-
-.modal-box {
-  width: 100%;
-  max-width: 560px;
-  max-height: 92vh;
-  overflow-y: auto;
-  background: linear-gradient(180deg, rgba(15,15,24,.96), rgba(8,8,14,.98));
-  border: 1px solid rgba(255,45,120,.55);
-  border-radius: 30px;
-  padding: 34px;
-  box-shadow:
-    0 0 80px rgba(255,45,120,.32),
-    inset 0 0 40px rgba(255,255,255,.03);
-  position: relative;
-}
-
-.modal-box::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-box::-webkit-scrollbar-thumb {
-  background: #ff2d78;
-  border-radius: 20px;
-}
-
-.modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.07);
-  color: white;
-  font-size: 26px;
-  cursor: pointer;
-}
-
-.modal-box h2 {
-  font-size: 34px;
-  line-height: 1;
-  margin-bottom: 8px;
-  background: linear-gradient(90deg,#fff,#ff7aa9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.modal-subtitle {
-  color: rgba(255,255,255,.58);
-  margin-bottom: 26px;
-  font-size: 15px;
-}
-
-.modal-box label {
-  display: block;
-  margin: 18px 0 8px;
-  font-weight: 800;
-  font-size: 13px;
-  color: #fff;
-}
-
-.modal-box input,
-.modal-box textarea {
-  width: 100%;
-  background: rgba(255,255,255,.065);
-  border: 1px solid rgba(255,255,255,.13);
-  color: white;
-  padding: 15px 16px;
-  border-radius: 15px;
-  outline: none;
-  transition: .2s ease;
-}
-
-.modal-box input:focus,
-.modal-box textarea:focus {
-  border-color: #ff2d78;
-  box-shadow: 0 0 0 4px rgba(255,45,120,.12);
-}
-
-.modal-box input[type="file"] {
-  padding: 13px;
-  cursor: pointer;
-}
-
-.modal-box input[type="file"]::file-selector-button {
-  border: none;
-  background: linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color: white;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 800;
-  margin-right: 12px;
-  cursor: pointer;
-}
-
-.modal-box textarea {
-  height: 115px;
-  resize: none;
-}
-
-.btn-full {
-  width: 100%;
-  margin-top: 20px;
-  border: none;
-  padding: 17px;
-  border-radius: 16px;
-  background: linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color: white;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 16px 45px rgba(255,45,120,.28);
-}
-
-.btn-full.secondary {
-  background: rgba(255,255,255,.035);
-  border: 1px solid #ff2d78;
-  box-shadow: none;
-}
-
-@media(max-width:600px) {
-  .modal-box {
-    padding: 26px 20px;
-    border-radius: 24px;
-  }
-
-  .modal-box h2 {
-    font-size: 28px;
-  }
-}
-  .hidden{display:none!important}
-
-.final-experience {
-  background: #040407;
-  padding: 40px 20px;
-}
-
-.final-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 1500px;
-  margin: auto;
-  border: 1px solid rgba(255,45,120,.25);
-}
-
-.final-panel {
-  min-height: 520px;
-  padding: 38px;
-  border: 1px solid rgba(255,45,120,.22);
-  background:
-    radial-gradient(circle at 80% 20%, rgba(255,45,120,.18), transparent 35%),
-    linear-gradient(160deg, #07070d, #14050b);
-  position: relative;
-  overflow: hidden;
-}
-
-.step {
-  font-size: 13px;
-  font-weight: 900;
-  color: white;
-  opacity: .85;
-}
-
-.brand {
-  color: #ff4b8b;
-  font-size: 28px;
-  font-weight: 900;
-  margin-top: 20px;
-}
-
-.abertura h1 {
-  font-size: clamp(54px, 8vw, 110px);
-  font-family: cursive;
-  margin-top: 80px;
-  font-weight: 400;
-}
-
-.abertura h1 b {
-  color: #ff2d78;
-}
-
-.final-panel h2 {
-  font-size: clamp(34px, 5vw, 70px);
-  line-height: 1.1;
-}
-
-.final-panel h2 span,
-.final-panel h3,
-.big-number,
-.insight-card b {
-  color: #ff2d78;
-  text-shadow: 0 0 25px rgba(255,45,120,.7);
-}
-
-.polaroid {
-  width: 300px;
-  background: white;
-  padding: 14px;
-  transform: rotate(-4deg);
-  margin: 40px auto;
-}
-
-.polaroid img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-}
-
-.time-item {
-  margin: 28px 0;
-  font-size: 24px;
-}
-
-.time-item strong {
-  color: #ff2d78;
-  margin-left: 12px;
-}
-
-.time-item p {
-  margin-left: 48px;
-  color: #ddd;
-  font-size: 18px;
-}
-
-.big-number {
-  display: block;
-  font-size: 82px;
-  font-weight: 900;
-  margin: 20px 0;
-}
-
-.insight-card {
-  margin-top: 24px;
-  padding: 24px;
-  border: 1px solid rgba(255,45,120,.35);
-  border-radius: 18px;
-  background: rgba(255,255,255,.04);
-  font-size: 22px;
-}
-
-.galeria-fotos {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  height: 420px;
-}
-
-.galeria-fotos img {
-  width: 30%;
-  height: 330px;
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.45);
-}
-
-.galeria-fotos img:nth-child(2) {
-  width: 40%;
-  height: 390px;
-}
-
-.quote {
-  padding: 30px;
-  border: 1px solid rgba(255,45,120,.35);
-  border-radius: 18px;
-  margin-top: 24px;
-  background: rgba(255,255,255,.035);
-  font-size: 20px;
-  line-height: 1.5;
-}
-
-.musica-final audio {
-  width: 100%;
-  margin-top: 40px;
-}
-
-.carta {
-  background: #f1d7b4;
-  color: #321;
-  padding: 40px;
-  border-radius: 8px;
-  transform: rotate(-3deg);
-  max-width: 600px;
-  margin: 60px auto;
-  font-family: Georgia, serif;
-}
-
-.carta h2 {
-  color: #b9274f;
-  font-size: 42px;
-  margin-bottom: 24px;
-}
-
-.encerramento {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.encerramento h2 {
-  color: #ff2d78;
-  text-transform: uppercase;
-  letter-spacing: 4px;
-}
-
-.compartilhar {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 22px;
-}
-
-.compartilhar button {
-  padding: 22px;
-  border-radius: 18px;
-  border: 1px solid #ff2d78;
-  background: rgba(255,255,255,.04);
-  color: white;
-  font-size: 20px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-@media(max-width: 800px) {
-  .final-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .final-panel {
-    min-height: 100vh;
-    padding: 28px 20px;
-  }
-
-  .galeria-fotos {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .galeria-fotos img,
-  .galeria-fotos img:nth-child(2) {
-    width: 100%;
-    height: 260px;
-  }
-}
-
-.category-description{
-  margin-top:10px;
-  padding:14px;
-  border:1px solid rgba(255,45,120,.25);
-  background:rgba(255,45,120,.07);
-  color:rgba(255,255,255,.78);
-  border-radius:14px;
-  font-size:14px;
-  line-height:1.4;
-}
-.card.active::after{
-  content:"✓";
-  position:absolute;
-  top:14px;
-  right:14px;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
-  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color:#fff;
-  font-weight:900;
-  z-index:2;
-  box-shadow:0 0 24px rgba(255,45,120,.55);
-}
-.final-panel::after{
-  content:"";
-  position:absolute;
-  inset:auto -20% -40% -20%;
-  height:45%;
-  background:radial-gradient(circle, rgba(255,45,120,.22), transparent 60%);
-  pointer-events:none;
-}
-.final-panel > *{position:relative;z-index:1}
-.notice-ok{
-  color:#ff7aa9;
-  font-size:13px;
-  margin-top:8px;
-}
-
-
-/* INDEX_HIDE_FINAL_ART */
-#arteFinal,
-.final-experience,
-.final-grid,
-.extra {
-  display: none !important;
-}
+/* ── ANIMATIONS ─────────────────────────────────────────────────────────── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes glow{0%,100%{text-shadow:0 0 20px rgba(255,45,120,.3)}50%{text-shadow:0 0 50px rgba(255,45,120,.7)}}
 </style>
 </head>
-
 <body>
 
+<!-- ══ HEADER ══════════════════════════════════════════════════════════════ -->
 <header>
-  <div class="logo">♡ LoveBlast</div>
+  <div class="logo"><span class="logo-heart">♡</span> LoveBlast</div>
   <nav>
     <a href="#inicio">INÍCIO</a>
     <a href="#como-funciona">COMO FUNCIONA</a>
     <a href="#exemplos">EXEMPLOS</a>
     <a href="#precos">PREÇOS</a>
   </nav>
-  <button class="btn js-open-modal">CRIAR RETROSPECTIVA</button>
+  <button class="btn-nav" onclick="abrirModal('casal')">CRIAR RETROSPECTIVA</button>
 </header>
 
-<section id="inicio" class="hero">
-  <div>
-    <h1>Todas as suas histórias merecem ser <span>eternizadas.</span></h1>
-    <p>Crie retrospectivas emocionantes para qualquer pessoa especial na sua vida.</p>
-    <button class="btn js-open-modal">CRIAR MINHA RETROSPECTIVA ♡</button>
+<!-- ══ HERO ════════════════════════════════════════════════════════════════ -->
+<section id="inicio">
+  <div class="hero-text">
+    <h1>Todas as suas histórias merecem ser <em>eternizadas.</em></h1>
+    <p class="hero-sub">Crie retrospectivas emocionantes para qualquer pessoa especial na sua vida.</p>
+    <button class="btn-hero" onclick="abrirModal('casal')">CRIAR MINHA RETROSPECTIVA ♡</button>
+    <div class="hero-tag"><span>♡</span> Feito com amor para eternizar memórias</div>
   </div>
 
-  <div class="categories">
-    <div class="card active" data-category="casal" style="background-image:url('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=700')">
-      <div class="icon">♡</div><h3>Casal</h3><p>Celebre seu amor</p>
+  <div class="categories" id="catGrid">
+    <!-- Casal -->
+    <div class="cat-card" data-cat="casal"
+      style="background-image:url('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">♡</div>
+      <h3>Casal</h3>
+      <p>Celebre seu amor</p>
     </div>
-    <div class="card" data-category="mae" style="background-image:url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=700')">
-      <div class="icon">♡</div><h3>Mãe</h3><p>Homenageie quem sempre esteve lá</p>
+    <!-- Mãe -->
+    <div class="cat-card" data-cat="mae"
+      style="background-image:url('https://images.unsplash.com/photo-1561049933-c8fbef47b329?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">🌸</div>
+      <h3>Mãe</h3>
+      <p>Homenageie quem sempre esteve lá</p>
     </div>
-    <div class="card" data-category="pai" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=700')">
-      <div class="icon">♡</div><h3>Pai</h3><p>Celebre seu herói</p>
+    <!-- Pai -->
+    <div class="cat-card" data-cat="pai"
+      style="background-image:url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">🦁</div>
+      <h3>Pai</h3>
+      <p>Celebre seu herói</p>
     </div>
-    <div class="card" data-category="familia" style="background-image:url('https://images.unsplash.com/photo-1511895426328-dc8714191300?w=700')">
-      <div class="icon">♧</div><h3>Família</h3><p>Histórias que unem gerações</p>
+    <!-- Família -->
+    <div class="cat-card" data-cat="familia"
+      style="background-image:url('https://images.unsplash.com/photo-1609220136736-443140cffec6?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">🏠</div>
+      <h3>Família</h3>
+      <p>Histórias que unem gerações</p>
     </div>
-    <div class="card" data-category="amigos" style="background-image:url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700')">
-      <div class="icon">♧</div><h3>Amigos</h3><p>Parceiros de todas as horas</p>
+    <!-- Amigos -->
+    <div class="cat-card" data-cat="amigos"
+      style="background-image:url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">🤝</div>
+      <h3>Amigos</h3>
+      <p>Parceiros de todas as horas</p>
     </div>
-    <div class="card" data-category="formatura" style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=700')">
-      <div class="icon">◇</div><h3>Formatura</h3><p>Seu esforço, sua conquista</p>
+    <!-- Formatura -->
+    <div class="cat-card" data-cat="formatura"
+      style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">🎓</div>
+      <h3>Formatura</h3>
+      <p>Seu esforço, sua conquista</p>
     </div>
-    <div class="card" data-category="bebe" style="background-image:url('https://images.unsplash.com/photo-1546015720-b8b30df5aa27?w=700')">
-      <div class="icon">☻</div><h3>Bebê</h3><p>Cada fase, cada descoberta</p>
+    <!-- Bebê -->
+    <div class="cat-card" data-cat="bebe"
+      style="background-image:url('https://images.unsplash.com/photo-1522771930-78848d9293e8?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">👶</div>
+      <h3>Bebê</h3>
+      <p>Cada fase, cada descoberta</p>
     </div>
-    <div class="card" data-category="pet" style="background-image:url('https://images.unsplash.com/photo-1552053831-71594a27632d?w=700')">
-      <div class="icon">♨</div><h3>Pet</h3><p>Amor que tem quatro patas</p>
+    <!-- Pet -->
+    <div class="cat-card" data-cat="pet"
+      style="background-image:url('https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=600&auto=format&fit=crop')">
+      <div class="cat-icon">🐾</div>
+      <h3>Pet</h3>
+      <p>Amor que tem quatro patas</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══ EXEMPLOS ════════════════════════════════════════════════════════════ -->
+<section id="exemplos">
+  <div class="section-label">EXEMPLO DE RETROSPECTIVA</div>
+  <div class="section-title">TEMA <span class="accent">CASAL</span> ♡</div>
+
+  <div class="phones-scroll">
+    <!-- Phone 1 -->
+    <div class="phone-mock">
+      <div class="phone-inner">
+        <div class="phone-brand"><span>♡ LoveBlast</span><span>🔊 🎵</span></div>
+        <div style="font-family:'Instrument Serif',serif;font-style:italic;font-size:1.1rem;line-height:1.5;color:#fff">
+          A história de vocês<br><span style="color:var(--pink)">como nunca antes.</span>
+        </div>
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 0 20px rgba(255,45,120,.4)">♡</div>
+        <div class="phone-num"><span>1 / 12</span><div class="bar"><div class="bar-fill" style="width:8%"></div></div></div>
+      </div>
+    </div>
+    <!-- Phone 2 -->
+    <div class="phone-mock">
+      <div class="phone-inner">
+        <div class="phone-brand"><span>♡ LoveBlast</span><span>🔊 🎵</span></div>
+        <div class="phone-text" style="font-size:12px">Vocês já criaram memórias há</div>
+        <div class="phone-big">732</div>
+        <div class="phone-big-label">DIAS</div>
+        <div class="phone-num"><span>2 / 12</span><div class="bar"><div class="bar-fill" style="width:16%"></div></div></div>
+      </div>
+    </div>
+    <!-- Phone 3 -->
+    <div class="phone-mock">
+      <div class="phone-inner">
+        <div class="phone-brand"><span>♡ LoveBlast</span><span>🔊 🎵</span></div>
+        <div class="phone-text">Vocês trocaram</div>
+        <div class="phone-big" style="font-size:2.4rem">18.432</div>
+        <div class="phone-big-label">MENSAGENS</div>
+        <div class="phone-text" style="font-size:11px">e cada uma delas fez história.</div>
+        <div class="phone-num"><span>3 / 12</span><div class="bar"><div class="bar-fill" style="width:25%"></div></div></div>
+      </div>
+    </div>
+    <!-- Phone 4 -->
+    <div class="phone-mock">
+      <div class="phone-inner">
+        <div class="phone-brand"><span>♡ LoveBlast</span><span>🔊 🎵</span></div>
+        <div class="phone-text">A palavra mais usada foi:</div>
+        <div class="phone-italic">amor</div>
+        <div style="font-size:1.6rem;margin-top:4px">♡</div>
+        <div class="phone-num"><span>4 / 12</span><div class="bar"><div class="bar-fill" style="width:33%"></div></div></div>
+      </div>
+    </div>
+    <!-- Phone 5 -->
+    <div class="phone-mock">
+      <div class="phone-inner">
+        <div class="phone-brand"><span>♡ LoveBlast</span><span>🔊 🎵</span></div>
+        <div class="phone-year">2024</div>
+        <div class="phone-text">foi o ano</div>
+        <div class="phone-year-sub">mais intenso 🔥</div>
+        <div class="phone-num"><span>5 / 12</span><div class="bar"><div class="bar-fill" style="width:42%"></div></div></div>
+      </div>
+    </div>
+    <!-- Phone 6 -->
+    <div class="phone-mock">
+      <div class="phone-inner">
+        <div class="phone-brand"><span>♡ LoveBlast</span><span>🔊 🎵</span></div>
+        <div class="phone-title">Nossa <span style="color:var(--pink);font-family:'Instrument Serif',serif;font-style:italic">música</span></div>
+        <div class="phone-text" style="font-size:11px">trilha sonora da história</div>
+        <div class="yt-btn">▶</div>
+        <div class="phone-num"><span>6 / 12</span><div class="bar"><div class="bar-fill" style="width:50%"></div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-demo" onclick="abrirModal('casal')">▶ VER EXEMPLO COMPLETO</button>
+</section>
+
+<!-- ══ COMO FUNCIONA ═══════════════════════════════════════════════════════ -->
+<section id="como-funciona">
+  <div class="section-label">PASSO A PASSO</div>
+  <div class="section-title" style="margin-bottom:32px">Como <span class="accent">funciona</span></div>
+  <div class="steps-grid">
+    <div class="step-item">
+      <div class="step-num">01</div>
+      <div class="step-icon">🎨</div>
+      <h3>Escolha a categoria</h3>
+      <p>Selecione o tema da retrospectiva: casal, mãe, amigos, pet e muito mais.</p>
+    </div>
+    <div class="step-item">
+      <div class="step-num">02</div>
+      <div class="step-icon">📸</div>
+      <h3>Adicione fotos e música</h3>
+      <p>Envie até 12 fotos e opcionalmente uma conversa do WhatsApp para insights.</p>
+    </div>
+    <div class="step-item">
+      <div class="step-num">03</div>
+      <div class="step-icon">✍️</div>
+      <h3>Personalize a mensagem</h3>
+      <p>Escreva uma mensagem especial. Nossa IA vai criar frases únicas para vocês.</p>
+    </div>
+    <div class="step-item">
+      <div class="step-num">04</div>
+      <div class="step-icon">🎁</div>
+      <h3>Surpreenda & compartilhe</h3>
+      <p>Baixe ou compartilhe o link. A pessoa vai guardar para sempre.</p>
     </div>
   </div>
 </section>
 
-<h2 id="exemplos" class="section-title">EXEMPLO DE RETROSPECTIVA — TEMA <span id="temaExemplo" class="neon">CASAL</span> ♡</h2>
-
-<section class="phones">
-  <div class="phone"><div class="phone-content"><h2>A história de vocês<br><span class="neon">como nunca antes.</span></h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><p>Vocês já criaram memórias há</p><h2 class="big">732</h2><h2>DIAS</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><p>Vocês trocaram</p><h2 class="big">18.432</h2><h2>MENSAGENS</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><p>A palavra mais usada foi:</p><h2 class="neon" style="font-size:54px">amor</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><h2>2024</h2><p>foi o ano</p><h2 class="neon">mais intenso 🔥</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><h2>Nossa <span class="neon">música</span></h2><p>trilha sonora da história</p><button class="btn js-open-modal" type="button">▶</button><div class="progress"><span></span></div></div></div>
-</section>
-
-<section id="como-funciona" class="preview">
-  <div>
-    <h2>PRÉVIA ANTES DO PAGAMENTO</h2>
-    <p style="color:#ccc;margin:10px 0 20px">Mostramos apenas uma parte da retrospectiva para aumentar a curiosidade.</p>
-    <div class="preview-list">
-      <div class="preview-item">Introdução ✓</div>
-      <div class="preview-item">Tempo juntos ✓</div>
-      <div class="preview-item">Primeira foto ✓</div>
-      <div class="preview-item">18.432 mensagens ✓</div>
-      <div class="preview-item locked">🔒 Palavra mais usada</div>
-      <div class="preview-item locked">🔒 Horário favorito</div>
-      <div class="preview-item locked">🔒 Galeria completa</div>
-      <div class="preview-item locked">🔒 Mensagem final</div>
+<!-- ══ PREÇOS ══════════════════════════════════════════════════════════════ -->
+<section id="precos">
+  <div class="section-label">PLANOS</div>
+  <div class="section-title" style="margin-bottom:32px">Escolha seu <span class="accent">plano</span></div>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="price-name">Essencial</div>
+      <div class="price-val">R$14<span>,90</span></div>
+      <div class="price-desc">Perfeito para uma retrospectiva simples e emocionante.</div>
+      <ul class="price-feat">
+        <li>6 slides animados</li>
+        <li>Até 4 fotos</li>
+        <li>Mensagem personalizada</li>
+        <li>Download HTML</li>
+      </ul>
+      <button class="btn-price outline" onclick="abrirModal('casal')">CRIAR AGORA</button>
     </div>
-  </div>
-  <div style="display:flex;align-items:center;justify-content:center">
-    <button class="btn js-open-modal">DESBLOQUEAR AGORA</button>
-  </div>
-</section>
-
-<section id="precos" class="insights">
-  <div class="panel">
-    <h2>INSIGHTS DA SUA CONVERSA <span class="neon">IA LoveBlast</span></h2>
-    <div class="insight-grid">
-      <div class="mini"><strong>18.432</strong>Mensagens</div>
-      <div class="mini"><strong>amor</strong>Palavra mais usada</div>
-      <div class="mini"><strong>82</strong>vezes “eu te amo”</div>
-      <div class="mini"><strong>103</strong>vezes saudade</div>
-      <div class="mini"><strong>23:47</strong>Horário favorito</div>
-      <div class="mini"><strong>😂</strong>Emoji mais usado</div>
-      <div class="mini"><strong>Alto</strong>Nível emocional</div>
-      <div class="mini"><strong>Incrível</strong>Conexão forte</div>
+    <div class="price-card featured">
+      <div class="price-name">Premium</div>
+      <div class="price-val">R$19<span>,90</span></div>
+      <div class="price-desc">A experiência cinematográfica completa para emocionar.</div>
+      <ul class="price-feat">
+        <li>12 slides fullscreen</li>
+        <li>Até 12 fotos</li>
+        <li>Upload de música real</li>
+        <li>Insights do WhatsApp</li>
+        <li>Frases geradas por IA</li>
+        <li>Download + link compartilhável</li>
+      </ul>
+      <button class="btn-price" onclick="abrirModal('casal')">COMEÇAR AGORA</button>
     </div>
-  </div>
-
-  <div class="panel">
-    <h2>FRASES GERADAS PARA VOCÊS</h2>
-    <div class="phrase">Vocês transformaram mensagens simples em uma história extraordinária. ♡</div>
-    <div class="phrase">O carinho aparece mais nos detalhes do que nas grandes frases.</div>
-    <div class="phrase">A saudade foi uma das emoções mais presentes na relação de vocês.</div>
-    <div class="phrase">Mesmo nas mensagens simples, vocês criaram um lar um no outro.</div>
+    <div class="price-card">
+      <div class="price-name">Família</div>
+      <div class="price-val">R$29<span>,90</span></div>
+      <div class="price-desc">Para histórias maiores que envolvem toda a família.</div>
+      <ul class="price-feat">
+        <li>20 slides cinematográficos</li>
+        <li>Fotos ilimitadas</li>
+        <li>Múltiplas músicas</li>
+        <li>Álbum digital compartilhável</li>
+        <li>Suporte prioritário</li>
+      </ul>
+      <button class="btn-price outline" onclick="abrirModal('familia')">CRIAR AGORA</button>
+    </div>
   </div>
 </section>
 
-<div id="createModal" class="modal-overlay">
-  <div class="modal-box">
-    <button id="closeModal" class="modal-close" type="button">×</button>
+<!-- ══ FOOTER ══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-logo">♡ LoveBlast</div>
+  <p>Feito com amor para eternizar memórias &nbsp;·&nbsp; © 2025 LoveBlast</p>
+</footer>
 
-    <h2>Criar retrospectiva</h2>
-    <p class="modal-subtitle">Preencha os dados, envie fotos, música e conversa do WhatsApp.</p>
-
-    <label>Categoria escolhida</label>
-    <input id="categoriaInput" type="text" value="casal" readonly>
-
-    <div id="categoriaDescricao" class="category-description">Celebre seu amor com uma retrospectiva cinematográfica.</div>
-
-    <label>Seu nome</label>
-    <input id="nome1" type="text" placeholder="Ex: Robson">
-
-    <label>Nome da pessoa</label>
-    <input id="nome2" type="text" placeholder="Ex: Maria">
-
-    <label>E-mail</label>
-    <input id="email" type="email" placeholder="cliente@email.com">
-
-    <label>Fotos</label>
-    <input id="photos" type="file" accept="image/*" multiple>
-
-    <label>Música real</label>
-    <input id="music" type="file" accept="audio/mp3,audio/mpeg">
-
-    <label>Conversa do WhatsApp</label>
-    <input id="whatsappFile" type="file" accept=".txt">
-
-    <label>Mensagem especial</label>
-    <textarea id="mensagem" placeholder="Escreva uma mensagem especial..."></textarea>
-
-    <button id="previewBtn" class="btn-full" type="button">Ver prévia</button>
-
-    <div id="previewResult" class="preview-result">
-      <strong>Prévia criada ✨</strong>
-      <p id="previewText" style="color:#ccc;margin-top:8px"></p>
-      <div id="previewImages" class="preview-row"></div>
-      <audio id="previewAudio" controls style="width:100%;margin-top:12px;display:none"></audio>
+<!-- ══ MODAL DE CRIAÇÃO (adapta por categoria) ═════════════════════════════ -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header" id="modalHeader">
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+      <div class="modal-cat-badge" id="modalBadge"></div>
+      <h2 id="modalTitle">Criar retrospectiva</h2>
+      <p id="modalSub">Preencha os dados para personalizar sua retrospectiva</p>
     </div>
 
-    <button id="payBtn" class="btn-full secondary" type="button">Finalizar pagamento</button>
+    <div class="modal-body">
+      <!-- Nomes -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" id="label1">Seu nome</label>
+          <input class="form-input" id="nome1" type="text" placeholder="Ex: Ana">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="label2">Nome da pessoa especial</label>
+          <input class="form-input" id="nome2" type="text" placeholder="Ex: Pedro">
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="form-group">
+        <label class="form-label">Seu e-mail</label>
+        <input class="form-input" id="email" type="email" placeholder="seu@email.com">
+      </div>
+
+      <!-- Mensagem personalizada -->
+      <div class="form-group">
+        <label class="form-label" id="labelMsg">Sua mensagem especial</label>
+        <textarea class="form-textarea" id="mensagem" id="mensagem"
+          placeholder="Escreva do coração..."></textarea>
+      </div>
+
+      <div class="modal-divider">ARQUIVOS</div>
+
+      <!-- Fotos -->
+      <div class="form-group">
+        <label class="form-label">Fotos (até 12)</label>
+        <div class="upload-box" onclick="document.getElementById('photos').click()">
+          <div class="upload-icon">📸</div>
+          <p><span>Clique para adicionar fotos</span></p>
+          <small>JPG, PNG, WebP · até 20 MB por arquivo</small>
+        </div>
+        <input type="file" id="photos" class="file-hidden" accept="image/*" multiple>
+        <div class="photo-grid" id="photoGrid"></div>
+      </div>
+
+      <!-- Música -->
+      <div class="form-group">
+        <label class="form-label">Música (MP3 / WAV)</label>
+        <div class="upload-box" onclick="document.getElementById('music').click()">
+          <div class="upload-icon">🎵</div>
+          <p><span>Fazer upload do MP3</span></p>
+          <small>Opcional · até 15 MB</small>
+        </div>
+        <input type="file" id="music" class="file-hidden" accept="audio/*,.mp3,.wav,.m4a">
+        <div class="upload-name" id="musicName"></div>
+      </div>
+
+      <!-- WhatsApp -->
+      <div class="form-group">
+        <label class="form-label">Conversa do WhatsApp (opcional)</label>
+        <div class="upload-box" onclick="document.getElementById('whatsappFile').click()">
+          <div class="upload-icon">💬</div>
+          <p><span>Exportar conversa do WhatsApp</span></p>
+          <small>Arquivo .txt · Gera insights automáticos</small>
+        </div>
+        <input type="file" id="whatsappFile" class="file-hidden" accept=".txt">
+        <div class="upload-name" id="whatsappName"></div>
+      </div>
+
+      <!-- Prévia -->
+      <div id="previewResult">
+        <div class="modal-divider">PRÉVIA</div>
+        <div class="preview-card">
+          <div class="preview-names" id="previewNames">Ana & Pedro</div>
+          <div id="previewImages"></div>
+          <div id="previewText"></div>
+          <audio id="previewAudio" controls></audio>
+          <div class="preview-blur-msg">🔒 A retrospectiva completa é liberada após o pagamento</div>
+        </div>
+      </div>
+
+    </div><!-- /modal-body -->
+
+    <div class="modal-footer">
+      <button class="btn-preview" id="previewBtn">👁 VER PRÉVIA</button>
+      <button class="btn-pay" id="payBtn">
+        <span id="payLabel">🔒 FINALIZAR PAGAMENTO</span>
+      </button>
+    </div>
   </div>
 </div>
+
+<!-- ══ ARTE FINAL ══════════════════════════════════════════════════════════ -->
 <section id="arteFinal" class="final-experience hidden">
+  <div class="final-header">
+    <h2 id="finalTitle">Sua retrospectiva está pronta ♡</h2>
+    <p id="finalSub">Uma história única, eternizada para sempre.</p>
+  </div>
   <div class="final-grid">
 
-    <div class="final-panel abertura">
+    <div class="final-panel abertura" style="--panel-glow:rgba(255,45,120,.15);grid-column:span 2">
       <span class="step">01 ABERTURA</span>
       <div class="brand">♡ LoveBlast</div>
       <h1><span id="finalNome1">Robson</span> <b>&</b> <span id="finalNome2">Raa</span></h1>
-      <p>Algumas histórias não cabem em palavras.</p>
+      <p id="finalTagline" style="color:rgba(255,255,255,.6);font-size:15px;margin-top:6px">
+        Algumas histórias não cabem em palavras.</p>
     </div>
 
-    <div class="final-panel comeco">
-      <span class="step">02 COMEÇO DE TUDO</span>
-      <div class="polaroid">
-        <img id="fotoPrincipal" src="" alt="Foto principal">
-      </div>
+    <div class="final-panel" style="--panel-glow:rgba(255,107,26,.12)">
+      <span class="step">02 COMEÇO</span>
+      <div class="polaroid"><img id="fotoPrincipal" src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400" alt="Foto"></div>
       <h2>Tudo começou <span>aqui.</span></h2>
-      <p>E desde então, cada detalhe faz sentido.</p>
     </div>
 
-    <div class="final-panel timeline-final">
+    <div class="final-panel" style="--panel-glow:rgba(255,45,120,.1)">
       <span class="step">03 LINHA DO TEMPO</span>
-      <div class="time-item">❤️ <strong>2023</strong><p>Vocês se conheceram</p></div>
-      <div class="time-item">💬 <strong>2023</strong><p>Primeiras conversas</p></div>
-      <div class="time-item">✈️ <strong>2024</strong><p>Primeira viagem juntos</p></div>
-      <div class="time-item">🔥 <strong>2025</strong><p>E ainda parece o começo</p></div>
+      <h2 style="margin-bottom:16px">Nossa história</h2>
+      <div class="time-item">❤️ <div><strong>2023</strong><p>Vocês se conheceram</p></div></div>
+      <div class="time-item">💬 <div><strong>2024</strong><p>Primeiras memórias juntos</p></div></div>
+      <div class="time-item">✈️ <div><strong>2024</strong><p>Primeiro grande momento</p></div></div>
+      <div class="time-item">🔥 <div><strong>2025</strong><p>E ainda parece o começo</p></div></div>
     </div>
 
-    <div class="final-panel insights-final">
-      <span class="step">04 NOSSOS INSIGHTS</span>
+    <div class="final-panel" style="--panel-glow:rgba(139,61,255,.12)">
+      <span class="step">04 INSIGHTS</span>
       <h2>Vocês trocaram</h2>
       <strong class="big-number" id="totalMensagens">18.432</strong>
-      <p>mensagens</p>
-
-      <div class="insight-card">
-        A palavra mais usada foi:<br>
-        <b id="palavraMaisUsada">amor</b> ❤️
-      </div>
-
-      <div class="insight-card">
-        Vocês disseram<br>
-        <b id="saudadeCount">saudade 103 vezes</b>
-      </div>
+      <p style="color:rgba(255,255,255,.5);font-size:13px">mensagens</p>
+      <div class="insight-card">Palavra mais usada: <b id="palavraMaisUsada">amor</b> ❤️</div>
+      <div class="insight-card">Disseram <b id="saudadeCount">saudade 103x</b></div>
     </div>
 
-    <div class="final-panel galeria-final">
-      <span class="step">05 NOSSAS MEMÓRIAS</span>
+    <div class="final-panel" style="--panel-glow:rgba(255,45,120,.1)">
+      <span class="step">05 MEMÓRIAS</span>
+      <h2 style="margin-bottom:12px">Nossas fotos</h2>
       <div id="galeriaFinal" class="galeria-fotos"></div>
     </div>
 
-    <div class="final-panel frases-final">
-      <span class="step">06 FRASES QUE DEFINEM</span>
-      <div class="quote">“O carinho de vocês aparece mais nos detalhes do que nas declarações.”</div>
-      <div class="quote">“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”</div>
-      <div class="quote">“A saudade foi uma das emoções mais presentes da história de vocês.”</div>
+    <div class="final-panel" style="--panel-glow:rgba(255,214,10,.08)">
+      <span class="step">06 FRASES</span>
+      <h2 style="margin-bottom:14px">Sobre vocês</h2>
+      <div class="quote" id="frase1">"O carinho de vocês aparece mais nos detalhes do que nas declarações."</div>
+      <div class="quote" id="frase2">"Mesmo nas mensagens simples, vocês criaram um lar um no outro."</div>
     </div>
 
-    <div class="final-panel musica-final">
-      <span class="step">07 NOSSA MÚSICA</span>
+    <div class="final-panel" style="--panel-glow:rgba(139,61,255,.15)">
+      <span class="step">07 MÚSICA</span>
       <h2>Nossa música ♡</h2>
-      <h3 id="nomeMusicaFinal">Música escolhida</h3>
-      <audio id="audioFinal" controls></audio>
+      <h3 id="nomeMusicaFinal" style="color:var(--pink);font-size:14px;margin:8px 0">Música escolhida</h3>
+      <audio id="audioFinal" controls style="width:100%;margin-top:8px"></audio>
     </div>
 
-    <div class="final-panel carta-final">
-      <span class="step">08 MENSAGEM ESPECIAL</span>
+    <div class="final-panel" style="--panel-glow:rgba(255,45,120,.1)">
+      <span class="step">08 MENSAGEM</span>
       <div class="carta">
-        <h2>Para <span id="cartaNome">Raa</span>,</h2>
-        <p id="mensagemFinal">Cada mensagem, cada risada, cada momento virou parte da nossa história.</p>
+        <h2>Para <span id="cartaNome">você</span>,</h2>
+        <p id="mensagemFinal" style="color:rgba(255,255,255,.7);font-size:13px;margin-top:6px">
+          Cada mensagem, cada risada, cada momento virou parte da nossa história.</p>
       </div>
     </div>
 
-    <div class="final-panel encerramento">
-      <span class="step">09 FINAL ÉPICO</span>
-      <h2>Algumas histórias merecem ser eternizadas.</h2>
-      <p>Obrigado por criar essa retrospectiva.</p>
-    </div>
-
-    <div class="final-panel compartilhar">
-      <span class="step">10 GUARDE & COMPARTILHE</span>
-      <button onclick="baixarArte()">⬇ Baixar</button>
-      <button onclick="compartilharArte()">🔗 Compartilhar</button>
-      <button onclick="location.href='/'">♡ Criar outra</button>
+    <div class="final-panel" style="--panel-glow:rgba(255,45,120,.2)">
+      <span class="step">09 COMPARTILHAR</span>
+      <h2 style="margin-bottom:6px">Guarde & compartilhe</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:16px">
+        Esse momento merece ser lembrado para sempre.</p>
+      <div class="final-actions">
+        <button class="btn-action primary" onclick="baixarArte()">⬇ Baixar retrospectiva</button>
+        <button class="btn-action secondary" onclick="compartilharArte()">🔗 Copiar link</button>
+        <button class="btn-action secondary" onclick="location.href='/'">♡ Criar outra</button>
+      </div>
     </div>
 
   </div>
 </section>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  const STORAGE_KEY = 'loveblast_dados_retro';
-
-  const CATEGORY_CONFIG = {
-    casal: {
-      label: 'CASAL',
-      modal: 'Celebre o amor de vocês com fotos, música, conversa do WhatsApp e insights emocionais.',
-      title: 'A história de vocês como nunca antes.',
-      intro: 'Algumas histórias não cabem em palavras.',
-      timeline: [
-        ['❤️', '2023', 'Vocês se conheceram'],
-        ['💬', '2023', 'Primeiras conversas'],
-        ['✈️', '2024', 'Primeira viagem juntos'],
-        ['🔥', '2025', 'E ainda parece o começo']
-      ],
-      quotes: [
-        'O carinho de vocês aparece mais nos detalhes do que nas declarações.',
-        'Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.',
-        'A saudade foi uma das emoções mais presentes da história de vocês.'
-      ],
-      final: 'Algumas histórias merecem ser eternizadas.'
-    },
-    mae: {
-      label: 'MÃE',
-      modal: 'Crie uma homenagem emocionante para quem sempre cuidou, protegeu e esteve presente.',
-      title: 'Uma homenagem para quem sempre foi lar.',
-      intro: 'Amor de mãe não cabe em palavras.',
-      timeline: [
-        ['🌷', 'Sempre', 'Ela esteve presente'],
-        ['🤍', 'Cuidado', 'Cada gesto virou memória'],
-        ['🏠', 'Lar', 'O abraço que acalma tudo'],
-        ['✨', 'Hoje', 'Uma homenagem para eternizar']
-      ],
-      quotes: [
-        'Algumas pessoas não apenas cuidam. Elas viram abrigo.',
-        'O amor dela aparece nos detalhes que ninguém vê.',
-        'Mãe é a primeira forma de amor que a vida ensina.'
-      ],
-      final: 'Alguns amores merecem ser eternizados.'
-    },
-    pai: {
-      label: 'PAI',
-      modal: 'Monte uma retrospectiva para celebrar histórias, conselhos, força e presença.',
-      title: 'Uma história feita de exemplo e presença.',
-      intro: 'Alguns heróis não usam capa.',
-      timeline: [
-        ['🛡️', 'Proteção', 'Sempre esteve por perto'],
-        ['🧭', 'Exemplo', 'Ensinou mais por atitudes'],
-        ['💬', 'Conselhos', 'Palavras que ficaram'],
-        ['🔥', 'Hoje', 'Uma homenagem para guardar']
-      ],
-      quotes: [
-        'Pai é presença que guia, mesmo em silêncio.',
-        'Alguns ensinamentos ficam para sempre.',
-        'O amor também mora no cuidado silencioso.'
-      ],
-      final: 'Heróis de verdade merecem ser lembrados.'
-    },
-    familia: {
-      label: 'FAMÍLIA',
-      modal: 'Crie uma retrospectiva familiar com momentos, gerações, fotos e mensagens especiais.',
-      title: 'A história de uma família inteira.',
-      intro: 'Tudo que importa começa em casa.',
-      timeline: [
-        ['🏠', 'Raízes', 'Onde tudo começou'],
-        ['📸', 'Memórias', 'Momentos que uniram todos'],
-        ['🫶', 'Presença', 'Cada pessoa faz parte'],
-        ['✨', 'Hoje', 'Uma história de gerações']
-      ],
-      quotes: [
-        'Família é onde a vida ganha significado.',
-        'Cada foto guarda um pedaço de todos vocês.',
-        'Algumas memórias atravessam gerações.'
-      ],
-      final: 'Histórias de família merecem durar para sempre.'
-    },
-    amigos: {
-      label: 'AMIGOS',
-      modal: 'Transforme amizade, risadas, surtos e conversas em um recap estilo Spotify Wrapped.',
-      title: 'A amizade de vocês como nunca antes.',
-      intro: 'Algumas amizades viram família.',
-      timeline: [
-        ['😂', 'Risadas', 'Momentos impossíveis de esquecer'],
-        ['💬', 'Conversas', 'Assuntos que só vocês entendem'],
-        ['🤝', 'Parceria', 'Um pelo outro sempre'],
-        ['🔥', 'Hoje', 'Mais histórias para viver']
-      ],
-      quotes: [
-        'Vocês transformaram dias comuns em histórias boas.',
-        'A amizade aparece nas piadas, nos conselhos e na presença.',
-        'Algumas pessoas chegam e ficam para sempre.'
-      ],
-      final: 'Amizades verdadeiras merecem ser eternizadas.'
-    },
-    formatura: {
-      label: 'FORMATURA',
-      modal: 'Crie uma retrospectiva de conquista, esforço, superação e orgulho.',
-      title: 'Uma conquista que merece ser lembrada.',
-      intro: 'Todo esforço conta uma história.',
-      timeline: [
-        ['📚', 'Começo', 'O primeiro passo foi dado'],
-        ['☕', 'Rotina', 'Dias difíceis também fizeram parte'],
-        ['🎓', 'Conquista', 'O sonho virou realidade'],
-        ['✨', 'Hoje', 'Uma nova fase começa']
-      ],
-      quotes: [
-        'A conquista de hoje carrega todo esforço de ontem.',
-        'Cada etapa difícil também fez parte da vitória.',
-        'O diploma é só o começo de uma história maior.'
-      ],
-      final: 'Conquistas grandes merecem ser eternizadas.'
-    },
-    bebe: {
-      label: 'BEBÊ',
-      modal: 'Registre as primeiras fases, descobertas, sorrisos e momentos mais fofos.',
-      title: 'Pequenos momentos, memórias gigantes.',
-      intro: 'Cada descoberta virou amor.',
-      timeline: [
-        ['🍼', 'Começo', 'Tudo era novidade'],
-        ['👶', 'Sorrisos', 'Cada risada mudou o dia'],
-        ['🐾', 'Passinhos', 'Cada fase uma emoção'],
-        ['✨', 'Hoje', 'Um amor que só cresce']
-      ],
-      quotes: [
-        'Alguns pequenos momentos viram memórias enormes.',
-        'Cada sorriso conta uma nova descoberta.',
-        'O amor cresceu junto com cada fase.'
-      ],
-      final: 'Infâncias merecem ser guardadas com carinho.'
-    },
-    pet: {
-      label: 'PET',
-      modal: 'Crie uma homenagem fofa para seu melhor amigo de quatro patas.',
-      title: 'Uma história de amor em quatro patas.',
-      intro: 'Alguns amores deixam pegadas.',
-      timeline: [
-        ['🐾', 'Chegada', 'A casa nunca mais foi igual'],
-        ['🎾', 'Bagunça', 'Cada travessura virou memória'],
-        ['❤️', 'Companhia', 'Sempre perto, sempre amor'],
-        ['✨', 'Hoje', 'Um melhor amigo para sempre']
-      ],
-      quotes: [
-        'Alguns anjos chegam com patas.',
-        'O amor deles é simples, puro e infinito.',
-        'Cada olhar parecia dizer: estou aqui.'
-      ],
-      final: 'Amores de quatro patas também merecem eternidade.'
-    }
-  };
-
-  let categoriaSelecionada = 'casal';
-  window.categoriaSelecionada = categoriaSelecionada;
-
-  const modal = document.getElementById('createModal');
-  const closeModal = document.getElementById('closeModal');
-  const categoriaInput = document.getElementById('categoriaInput');
-  const categoriaDescricao = document.getElementById('categoriaDescricao');
-
-  function setText(selector, value) {
-    const el = document.querySelector(selector);
-    if (el) el.textContent = value;
-  }
-
-  function aplicarCategoria(cat) {
-    categoriaSelecionada = cat || 'casal';
-    window.categoriaSelecionada = categoriaSelecionada;
-
-    const config = CATEGORY_CONFIG[categoriaSelecionada] || CATEGORY_CONFIG.casal;
-
-    document.querySelectorAll('.card').forEach(c => {
-      c.classList.toggle('active', c.dataset.category === categoriaSelecionada);
-    });
-
-    if (categoriaInput) categoriaInput.value = categoriaSelecionada;
-    if (categoriaDescricao) categoriaDescricao.textContent = config.modal;
-
-    setText('#temaExemplo', config.label);
-
-    const firstPhone = document.querySelector('.phones .phone:first-child h2');
-    if (firstPhone) firstPhone.innerHTML = config.title.replace(' ', '<br><span class="neon">') + '</span>';
-
-    const finalTitle = document.querySelector('.encerramento h2');
-    if (finalTitle) finalTitle.textContent = config.final;
-
-    const quotes = document.querySelectorAll('.frases-final .quote');
-    config.quotes.forEach((q, i) => {
-      if (quotes[i]) quotes[i].textContent = '“' + q + '”';
-    });
-
-    const timeItems = document.querySelectorAll('.timeline-final .time-item');
-    config.timeline.forEach((item, i) => {
-      if (!timeItems[i]) return;
-      timeItems[i].innerHTML = `${item[0]} <strong>${item[1]}</strong><p>${item[2]}</p>`;
-    });
-  }
-
-  function abrirFormulario() {
-    if (!modal) return;
-    aplicarCategoria(categoriaSelecionada);
-    modal.classList.add('active');
-  }
-
-  function fecharFormulario() {
-    modal?.classList.remove('active');
-  }
-
-  document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      aplicarCategoria(card.dataset.category || 'casal');
-      abrirFormulario();
-    });
-  });
-
-  document.querySelectorAll('.js-open-modal').forEach(btn => {
-    btn.addEventListener('click', abrirFormulario);
-  });
-
-  closeModal?.addEventListener('click', fecharFormulario);
-
-  modal?.addEventListener('click', e => {
-    if (e.target === modal) fecharFormulario();
-  });
-
-  document.querySelectorAll('nav a[href^="#"]').forEach(link => {
-    link.addEventListener('click', e => {
-      const target = document.querySelector(link.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  });
-
-  function fileToDataURL(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  function analisarConversaWhatsApp(texto) {
-    const clean = (texto || '').toLowerCase();
-    const linhas = clean.split(/\r?\n/).filter(Boolean);
-    const totalMessages = Math.max(linhas.length, 0);
-
-    const loveCount = (clean.match(/eu te amo|te amo|amo você|amo vc/g) || []).length;
-    const saudadeCount = (clean.match(/saudade|sdds|saudades/g) || []).length;
-    const kkkCount = (clean.match(/kkk+/g) || []).length;
-
-    const emojis = clean.match(/[\u{1F300}-\u{1FAFF}❤️💕💖💘💝😍😂😭🥺🔥✨]/gu) || [];
-    const emojiMap = {};
-    emojis.forEach(e => emojiMap[e] = (emojiMap[e] || 0) + 1);
-    const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '❤️';
-
-    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro','amor']);
-    const words = clean.normalize('NFD').replace(/[\u0300-\u036f]/g,'').match(/\b[a-z]{4,}\b/g) || [];
-    const wordMap = {};
-    words.forEach(w => {
-      if (!stop.has(w)) wordMap[w] = (wordMap[w] || 0) + 1;
-    });
-
-    let topWord = Object.entries(wordMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
-    if ((clean.match(/amor/g) || []).length >= 2) topWord = 'amor';
-
-    const hourMap = {};
-    const hourMatches = texto.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g) || [];
-    hourMatches.forEach(h => {
-      const hour = h.split(':')[0].padStart(2,'0');
-      hourMap[hour] = (hourMap[hour] || 0) + 1;
-    });
-    const favoriteHour = Object.entries(hourMap).sort((a,b)=>b[1]-a[1])[0]?.[0];
-    const favoriteTime = favoriteHour ? `${favoriteHour}:00` : '23:47';
-
-    const emotionalLevel = loveCount + saudadeCount + kkkCount > 40 ? 'Muito alto' : loveCount + saudadeCount > 10 ? 'Alto' : 'Especial';
-
-    return {
-      totalMessages: totalMessages || 18432,
-      topWord,
-      loveCount: loveCount || 82,
-      saudadeCount: saudadeCount || 103,
-      favoriteTime,
-      topEmoji,
-      emotionalLevel,
-      generatedPhrases: [
-        `A palavra que mais marcou essa história foi: ${topWord}.`,
-        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — sinal de presença mesmo na distância.` : 'Mesmo nas mensagens simples, vocês criaram presença.',
-        kkkCount > 0 ? `O humor também fez parte: foram muitas risadas no caminho.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.'
-      ]
-    };
-  }
-
-  async function lerArquivoTexto(file) {
-    if (!file) return null;
-    return await file.text();
-  }
-
-  function formatNumber(n) {
-    return Number(n || 0).toLocaleString('pt-BR');
-  }
-
-  function obterDadosRetrospectiva() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-    } catch {
-      return {};
-    }
-  }
-
-  async function salvarDadosRetrospectivaLocal() {
-    const nome1 = document.getElementById('nome1')?.value || 'Robson';
-    const nome2 = document.getElementById('nome2')?.value || 'Raa';
-    const mensagem = document.getElementById('mensagem')?.value ||
-      'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
-
-    const fotos = Array.from(document.getElementById('photos')?.files || []).slice(0, 6);
-    const fotosBase64 = [];
-
-    for (const foto of fotos.slice(0, 3)) {
-      try {
-        fotosBase64.push(await fileToDataURL(foto));
-      } catch (error) {
-        console.warn('Não foi possível salvar uma foto localmente.', error);
-      }
-    }
-
-    const musica = document.getElementById('music')?.files?.[0];
-    const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
-    const textoWhats = await lerArquivoTexto(whatsappFile);
-    const insights = textoWhats ? analisarConversaWhatsApp(textoWhats) : {
-      totalMessages: 18432,
-      topWord: 'amor',
-      loveCount: 82,
-      saudadeCount: 103,
-      favoriteTime: '23:47',
-      topEmoji: '😂',
-      emotionalLevel: 'Alto',
-      generatedPhrases: [
-        'Vocês transformaram mensagens simples em uma história extraordinária.',
-        'O carinho aparece mais nos detalhes do que nas grandes frases.',
-        'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
-      ]
-    };
-
-    const dados = {
-      nome1,
-      nome2,
-      mensagem,
-      categoria: categoriaSelecionada,
-      fotos: fotosBase64,
-      musicaNome: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Música escolhida',
-      insights,
-      criadoEm: Date.now()
-    };
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
-    } catch (error) {
-      console.warn('LocalStorage cheio ou bloqueado. A arte usará dados padrão.', error);
-    }
-
-    return dados;
-  }
-
-  function preencherArteFinal(dados = {}) {
-    const config = CATEGORY_CONFIG[dados.categoria || categoriaSelecionada] || CATEGORY_CONFIG.casal;
-    aplicarCategoria(dados.categoria || categoriaSelecionada);
-
-    const nome1 = dados.nome1 || document.getElementById('nome1')?.value || 'Robson';
-    const nome2 = dados.nome2 || document.getElementById('nome2')?.value || 'Raa';
-    const mensagem = dados.mensagem || document.getElementById('mensagem')?.value ||
-      'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
-
-    setText('#finalNome1', nome1);
-    setText('#finalNome2', nome2);
-    setText('#cartaNome', nome2);
-    setText('#mensagemFinal', mensagem);
-
-    const insights = dados.insights || {};
-    setText('#totalMensagens', formatNumber(insights.totalMessages || 18432));
-    setText('#palavraMaisUsada', insights.topWord || 'amor');
-    setText('#saudadeCount', `saudade ${insights.saudadeCount || 103} vezes`);
-
-    const quotes = document.querySelectorAll('.frases-final .quote');
-    const generated = insights.generatedPhrases || config.quotes;
-    generated.slice(0, 3).forEach((q, i) => {
-      if (quotes[i]) quotes[i].textContent = '“' + q + '”';
-    });
-
-    const galeria = document.getElementById('galeriaFinal');
-    const fotoPrincipal = document.getElementById('fotoPrincipal');
-    if (galeria) galeria.innerHTML = '';
-
-    const fallbackFotos = [
-      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
-      'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
-      'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
-    ];
-
-    const fotos = dados.fotos && dados.fotos.length ? dados.fotos : fallbackFotos;
-
-    fotos.slice(0, 3).forEach((src, index) => {
-      const img = document.createElement('img');
-      img.src = src;
-      galeria?.appendChild(img);
-
-      if (index === 0 && fotoPrincipal) fotoPrincipal.src = src;
-    });
-
-    setText('#nomeMusicaFinal', dados.musicaNome || 'Música escolhida');
-  }
-
-  function mostrarArteFinal() {
-    preencherArteFinal(obterDadosRetrospectiva());
-
-    const arteFinal = document.getElementById('arteFinal');
-    arteFinal?.classList.remove('hidden');
-
-    setTimeout(() => {
-      arteFinal?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
-  }
-
-  document.getElementById('previewBtn')?.addEventListener('click', async () => {
-    const dados = await salvarDadosRetrospectivaLocal();
-
-    const nome1 = dados.nome1 || 'Você';
-    const nome2 = dados.nome2 || 'Pessoa especial';
-    const mensagem = dados.mensagem || 'Sua retrospectiva está quase pronta.';
-    const photos = Array.from(document.getElementById('photos')?.files || []);
-
-    setText('#previewText', `${nome1} & ${nome2} — ${CATEGORY_CONFIG[dados.categoria]?.label || 'CASAL'}. ${mensagem}`);
-
-    const previewImages = document.getElementById('previewImages');
-    if (previewImages) {
-      previewImages.innerHTML = '';
-      photos.slice(0, 4).forEach(file => {
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        previewImages.appendChild(img);
-      });
-    }
-
-    const audio = document.getElementById('previewAudio');
-    const music = document.getElementById('music')?.files?.[0];
-
-    if (audio) {
-      if (music) {
-        audio.src = URL.createObjectURL(music);
-        audio.style.display = 'block';
-      } else {
-        audio.style.display = 'none';
-      }
-    }
-
-    const pr = document.getElementById('previewResult');
-    pr?.classList.add('active');
-
-    const miniText = dados.insights
-      ? `Insight: ${formatNumber(dados.insights.totalMessages)} mensagens analisadas. Palavra marcante: ${dados.insights.topWord}.`
-      : '';
-    if (miniText && pr) {
-      let notice = pr.querySelector('.notice-ok');
-      if (!notice) {
-        notice = document.createElement('div');
-        notice.className = 'notice-ok';
-        pr.appendChild(notice);
-      }
-      notice.textContent = miniText;
-    }
-  });
-
-  document.getElementById('payBtn')?.addEventListener('click', async () => {
-    const payBtn = document.getElementById('payBtn');
-
-    const nome1 = document.getElementById('nome1')?.value.trim();
-    const nome2 = document.getElementById('nome2')?.value.trim();
-    const email = document.getElementById('email')?.value.trim();
-    const mensagem = document.getElementById('mensagem')?.value.trim();
-
-    if (!nome1 || !nome2 || !email) {
-      alert('Preencha nome, nome da pessoa e e-mail.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('nome1', nome1);
-    formData.append('nome2', nome2);
-    formData.append('email', email);
-    formData.append('mensagem', mensagem || '');
-    formData.append('categoria', categoriaSelecionada);
-
-    Array.from(document.getElementById('photos')?.files || []).forEach(file => {
-      formData.append('photos', file);
-    });
-
-    const music = document.getElementById('music')?.files?.[0];
-    if (music) formData.append('music', music);
-
-    const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
-    if (whatsappFile) formData.append('whatsappFile', whatsappFile);
-
-    try {
-      await salvarDadosRetrospectivaLocal();
-
-      payBtn.disabled = true;
-      payBtn.textContent = 'CRIANDO SESSÃO...';
-
-      await salvarDadosLoveBlast();
-
-    const response = await fetch('/criar-sessao', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || 'Erro ao iniciar pagamento.');
-      }
-
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-        return;
-      }
-
-      alert('Não foi possível iniciar o pagamento.');
-
-    } catch (error) {
-      console.error(error);
-      alert(error.message || 'Erro ao iniciar pagamento.');
-      payBtn.disabled = false;
-      payBtn.textContent = 'Finalizar pagamento';
-    }
-  });
-
-  window.baixarArte = function baixarArte() {
-    window.print();
-  };
-
-  window.compartilharArte = function compartilharArte() {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Minha retrospectiva LoveBlast',
-        text: 'Olha essa retrospectiva que eu criei ❤️',
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copiado!');
-    }
-  };
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('pago') === '1') {
-    mostrarArteFinal();
-  }
-
-  aplicarCategoria('casal');
+// ══ CONFIG POR CATEGORIA ═════════════════════════════════════════════════════
+const CATS = {
+  casal: {
+    label:'CASAL', icon:'♡', color:'#ff2d78', bg:'rgba(255,45,120,.15)',
+    title:'Retrospectiva do Casal ♡',
+    sub:'Eternize a história do amor de vocês',
+    label1:'Seu nome', label2:'Nome do(a) amor',
+    labelMsg:'Mensagem para ele/ela',
+    msgPh:'O que você quer que ele/ela saiba...',
+    tagline:'Algumas histórias não cabem em palavras.',
+    finalTitle:'Vocês são inesquecíveis ♡',
+  },
+  mae: {
+    label:'MÃE', icon:'🌸', color:'#ff9a3c', bg:'rgba(255,154,60,.15)',
+    title:'Homenagem para a Mãe 🌸',
+    sub:'Uma retrospectiva para ela que sempre esteve lá',
+    label1:'Seu nome', label2:'Nome da sua mãe',
+    labelMsg:'O que você quer dizer para ela',
+    msgPh:'Tudo que você sempre quis falar...',
+    tagline:'O amor de mãe é o maior que existe.',
+    finalTitle:'Para a melhor mãe do mundo 🌸',
+  },
+  pai: {
+    label:'PAI', icon:'🦁', color:'#3c8dff', bg:'rgba(60,141,255,.15)',
+    title:'Homenagem para o Pai 🦁',
+    sub:'Celebre o herói que sempre acreditou em você',
+    label1:'Seu nome', label2:'Nome do seu pai',
+    labelMsg:'Uma mensagem do coração',
+    msgPh:'O que ele significa para você...',
+    tagline:'O maior herói que já existiu.',
+    finalTitle:'Para o melhor pai do mundo 🦁',
+  },
+  familia: {
+    label:'FAMÍLIA', icon:'🏠', color:'#ff7b1a', bg:'rgba(255,123,26,.15)',
+    title:'Retrospectiva da Família 🏠',
+    sub:'Histórias que unem gerações',
+    label1:'Seu nome', label2:'Nome da família',
+    labelMsg:'Uma mensagem para a família',
+    msgPh:'O que a família representa para você...',
+    tagline:'A família é onde a história começa.',
+    finalTitle:'Nossa família, nossa história 🏠',
+  },
+  amigos: {
+    label:'AMIGOS', icon:'🤝', color:'#ffd60a', bg:'rgba(255,214,10,.15)',
+    title:'Retrospectiva dos Amigos 🤝',
+    sub:'Parceiros de todas as horas, para sempre',
+    label1:'Seu nome', label2:'Nome do(a) amigo(a)',
+    labelMsg:'Uma mensagem de amizade',
+    msgPh:'Por que essa amizade é especial...',
+    tagline:'Amigos são a família que a gente escolhe.',
+    finalTitle:'Amizade que dura para sempre 🤝',
+  },
+  formatura: {
+    label:'FORMATURA', icon:'🎓', color:'#c9a227', bg:'rgba(201,162,39,.15)',
+    title:'Retrospectiva de Formatura 🎓',
+    sub:'Seu esforço, sua conquista, sua história',
+    label1:'Nome do(a) formando(a)', label2:'Curso / Instituição',
+    labelMsg:'Uma mensagem de conquista',
+    msgPh:'O que essa formatura representa...',
+    tagline:'Cada sacrifício valeu a pena.',
+    finalTitle:'Uma conquista para sempre 🎓',
+  },
+  bebe: {
+    label:'BEBÊ', icon:'👶', color:'#ff85a1', bg:'rgba(255,133,161,.15)',
+    title:'Retrospectiva do Bebê 👶',
+    sub:'Cada fase, cada descoberta eternizada',
+    label1:'Nome dos pais', label2:'Nome do bebê',
+    labelMsg:'Uma mensagem para o seu bebê',
+    msgPh:'O que você quer contar para ele(a) quando crescer...',
+    tagline:'Você mudou tudo com um sorriso.',
+    finalTitle:'A maior história de amor 👶',
+  },
+  pet: {
+    label:'PET', icon:'🐾', color:'#d4845a', bg:'rgba(212,132,90,.15)',
+    title:'Retrospectiva do Pet 🐾',
+    sub:'Amor que tem quatro patas e enche o coração',
+    label1:'Seu nome', label2:'Nome do pet',
+    labelMsg:'Uma mensagem para o seu pet',
+    msgPh:'O que ele/ela significa para você...',
+    tagline:'O amor mais puro que existe.',
+    finalTitle:'Amor que tem quatro patas 🐾',
+  },
+};
+
+let catAtual = 'casal';
+let photos = [];
+let audioFile = null;
+
+// ══ ABRIR / FECHAR MODAL ═════════════════════════════════════════════════════
+function abrirModal(cat){
+  catAtual = cat || 'casal';
+  const c = CATS[catAtual] || CATS.casal;
+
+  // Header
+  document.getElementById('modalHeader').style.background =
+    `linear-gradient(135deg,${c.bg},transparent)`;
+  document.getElementById('modalHeader').style.borderBottom =
+    `1px solid ${c.color}22`;
+  document.getElementById('modalBadge').textContent = c.label;
+  document.getElementById('modalBadge').style.color = c.color;
+  document.getElementById('modalBadge').style.borderColor = c.color+'44';
+  document.getElementById('modalBadge').style.background = c.bg;
+  document.getElementById('modalTitle').textContent = c.title;
+  document.getElementById('modalSub').textContent = c.sub;
+
+  // Labels
+  document.getElementById('label1').textContent = c.label1;
+  document.getElementById('label2').textContent = c.label2;
+  document.getElementById('labelMsg').textContent = c.labelMsg;
+  document.getElementById('mensagem').placeholder = c.msgPh;
+
+  // Cor do botão pagar
+  const payBtn = document.getElementById('payBtn');
+  payBtn.style.background = `linear-gradient(90deg,${c.color},#ff6b1a)`;
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function fecharModal(){
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.getElementById('modalOverlay').addEventListener('click', e=>{
+  if(e.target === e.currentTarget) fecharModal();
 });
 
-function loveblastFileToDataURL(file) {
-  return new Promise(resolve => {
-    if (!file) return resolve(null);
+// ══ CARDS ════════════════════════════════════════════════════════════════════
+document.querySelectorAll('.cat-card').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    document.querySelectorAll('.cat-card').forEach(c=>c.classList.remove('active'));
+    card.classList.add('active');
+    abrirModal(card.dataset.cat);
+  });
+});
+
+// ══ FOTOS ════════════════════════════════════════════════════════════════════
+document.getElementById('photos').addEventListener('change', function(){
+  Array.from(this.files).forEach(f=>{
+    if(photos.length >= 12) return;
     const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(file);
+    reader.onload = e => { photos.push({file:f,url:e.target.result}); renderPhotos(); };
+    reader.readAsDataURL(f);
+  });
+  this.value = '';
+});
+function renderPhotos(){
+  const g = document.getElementById('photoGrid'); g.innerHTML='';
+  photos.forEach((p,i)=>{
+    const d=document.createElement('div'); d.className='photo-thumb';
+    const img=document.createElement('img'); img.src=p.url; img.alt='Foto';
+    const btn=document.createElement('button'); btn.className='photo-rm'; btn.textContent='✕';
+    btn.onclick=()=>{photos.splice(i,1);renderPhotos();};
+    d.appendChild(img); d.appendChild(btn); g.appendChild(d);
   });
 }
 
-function analisarWhatsAppTexto(texto) {
-  const lower = (texto || '').toLowerCase();
-  const words = lower
-    .replace(/[^\p{L}\p{N}\s❤️😂🥰😍😭🤣💕💖]/gu, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2);
+// ══ MÚSICA ═══════════════════════════════════════════════════════════════════
+document.getElementById('music').addEventListener('change', function(){
+  audioFile = this.files[0];
+  const el = document.getElementById('musicName');
+  if(audioFile){ el.textContent='✓ '+audioFile.name; el.style.display='block'; }
+});
 
-  const ignore = new Set(['que','com','para','uma','não','sim','por','dos','das','vou','você','voce','ele','ela','mas','meu','minha','seu','sua','tem','estou','estava','isso','aqui','hoje','amanhã','bom','boa']);
-  const counts = {};
-  words.forEach(w => {
-    if (!ignore.has(w)) counts[w] = (counts[w] || 0) + 1;
+// ══ WHATSAPP ═════════════════════════════════════════════════════════════════
+document.getElementById('whatsappFile').addEventListener('change', function(){
+  const f = this.files[0];
+  const el = document.getElementById('whatsappName');
+  if(f){ el.textContent='✓ '+f.name; el.style.display='block'; }
+});
+
+// ══ PRÉVIA ═══════════════════════════════════════════════════════════════════
+document.getElementById('previewBtn').addEventListener('click', async ()=>{
+  const n1 = document.getElementById('nome1').value || 'Você';
+  const n2 = document.getElementById('nome2').value || 'Pessoa especial';
+  const msg = document.getElementById('mensagem').value || 'Sua retrospectiva está quase pronta.';
+
+  document.getElementById('previewNames').textContent = `${n1} & ${n2}`;
+  document.getElementById('previewText').textContent = msg;
+
+  const imgs = document.getElementById('previewImages');
+  imgs.innerHTML = '';
+  photos.slice(0,4).forEach(p=>{
+    const img=document.createElement('img'); img.src=p.url; imgs.appendChild(img);
   });
 
-  const topWord = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
-  const totalMessages = (texto.match(/\n/g) || []).length || Math.max(1, Math.round(words.length / 8));
+  const audio = document.getElementById('previewAudio');
+  if(audioFile){
+    audio.src = URL.createObjectURL(audioFile);
+    audio.style.display='block';
+  } else { audio.style.display='none'; }
 
-  return {
-    totalMessages,
-    topWord,
-    loveCount: (lower.match(/eu te amo|te amo/g) || []).length,
-    saudadeCount: (lower.match(/saudade|saudades/g) || []).length,
-    favoriteTime: '23:47',
-    emoji: '😂'
-  };
+  document.getElementById('previewResult').classList.add('active');
+});
+
+// ══ PAGAMENTO ════════════════════════════════════════════════════════════════
+const STORAGE_KEY = 'loveblast_dados_retro';
+
+async function fileToDataURL(file){
+  return new Promise((res,rej)=>{
+    const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej;
+    r.readAsDataURL(file);
+  });
 }
 
-async function salvarDadosLoveBlast() {
-  const photosInput = document.getElementById('photos');
-  const musicInput = document.getElementById('music');
-  const whatsappInput = document.getElementById('whatsappFile');
-
-  const photoFiles = Array.from(photosInput?.files || []).slice(0, 6);
-  const photos = [];
-  for (const file of photoFiles) {
-    const dataUrl = await loveblastFileToDataURL(file);
-    if (dataUrl) if(dataUrl && dataUrl.length<1500000) photos.push(dataUrl);
-  }
-
-  let musicSrc = null;
-  let musicName = 'Trilha sonora da história';
-  const musicFile = musicInput?.files?.[0];
-  if (musicFile) {
-    musicSrc = await loveblastFileToDataURL(musicFile);
-    musicName = musicFile.name.replace(/\.[^/.]+$/, '');
-  }
-
-  let insights = {
-    totalMessages: 18432,
-    topWord: 'amor',
-    loveCount: 82,
-    saudadeCount: 103,
-    favoriteTime: '23:47',
-    emoji: '😂'
-  };
-
-  const whatsFile = whatsappInput?.files?.[0];
-  if (whatsFile) {
-    const text = await whatsFile.text();
-    insights = analisarWhatsAppTexto(text);
-  }
-
-  const data = {
-    nome1: document.getElementById('nome1')?.value?.trim() || 'Robson',
-    nome2: document.getElementById('nome2')?.value?.trim() || 'Raa',
-    email: document.getElementById('email')?.value?.trim() || '',
-    mensagem: document.getElementById('mensagem')?.value?.trim() || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
-    categoria: typeof categoriaSelecionada !== 'undefined' ? categoriaSelecionada : 'casal',
-    photos,
-    musicSrc,
-    musicName,
-    insights
-  };
-
-  try {
-    localStorage.setItem('loveblastData', JSON.stringify(data));
-  } catch (err) {
-    console.warn('Não foi possível salvar todos os dados localmente:', err);
-    delete data.photos;
-    delete data.musicSrc;
-    localStorage.setItem('loveblastData', JSON.stringify(data));
-  }
-
-  return data;
+async function salvarLocalmente(){
+  const n1 = document.getElementById('nome1').value || 'Você';
+  const n2 = document.getElementById('nome2').value || 'Pessoa especial';
+  const msg = document.getElementById('mensagem').value || '';
+  const fotosB64 = [];
+  for(const p of photos.slice(0,3)){ fotosB64.push(p.url); }
+  const musicaNome = audioFile ? audioFile.name.replace(/\.[^/.]+$/,'') : 'Música escolhida';
+  const dados = { nome1:n1, nome2:n2, mensagem:msg, categoria:catAtual,
+    fotos:fotosB64, musicaNome, criadoEm:Date.now() };
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(dados)); }catch(e){}
+  return dados;
 }
 
+document.getElementById('payBtn').addEventListener('click', async ()=>{
+  const n1 = document.getElementById('nome1').value.trim();
+  const n2 = document.getElementById('nome2').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const msg = document.getElementById('mensagem').value.trim();
+
+  if(!n1||!n2){ alert('Preencha os nomes.'); return; }
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ alert('Digite um e-mail válido.'); return; }
+
+  const btn = document.getElementById('payBtn');
+  const lbl = document.getElementById('payLabel');
+  btn.disabled=true; lbl.innerHTML='<span class="spinner"></span> CRIANDO SESSÃO...';
+
+  await salvarLocalmente();
+
+  const formData = new FormData();
+  formData.append('nome1', n1);
+  formData.append('nome2', n2);
+  formData.append('email', email);
+  formData.append('mensagem', msg);
+  formData.append('categoria', catAtual);
+
+  photos.forEach(p=> formData.append('photos', p.file));
+  if(audioFile) formData.append('music', audioFile);
+
+  const wpp = document.getElementById('whatsappFile').files[0];
+  if(wpp) formData.append('whatsappFile', wpp);
+
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 20000);
+
+  try{
+    const res = await fetch('/criar-sessao',{ method:'POST', body:formData, signal:controller.signal });
+    clearTimeout(timer);
+    if(!res.ok){ const d=await res.json(); throw new Error(d.erro||'Erro'); }
+    const { checkoutUrl } = await res.json();
+    if(checkoutUrl){ window.location.href=checkoutUrl; return; }
+    throw new Error('URL de checkout não recebida.');
+  }catch(err){
+    clearTimeout(timer);
+    alert(err.name==='AbortError'
+      ? 'Tempo esgotado. Verifique sua conexão.'
+      : (err.message||'Erro ao iniciar pagamento.'));
+    btn.disabled=false; lbl.innerHTML='🔒 FINALIZAR PAGAMENTO';
+  }
+});
+
+// ══ ARTE FINAL ════════════════════════════════════════════════════════════════
+function obterDados(){ try{ return JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}'); }catch{ return {}; } }
+
+function preencherArte(d={}){
+  const cat = d.categoria || 'casal';
+  const c = CATS[cat] || CATS.casal;
+  const n1 = d.nome1||'Você', n2 = d.nome2||'Pessoa especial';
+
+  // Personaliza por categoria
+  document.getElementById('finalTitle').textContent = c.finalTitle;
+  document.getElementById('finalNome1').textContent = n1;
+  document.getElementById('finalNome2').textContent = n2;
+  document.getElementById('finalNome2').style.color = c.color;
+  document.getElementById('finalTagline').textContent = c.tagline;
+  document.getElementById('cartaNome').textContent = n2;
+  document.getElementById('mensagemFinal').textContent =
+    d.mensagem||'Cada momento virou parte da nossa história.';
+  document.getElementById('nomeMusicaFinal').textContent = d.musicaNome||'Nossa música';
+
+  // Fotos
+  const fallback=[
+    'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400',
+    'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=400',
+    'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=400',
+  ];
+  const fotos = (d.fotos&&d.fotos.length) ? d.fotos : fallback;
+  const gal = document.getElementById('galeriaFinal'); gal.innerHTML='';
+  fotos.slice(0,3).forEach((src,i)=>{
+    const img=document.createElement('img'); img.src=src; gal.appendChild(img);
+    if(i===0) document.getElementById('fotoPrincipal').src=src;
+  });
+
+  // Frases por categoria
+  const frases = {
+    casal:["O carinho de vocês aparece mais nos detalhes do que nas declarações.","Mesmo nas mensagens simples, vocês criaram um lar um no outro."],
+    mae:["Seu amor foi a primeira coisa que aprendi antes de entender o mundo.","Você nunca precisou de palavras para mostrar que estava lá."],
+    pai:["Você foi o primeiro herói que eu conheci — e continua sendo.","Sua força silenciosa sempre foi o alicerce de tudo."],
+    familia:["Em família, cada momento simples vira memória.","A maior herança que você pode deixar são as histórias."],
+    amigos:["Amizade verdadeira é aquela que sobrevive ao tempo e à distância.","Você é prova de que a família que escolhemos é a mais especial."],
+    formatura:["Cada madrugada estudando valeu por esse momento.","O diploma comprova o esforço, mas o crescimento ninguém tira."],
+    bebe:["Você chegou e o mundo ficou muito maior.","Cada sorriso seu reescreve o significado de felicidade."],
+    pet:["Você não precisa de palavras para mostrar amor.","Quatro patas, um coração enorme — e a vida ficou melhor."],
+  };
+  const f = frases[cat]||frases.casal;
+  document.getElementById('frase1').textContent = `"${f[0]}"`;
+  document.getElementById('frase2').textContent = `"${f[1]}"`;
+
+  // Cor dos painéis
+  document.querySelectorAll('.final-panel').forEach(p=>{
+    p.style.background = `#0f0f1a`;
+    p.style.borderColor = `${c.color}22`;
+  });
+  document.querySelectorAll('.brand,.big-number').forEach(el=>el.style.color=c.color);
+}
+
+function mostrarArte(){
+  preencherArte(obterDados());
+  const el = document.getElementById('arteFinal');
+  el.classList.remove('hidden');
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth'}),300);
+}
+
+function baixarArte(){ window.print(); }
+function compartilharArte(){
+  if(navigator.share) navigator.share({title:'Minha retrospectiva LoveBlast',url:location.href});
+  else { navigator.clipboard.writeText(location.href); alert('Link copiado! ✓'); }
+}
+
+// Verifica retorno do Stripe
+const params = new URLSearchParams(location.search);
+if(params.get('pago')==='1') mostrarArte();
 </script>
-
 </body>
 </html>
