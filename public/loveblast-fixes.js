@@ -16,7 +16,7 @@
       headline: 'A história de vocês como nunca antes.',
       intro: 'Algumas histórias não cabem em palavras.',
       start: 'E desde então, cada detalhe faz sentido.',
-      timeline: [['♡','2023','Vocês se encontraram'],['💬','2023','Primeiras conversas'],['✈','2024','Momentos que viraram memória'],['🔥','2025','E ainda parece o começo']],
+      timeline: [['♡','Início','O primeiro marco dessa história'],['💬','Conversas','Mensagens que aproximaram vocês'],['✈','Memórias','Momentos que ficaram guardados'],['🔥','Hoje','E ainda parece só o começo']],
       phrases: ['O carinho de vocês aparece mais nos detalhes do que nas declarações.', 'Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.', 'A saudade foi uma das emoções mais presentes da história de vocês.'],
       final: 'Algumas histórias merecem ser eternizadas.',
       message: 'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
@@ -29,7 +29,7 @@
       headline: 'Uma homenagem para quem sempre foi lar.',
       intro: 'Amor de mãe não cabe em palavras.',
       start: 'Tudo começou com cuidado, colo e presença.',
-      timeline: [['✦','Sempre','Ela esteve presente'],['♡','Cuidado','Cada gesto virou memória'],['⌂','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
+      timeline: [['✦','Presença','Ela esteve presente'],['♡','Cuidado','Cada gesto virou memória'],['⌂','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
       phrases: ['Algumas pessoas não apenas cuidam. Elas viram abrigo.', 'O amor dela aparece nos detalhes que quase ninguém vê.', 'Mãe é a primeira forma de amor que a vida ensina.'],
       final: 'Alguns amores merecem ser homenageados para sempre.',
       message: 'Obrigado por transformar cuidado em amor todos os dias.',
@@ -81,7 +81,7 @@
       headline: 'Uma conquista que merece ser lembrada.',
       intro: 'Todo esforço conta uma história.',
       start: 'Tudo começou com um sonho e muita coragem.',
-      timeline: [['📚','Começo','O primeiro passo foi dado'],['☕','Rotina','Dias difíceis também fizeram parte'],['◇','Conquista','O sonho virou realidade'],['✨','Hoje','Uma nova fase começa']],
+      timeline: [['📚','Começo','O primeiro passo foi dado'],['☕','Rotina','Dias difíceis também fizeram parte'],['◇','Conquista','O sonho virou realidade'],['✨','Agora','Uma nova fase começa']],
       phrases: ['A conquista de hoje carrega todo esforço de ontem.', 'Cada etapa difícil também fez parte da vitória.', 'O diploma é só o começo de uma história maior.'],
       final: 'Conquistas grandes merecem ser eternizadas.',
       message: 'Essa vitória carrega esforço, coragem e orgulho.',
@@ -94,7 +94,7 @@
       headline: 'Pequenos momentos, memórias gigantes.',
       intro: 'Cada descoberta virou amor.',
       start: 'Tudo começou com amor, cuidado e encanto.',
-      timeline: [['☻','Começo','Tudo era novidade'],['♡','Sorrisos','Cada risada mudou o dia'],['✦','Fases','Cada descoberta uma emoção'],['✨','Hoje','Um amor que só cresce']],
+      timeline: [['☻','Começo','Tudo era novidade'],['♡','Sorrisos','Cada risada mudou o dia'],['✦','Fases','Cada descoberta uma emoção'],['✨','Agora','Um amor que só cresce']],
       phrases: ['Alguns pequenos momentos viram memórias enormes.', 'Cada sorriso conta uma nova descoberta.', 'O amor cresceu junto com cada fase.'],
       final: 'Infâncias merecem ser guardadas com carinho.',
       message: 'Cada fase passou rápido, mas ficou para sempre no coração.',
@@ -190,17 +190,33 @@
   }
 
   function normalizeData(data) {
+    if (data.categoria && THEMES[data.categoria]) selectedTheme = data.categoria;
     return {
+      id: data.id || '',
       nome1: data.nome1 || 'Robson',
-      nome2: data.nome2 || 'Paloma',
+      nome2: data.nome2 || 'Pessoa especial',
       email: data.email || '',
       mensagem: data.mensagem || theme().message,
       categoria: data.categoria || selectedTheme || 'casal',
       photos: data.photos || data.fotos || [],
       musicSrc: data.musicSrc || data.musicaSrc || '',
       musicName: data.musicName || data.musicaNome || theme().music,
+      pago: data.pago === true,
       insights: data.insights || defaultInsights()
     };
+  }
+
+  async function loadSharedDataFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    if (!id) return null;
+    const paidFlag = params.get('pago') === '1' ? '?pago=1' : '';
+    const response = await fetch(`/api/retrospectiva/${encodeURIComponent(id)}${paidFlag}`);
+    if (!response.ok) throw new Error('Não foi possível carregar essa retrospectiva.');
+    const data = normalizeData(await response.json());
+    saveData(data);
+    await idbSet(data).catch(() => {});
+    return data;
   }
 
   function defaultInsights() {
@@ -473,10 +489,12 @@
   }
 
   function compartilharArte() {
+    const data = getData();
+    const sharedUrl = data.id ? `${location.origin}/view.html?id=${encodeURIComponent(data.id)}&pago=1` : location.href;
     if (navigator.share) {
-      navigator.share({ title: 'Minha retrospectiva LoveBlast', text: 'Olha essa retrospectiva que eu criei no LoveBlast.', url: location.href }).catch(() => {});
+      navigator.share({ title: 'Minha retrospectiva LoveBlast', text: 'Olha essa retrospectiva que eu criei no LoveBlast.', url: sharedUrl }).catch(() => {});
     } else if (navigator.clipboard) {
-      navigator.clipboard.writeText(location.href).then(() => showToast('Link copiado.'));
+      navigator.clipboard.writeText(sharedUrl).then(() => showToast(data.id ? 'Link compartilhável copiado.' : 'Link copiado.'));
     }
   }
 
@@ -521,12 +539,18 @@
         btn.disabled = true; btn.textContent = 'CRIANDO SESSÃO...';
         const formData = new FormData();
         ['nome1','nome2','email','mensagem','categoria'].forEach(key => formData.append(key, key === 'categoria' ? selectedTheme : data[key] || ''));
+        formData.append('insights', JSON.stringify(data.insights || defaultInsights()));
         Array.from($('#photos')?.files || []).forEach(file => formData.append('photos', file));
         if ($('#music')?.files?.[0]) formData.append('music', $('#music').files[0]);
         if ($('#whatsappFile')?.files?.[0]) formData.append('whatsappFile', $('#whatsappFile').files[0]);
         const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
         const json = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(json.erro || 'Erro ao iniciar pagamento.');
+        if (json.retrospectiveId) {
+          data.id = json.retrospectiveId;
+          saveData(data);
+          await idbSet(data).catch(() => {});
+        }
         if (json.checkoutUrl) location.href = json.checkoutUrl;
       } catch (error) {
         showToast(error.message || 'Erro ao iniciar pagamento.');
@@ -547,7 +571,10 @@
   }
 
   document.addEventListener('DOMContentLoaded', async () => {
-    const storedData = normalizeData((await idbGet().catch(() => null)) || getData());
+    const storedData = normalizeData((await loadSharedDataFromUrl().catch(error => {
+      showToast(error.message || 'Não foi possível carregar o link compartilhado.');
+      return null;
+    })) || (await idbGet().catch(() => null)) || getData());
     saveData(storedData);
     selectedTheme = storedData.categoria || 'casal';
     bind();
