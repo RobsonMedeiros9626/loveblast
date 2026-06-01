@@ -1,264 +1,645 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sua Retrospectiva — LoveBlast</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&family=Caveat:wght@700&family=DM+Sans:wght@700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-main: #0a0508;
-            --primary: #ff2a74;
-            --primary-glow: rgba(255, 42, 116, 0.2);
-            --card-bg: #140d12;
-            --text: #ffffff;
-            --text-muted: #a0969d;
-            --border: #261922;
-            --font-title: 'Inter', sans-serif;
-            --icon-heart: "♥";
-        }
-
-        /* Classes de sincronização de Temas */
-        .theme-casal { --primary: #ff2a74; --primary-glow: rgba(255, 42, 116, 0.2); --font-title: 'Caveat', cursive; --icon-heart: "♥"; }
-        .theme-mae { --primary: #9b5de5; --primary-glow: rgba(155, 93, 229, 0.2); --font-title: 'Playfair Display', serif; --icon-heart: "❀"; }
-        .theme-pai { --primary: #00bbf9; --primary-glow: rgba(0, 187, 249, 0.2); --font-title: 'DM Sans', sans-serif; --icon-heart: "✦"; }
-        .theme-familia { --primary: #f15bb5; --primary-glow: rgba(241, 91, 181, 0.2); --font-title: 'Inter', sans-serif; --icon-heart: "🏠"; }
-        .theme-amigos { --primary: #00f5d4; --primary-glow: rgba(0, 245, 212, 0.2); --font-title: 'DM Sans', sans-serif; --icon-heart: "⚡"; }
-        .theme-formatura { --primary: #fee440; --primary-glow: rgba(254, 228, 64, 0.2); --font-title: 'Inter', sans-serif; --icon-heart: "🎓"; }
-        .theme-bebe { --primary: #ffb703; --primary-glow: rgba(255, 183, 3, 0.2); --font-title: 'Caveat', cursive; --icon-heart: "🍼"; }
-        .theme-pet { --primary: #fb8500; --primary-glow: rgba(251, 133, 0, 0.2); --font-title: 'DM Sans', sans-serif; --icon-heart: "🐾"; }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: var(--bg-main);
-            color: var(--text);
-            font-family: 'Inter', sans-serif;
-            padding: 30px 5%;
-            line-height: 1.4;
-        }
-
-        .icon-render::before { content: var(--icon-heart) " "; color: var(--primary); }
-
-        /* Grid Responsiva Inteligente - Se adapta perfeitamente ao Mobile e Desktop */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 768px) {
-            .dashboard-grid { grid-template-columns: 1fr; gap: 15px; }
-        }
-
-        /* Estilização dos Cards Modulares */
-        .block-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 260px;
-            position: relative;
-        }
-        
-        .block-card h4 {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--text-muted);
-            margin-bottom: 15px;
-        }
-
-        .block-card .main-title {
-            font-size: 2.8rem;
-            font-family: var(--font-title);
-            color: var(--text);
-            font-weight: 700;
-        }
-        .block-card .main-title span { color: var(--primary); }
-
-        /* Bloco de Foto Customizável */
-        .photo-frame {
-            width: 100%; height: 200px;
-            background: #20161d; border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden; border: 1px solid var(--border);
-            margin-top: 10px;
-        }
-        .photo-frame img {
-            width: 100%; height: 100%; object-fit: cover;
-        }
-        .photo-placeholder {
-            color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 20px;
-        }
-
-        /* Player Customizado de Áudio */
-        .audio-container {
-            margin-top: 15px; background: #1a1117;
-            padding: 12px; border-radius: 30px;
-            border: 1px solid var(--border);
-            display: flex; align-items: center; gap: 10px;
-        }
-        .audio-container audio { width: 100%; height: 32px; outline: none; }
-
-        /* Bilhete de Mensagem Dedicada */
-        .sticky-note {
-            background: #f4ebd9; color: #2c221e;
-            padding: 25px; border-radius: 4px;
-            transform: rotate(-1.5deg); box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
-            font-family: 'Playfair Display', serif; font-size: 1.2rem;
-            margin-top: 15px; position: relative;
-        }
-        .sticky-note::before {
-            content: ''; position: absolute; top: -10px; left: 50%;
-            transform: translateX(-50%); width: 70px; height: 25px;
-            background: rgba(255,255,255,0.4);
-        }
-
-        /* Botões de Ação na Base */
-        .action-area {
-            grid-column: span 2; display: flex; gap: 15px; justify-content: center; margin-top: 20px;
-        }
-        @media (max-width: 768px) {
-            .action-area { grid-column: span 1; flex-direction: column; }
-        }
-
-        .btn {
-            padding: 14px 28px; border-radius: 12px; font-weight: 600; cursor: pointer;
-            text-decoration: none; font-size: 1rem; text-align: center; transition: 0.3s;
-            border: 1px solid var(--border); background: var(--card-bg); color: #fff;
-        }
-        .btn-highlight { background: var(--primary); color: #000; border: none; font-weight: 700; }
-        .btn:hover { transform: translateY(-2px); opacity: 0.95; }
-
-        /* ==========================================================================
-           FOLHA DE IMPRESSÃO EXCLUSIVA (@media print)
-           Remove lixo visual, reorganiza layouts para folha A4 vertical perfeitamente.
-           ========================================================================== */
-        @media print {
-            body { background: #ffffff !important; color: #000000 !important; padding: 0; margin: 0; }
-            .action-area, .audio-container, h4 { display: none !important; }
-            .dashboard-grid {
-                display: block !important;
-                max-width: 100% !important;
-            }
-            .block-card {
-                page-break-inside: avoid;
-                background: #ffffff !important;
-                border: 1px solid #ddd !important;
-                color: #000000 !important;
-                margin-bottom: 20px !important;
-                padding: 20px !important;
-                box-shadow: none !important;
-                min-height: auto !important;
-                display: block !important;
-            }
-            .block-card .main-title { color: #000000 !important; font-size: 2.2rem !important; }
-            .block-card .main-title span { color: #000000 !important; border-bottom: 2px dashed #000; }
-            .sticky-note {
-                background: #f9f9f9 !important;
-                border: 1px solid #ccc !important;
-                color: #000 !important;
-                transform: none !important;
-                box-shadow: none !important;
-            }
-            .photo-frame { border: 1px solid #ccc !important; height: 300px !important; }
-        }
-    </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LoveBlast — Retrospectiva</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:Arial,sans-serif;
+  background:#030306;
+  color:#fff;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 5%,rgba(255,45,120,.22),transparent 35%),
+    radial-gradient(circle at 90% 20%,rgba(255,107,26,.16),transparent 35%),
+    radial-gradient(circle at 50% 85%,rgba(255,45,120,.14),transparent 40%);
+  z-index:-2;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(rgba(255,45,120,.55) 1px, transparent 1px);
+  background-size:38px 38px;
+  opacity:.06;
+  z-index:-1;
+}
+.topbar{
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 30px;
+  background:rgba(3,3,6,.75);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid rgba(255,45,120,.2);
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.logo{
+  font-size:26px;
+  font-weight:900;
+  background:linear-gradient(90deg,#ff2d78,#ff8a00);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.actions{display:flex;gap:12px;align-items:center}
+.action-btn{
+  border:1px solid rgba(255,45,120,.75);
+  background:rgba(255,255,255,.04);
+  color:#fff;
+  padding:12px 18px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+}
+.action-btn.primary{
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  box-shadow:0 0 28px rgba(255,45,120,.35);
+}
+.final-experience{
+  padding:42px 18px 80px;
+}
+.final-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  max-width:1500px;
+  margin:auto;
+  border:1px solid rgba(255,45,120,.24);
+  box-shadow:0 0 70px rgba(255,45,120,.08);
+}
+.final-panel{
+  min-height:530px;
+  padding:38px;
+  border:1px solid rgba(255,45,120,.24);
+  background:
+    radial-gradient(circle at 80% 20%, rgba(255,45,120,.18), transparent 35%),
+    linear-gradient(160deg, rgba(7,7,13,.96), rgba(20,5,11,.96));
+  position:relative;
+  overflow:hidden;
+}
+.final-panel::before{
+  content:"";
+  position:absolute;
+  inset:-20%;
+  background:radial-gradient(circle,rgba(255,255,255,.08),transparent 30%);
+  opacity:.12;
+  pointer-events:none;
+}
+.final-panel > *{position:relative;z-index:1}
+.step{
+  font-size:13px;
+  font-weight:900;
+  color:white;
+  opacity:.85;
+  letter-spacing:.08em;
+}
+.brand{
+  color:#ff4b8b;
+  font-size:28px;
+  font-weight:900;
+  margin-top:24px;
+}
+.abertura{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.abertura h1{
+  font-size:clamp(54px,8vw,110px);
+  font-family:"Brush Script MT","Segoe Script",cursive;
+  margin-top:60px;
+  font-weight:400;
+  line-height:1;
+}
+.abertura h1 b{color:#ff2d78}
+.abertura p{margin-top:22px;color:#eee;font-size:18px}
+.final-panel h2{
+  font-size:clamp(34px,5vw,70px);
+  line-height:1.05;
+}
+.highlight,
+.final-panel h2 span,
+.final-panel h3,
+.big-number,
+.insight-card b{
+  color:#ff2d78;
+  text-shadow:0 0 25px rgba(255,45,120,.7);
+}
+.polaroid{
+  width:310px;
+  background:#fff;
+  padding:14px;
+  transform:rotate(-5deg);
+  margin:42px auto 36px;
+  box-shadow:0 30px 60px rgba(0,0,0,.4);
+}
+.polaroid img{
+  width:100%;
+  height:300px;
+  object-fit:cover;
+  display:block;
+}
+.comeco h2{margin-top:12px}
+.comeco p{font-size:18px;margin-top:16px;color:#eee;max-width:420px}
+.timeline-final{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.time-item{
+  margin:18px 0;
+  display:grid;
+  grid-template-columns:42px 90px 1fr;
+  gap:12px;
+  align-items:center;
+  font-size:22px;
+}
+.time-item .emoji{
+  width:38px;height:38px;border:1px solid rgba(255,45,120,.6);
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  background:rgba(255,45,120,.09)
+}
+.time-item strong{color:#ff2d78}
+.time-item p{color:#ddd;font-size:17px}
+.insights-final h2{font-size:42px}
+.big-number{
+  display:block;
+  font-size:84px;
+  font-weight:900;
+  margin:18px 0 0;
+}
+.insights-final > p{font-size:28px;font-weight:900;margin-bottom:20px}
+.insight-card{
+  margin-top:18px;
+  padding:24px;
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:18px;
+  background:rgba(255,255,255,.04);
+  font-size:21px;
+}
+.insight-card b{font-size:34px}
+.galeria-final{
+  display:flex;
+  flex-direction:column;
+}
+.galeria-fotos{
+  display:flex;
+  gap:18px;
+  align-items:center;
+  justify-content:center;
+  flex:1;
+  min-height:400px;
+}
+.galeria-fotos img{
+  width:30%;
+  height:330px;
+  object-fit:cover;
+  border-radius:20px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  transform:rotate(-2deg);
+}
+.galeria-fotos img:nth-child(2){
+  width:40%;
+  height:390px;
+  transform:rotate(1deg) scale(1.03);
+}
+.quote{
+  padding:30px;
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:18px;
+  margin-top:24px;
+  background:rgba(255,255,255,.035);
+  font-size:20px;
+  line-height:1.5;
+}
+.musica-final{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+.music-card{
+  display:flex;
+  align-items:center;
+  gap:28px;
+  margin-top:36px;
+}
+.disc{
+  width:190px;
+  height:190px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at center,#111 0 20%,#222 21% 24%,#080808 25% 100%);
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:0 0 60px rgba(255,45,120,.2);
+}
+.musica-final audio{width:100%;margin-top:28px}
+.carta{
+  background:#f1d7b4;
+  color:#321;
+  padding:40px;
+  border-radius:8px;
+  transform:rotate(-3deg);
+  max-width:600px;
+  margin:60px auto;
+  font-family:Georgia,serif;
+  box-shadow:0 30px 80px rgba(0,0,0,.35);
+}
+.carta h2{
+  color:#b9274f;
+  font-size:42px;
+  margin-bottom:24px;
+  font-family:"Brush Script MT","Segoe Script",cursive;
+}
+.carta p{font-size:19px;line-height:1.65}
+.encerramento{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  text-align:center;
+}
+.encerramento .heart{
+  font-size:76px;
+  color:#ff2d78;
+  text-shadow:0 0 32px rgba(255,45,120,.8);
+  margin-bottom:28px;
+}
+.encerramento h2{
+  color:#ff2d78;
+  text-transform:uppercase;
+  letter-spacing:4px;
+}
+.encerramento p{margin-top:22px;color:#eee;font-size:20px}
+.compartilhar{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:22px;
+}
+.share-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  margin-top:36px;
+}
+.compartilhar button{
+  padding:22px;
+  min-height:110px;
+  border-radius:18px;
+  border:1px solid #ff2d78;
+  background:rgba(255,255,255,.04);
+  color:white;
+  font-size:16px;
+  font-weight:900;
+  cursor:pointer;
+}
+.extra{
+  max-width:1500px;
+  margin:0 auto;
+  padding:26px;
+  border:1px solid rgba(255,45,120,.24);
+  border-top:0;
+  background:rgba(255,255,255,.025);
+}
+.extra h3{font-size:16px;letter-spacing:.08em;margin-bottom:18px}
+.extra-grid{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+}
+.extra-item{
+  padding:20px;
+  border:1px solid rgba(255,45,120,.22);
+  border-radius:16px;
+  background:rgba(255,255,255,.035);
+  text-align:center;
+}
+.extra-item strong{
+  display:block;
+  color:#ff2d78;
+  font-size:18px;
+  margin-top:8px;
+}
+.fade-in{animation:fadeUp .9s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+@media(max-width:900px){
+  .topbar{padding:0 16px;height:64px}
+  .actions{gap:8px}
+  .action-btn{padding:10px 12px;font-size:12px}
+  .final-grid{grid-template-columns:1fr}
+  .final-panel{min-height:100vh;padding:28px 20px}
+  .abertura h1{font-size:64px}
+  .time-item{grid-template-columns:36px 70px 1fr;font-size:18px}
+  .time-item p{font-size:15px}
+  .galeria-fotos{flex-direction:column;height:auto}
+  .galeria-fotos img,
+  .galeria-fotos img:nth-child(2){width:100%;height:260px;transform:none}
+  .music-card{flex-direction:column;align-items:flex-start}
+  .share-grid{grid-template-columns:1fr}
+  .extra-grid{grid-template-columns:1fr}
+}
+</style>
 </head>
 <body>
 
-    <div class="dashboard-grid">
-        
-        <!-- CARD 1: ABERTURA -->
-        <div class="block-card">
-            <h4>01 Abertura</h4>
-            <div class="main-title" id="render-names">Carregando...</div>
-            <p style="color: var(--text-muted); margin-top: 10px;">Algumas histórias não cabem em palavras.</p>
-        </div>
+<header class="topbar">
+  <div class="logo">♡ LoveBlast</div>
+  <div class="actions">
+    <button class="action-btn" onclick="compartilharArte()">Compartilhar</button>
+    <button class="action-btn primary" onclick="baixarArte()">Baixar</button>
+  </div>
+</header>
 
-        <!-- CARD 2: FOTO DESTAQUE -->
-        <div class="block-card">
-            <h4>02 Começo de Tudo</h4>
-            <div class="photo-frame" id="render-photo-container">
-                <!-- Inserido dinamicamente via JS -->
-            </div>
-            <p style="margin-top: 10px; font-weight: 600;">Tudo começou aqui.</p>
-        </div>
+<main class="final-experience">
+  <section id="arteFinal" class="final-grid fade-in">
 
-        <!-- CARD 3: MÚSICA -->
-        <div class="block-card">
-            <h4>03 Trilha Sonora</h4>
-            <div class="main-title"><span class="icon-render">Nossa Música</span></div>
-            <div class="audio-container">
-                <audio id="render-audio" controls src=""></audio>
-            </div>
-        </div>
-
-        <!-- CARD 4: MENSAGEM -->
-        <div class="block-card">
-            <h4>04 Mensagem Especial</h4>
-            <div class="sticky-note" id="render-msg">
-                Sua mensagem será exibida aqui...
-            </div>
-        </div>
-
-        <!-- CARD 5: INSIGHTS AUTOMÁTICOS -->
-        <div class="block-card" style="grid-column: span 2;" id="wide-card">
-            <h4>05 Conclusão da História</h4>
-            <div class="main-title" style="font-size: 2rem;">Algumas histórias merecem ser <span class="icon-render">eternizadas.</span></div>
-            <p style="color: var(--text-muted); margin-top: 15px;">
-                Palavra mais marcante dessa jornada: <strong style="color: var(--primary)" id="render-word">amor</strong>.
-            </p>
-        </div>
-
-        <!-- ÁREA DE AÇÕES -->
-        <div class="action-area">
-            <button class="btn btn-highlight" onclick="window.print()">Baixar / Imprimir PDF</button>
-            <a href="index.html" class="btn">Criar Outra Retrospectiva</a>
-        </div>
+    <div class="final-panel abertura">
+      <span class="step">01 ABERTURA</span>
+      <div class="brand">♡ LoveBlast</div>
+      <h1><span id="finalNome1">Robson</span> <b>&</b> <span id="finalNome2">Raa</span></h1>
+      <p id="fraseAbertura">Algumas histórias não cabem em palavras.</p>
     </div>
 
-    <script>
-        // Recupera as configurações salvas do localStorage
-        const localData = localStorage.getItem('loveblast_data');
-        
-        if (localData) {
-            const config = JSON.parse(localData);
-            
-            // Injeta o tema estruturado nas cores e símbolos
-            document.body.className = config.theme;
-            
-            // Processa strings e nomes customizados
-            document.getElementById('render-names').innerHTML = config.names.replace("&", "<span>&</span>");
-            document.getElementById('render-msg').innerText = config.msg;
-            document.getElementById('render-word').innerText = config.word;
-            
-            // Acerta o Player de áudio nativo para tocar sem travas
-            const audioCtx = document.getElementById('render-audio');
-            audioCtx.src = config.music;
-            audioCtx.volume = 0.6;
+    <div class="final-panel comeco">
+      <span class="step">02 COMEÇO DE TUDO</span>
+      <div class="polaroid">
+        <img id="fotoPrincipal" src="" alt="Foto principal">
+      </div>
+      <h2>Tudo começou <span>aqui.</span></h2>
+      <p id="textoCategoria">E desde então, cada detalhe faz sentido.</p>
+    </div>
 
-            // Gerencia renderização segura da foto anexada
-            const photoContainer = document.getElementById('render-photo-container');
-            if (config.img) {
-                photoContainer.innerHTML = `<img src="${config.img}" alt="Foto da Retrospectiva">`;
-            } else {
-                photoContainer.innerHTML = `<div class="photo-placeholder">Nenhuma imagem foi anexada para esta retrospectiva.</div>`;
-            }
+    <div class="final-panel timeline-final">
+      <span class="step">03 LINHA DO TEMPO</span>
+      <div class="time-item"><span class="emoji">💖</span><strong>2023</strong><p id="timeline1">Vocês se conheceram</p></div>
+      <div class="time-item"><span class="emoji">💬</span><strong>2023</strong><p>Primeiras conversas</p></div>
+      <div class="time-item"><span class="emoji">✈️</span><strong>2024</strong><p id="timeline2">Primeira viagem juntos</p></div>
+      <div class="time-item"><span class="emoji">🔥</span><strong>2025</strong><p>E ainda parece o começo</p></div>
+    </div>
 
-            // Ajuste dinâmico do card expandido para resoluções mobile
-            if(window.innerWidth <= 768) {
-                document.getElementById('wide-card').style.gridColumn = "span 1";
-            }
-        } else {
-            // Fallback caso acesse a página diretamente
-            document.getElementById('render-names').innerText = "História Não Encontrada";
-        }
-    </script>
+    <div class="final-panel insights-final">
+      <span class="step">04 NOSSOS INSIGHTS</span>
+      <h2>Vocês trocaram</h2>
+      <strong class="big-number" id="totalMensagens">18.432</strong>
+      <p>mensagens</p>
+
+      <div class="insight-card">
+        A palavra mais usada foi:<br>
+        <b id="palavraMaisUsada">amor</b> ❤️
+      </div>
+
+      <div class="insight-card">
+        Vocês disseram<br>
+        <b id="saudadeCount">saudade 103 vezes</b>
+      </div>
+    </div>
+
+    <div class="final-panel galeria-final">
+      <span class="step">05 NOSSAS MEMÓRIAS</span>
+      <div id="galeriaFinal" class="galeria-fotos"></div>
+    </div>
+
+    <div class="final-panel frases-final">
+      <span class="step">06 FRASES QUE DEFINEM</span>
+      <div class="quote" id="quote1">“O carinho aparece mais nos detalhes do que nas grandes declarações.”</div>
+      <div class="quote" id="quote2">“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”</div>
+      <div class="quote" id="quote3">“A saudade foi uma das emoções mais presentes dessa história.”</div>
+    </div>
+
+    <div class="final-panel musica-final">
+      <span class="step">07 NOSSA MÚSICA</span>
+      <h2>Nossa <span>música</span> ♡</h2>
+      <h3 id="nomeMusicaFinal">Trilha sonora da história</h3>
+      <div class="music-card">
+        <div class="disc"></div>
+        <div style="flex:1">
+          <p>Toque para reviver esse momento.</p>
+          <audio id="audioFinal" controls></audio>
+        </div>
+      </div>
+    </div>
+
+    <div class="final-panel carta-final">
+      <span class="step">08 MENSAGEM ESPECIAL</span>
+      <div class="carta">
+        <h2>Para <span id="cartaNome">Raa</span>,</h2>
+        <p id="mensagemFinal">Cada mensagem, cada risada, cada momento virou parte da nossa história.</p>
+      </div>
+    </div>
+
+    <div class="final-panel encerramento">
+      <span class="step">09 FINAL ÉPICO</span>
+      <div class="heart">♡</div>
+      <h2 id="fraseFinal">Algumas histórias merecem ser eternizadas.</h2>
+      <p>Obrigado por criar essa retrospectiva.</p>
+    </div>
+
+    <div class="final-panel compartilhar">
+      <span class="step">10 GUARDE & COMPARTILHE</span>
+      <h2>Sua retrospectiva está pronta.</h2>
+      <div class="share-grid">
+        <button onclick="baixarArte()">⬇<br>Baixar<br><small>sua retrospectiva</small></button>
+        <button onclick="compartilharArte()">🔗<br>Compartilhar<br><small>com quem ama</small></button>
+        <button onclick="location.href='/'">♡<br>Criar outra<br><small>retrospectiva</small></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="extra">
+    <h3>EXTRA: O QUE ESSA HISTÓRIA REVELA</h3>
+    <div class="extra-grid">
+      <div class="extra-item">💗 Nível de carinho<strong id="nivelCarinho">Muito alto</strong></div>
+      <div class="extra-item">😂 Humor<strong id="humor">Presente</strong></div>
+      <div class="extra-item">💬 Comunicação<strong id="comunicacao">Frequente</strong></div>
+      <div class="extra-item">🔥 Intensidade emocional<strong id="intensidade">Alta</strong></div>
+      <div class="extra-item">🤝 Conexão<strong id="conexao">Forte</strong></div>
+    </div>
+  </section>
+</main>
+
+<script>
+function analisarWhatsAppTexto(texto){return {totalMessages:(texto||'').split('\n').length,topWord:'amor',loveCount:0,saudadeCount:0,favoriteTime:'23:47',emoji:'❤️'};}
+
+const defaultPhotos = [
+  'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1000',
+  'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=1000',
+  'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=1000'
+];
+
+const categoryTexts = {
+  casal: {
+    abertura: 'Algumas histórias não cabem em palavras.',
+    comeco: 'E desde então, cada detalhe faz sentido.',
+    t1: 'Vocês se conheceram',
+    t2: 'Primeira viagem juntos',
+    q1: '“O carinho aparece mais nos detalhes do que nas grandes declarações.”',
+    q2: '“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”',
+    q3: '“A saudade foi uma das emoções mais presentes dessa história.”',
+    final: 'Algumas histórias merecem ser eternizadas.'
+  },
+  mae: {
+    abertura: 'O amor mais constante da vida.',
+    comeco: 'Tudo começou com cuidado, colo e presença.',
+    t1: 'Ela esteve presente',
+    t2: 'Momentos que viraram memória',
+    q1: '“Mãe é quem transforma cuidado em amor todos os dias.”',
+    q2: '“Alguns abraços carregam a força de uma vida inteira.”',
+    q3: '“Essa homenagem existe porque algumas presenças são eternas.”',
+    final: 'Alguns amores merecem ser homenageados para sempre.'
+  },
+  pai: {
+    abertura: 'Alguns heróis não usam capa.',
+    comeco: 'Tudo começou com exemplo, proteção e presença.',
+    t1: 'Ele esteve ao seu lado',
+    t2: 'Lições que ficaram',
+    q1: '“Pai é quem ensina até quando está em silêncio.”',
+    q2: '“O exemplo dele virou parte de quem você é.”',
+    q3: '“Alguns gestos simples carregam amor gigante.”',
+    final: 'Algumas histórias começam com um herói chamado pai.'
+  },
+  familia: {
+    abertura: 'Família é onde a história começa.',
+    comeco: 'Cada encontro virou parte de uma memória maior.',
+    t1: 'A família cresceu em histórias',
+    t2: 'Momentos juntos',
+    q1: '“Família é feita de risadas, apoio e lembranças que ficam.”',
+    q2: '“O lar não é só um lugar, é quem caminha com você.”',
+    q3: '“Cada foto guarda uma parte da história de vocês.”',
+    final: 'Histórias de família atravessam gerações.'
+  },
+  amigos: {
+    abertura: 'Algumas amizades viram família.',
+    comeco: 'Tudo começou com risadas e virou parceria.',
+    t1: 'A amizade começou',
+    t2: 'Momentos inesquecíveis',
+    q1: '“Vocês transformaram dias comuns em histórias absurdas.”',
+    q2: '“A amizade de vocês tem riso, parceria e presença.”',
+    q3: '“Algumas pessoas chegam e deixam a vida mais leve.”',
+    final: 'Amizades verdadeiras também merecem ser eternizadas.'
+  },
+  formatura: {
+    abertura: 'Todo esforço merece ser lembrado.',
+    comeco: 'Tudo começou com um sonho e muita coragem.',
+    t1: 'A jornada começou',
+    t2: 'Desafios superados',
+    q1: '“Cada dificuldade fez parte da conquista.”',
+    q2: '“Esse momento carrega noites, esforço e superação.”',
+    q3: '“Não é só um diploma. É uma história de vitória.”',
+    final: 'Algumas conquistas merecem ser eternizadas.'
+  },
+  bebe: {
+    abertura: 'Cada fase é uma descoberta.',
+    comeco: 'Tudo começou com amor, cuidado e encanto.',
+    t1: 'Primeiros momentos',
+    t2: 'Primeiras descobertas',
+    q1: '“Cada sorriso pequeno virou uma memória gigante.”',
+    q2: '“O tempo passa rápido, mas esses momentos ficam.”',
+    q3: '“Essa história é feita de amor em sua forma mais pura.”',
+    final: 'Algumas fases passam, mas ficam para sempre no coração.'
+  },
+  pet: {
+    abertura: 'Amor também tem quatro patas.',
+    comeco: 'Tudo começou com bagunça, carinho e companhia.',
+    t1: 'A amizade começou',
+    t2: 'Muitas aventuras',
+    q1: '“Alguns animais chegam e viram parte da família.”',
+    q2: '“O amor mais sincero às vezes vem com patas.”',
+    q3: '“Cada brincadeira virou uma memória feliz.”',
+    final: 'Alguns companheiros deixam marcas eternas.'
+  }
+};
+
+function getData(){
+  const saved = localStorage.getItem('loveblastData');
+  if(saved){
+    try { return JSON.parse(saved); } catch(e){}
+  }
+  return {
+    nome1:'Robson',
+    nome2:'Raa',
+    categoria:'casal',
+    mensagem:'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
+    insights:{
+      totalMessages:18432,
+      topWord:'amor',
+      saudadeCount:103,
+      loveCount:82,
+      favoriteTime:'23:47',
+      emoji:'😂'
+    },
+    photos:[],
+    musicName:'Trilha sonora da história'
+  };
+}
+
+function hydrate(){
+  const data = getData();
+  const cat = categoryTexts[data.categoria] || categoryTexts.casal;
+  const insights = data.insights || {};
+
+  finalNome1.textContent = data.nome1 || 'Robson';
+  finalNome2.textContent = data.nome2 || 'Raa';
+  cartaNome.textContent = data.nome2 || 'Raa';
+  mensagemFinal.textContent = data.mensagem || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+
+  fraseAbertura.textContent = cat.abertura;
+  textoCategoria.textContent = cat.comeco;
+  timeline1.textContent = cat.t1;
+  timeline2.textContent = cat.t2;
+  quote1.textContent = cat.q1;
+  quote2.textContent = cat.q2;
+  quote3.textContent = cat.q3;
+  fraseFinal.textContent = cat.final;
+
+  totalMensagens.textContent = Number(insights.totalMessages || 18432).toLocaleString('pt-BR');
+  palavraMaisUsada.textContent = insights.topWord || 'amor';
+  saudadeCount.textContent = `saudade ${insights.saudadeCount || 103} vezes`;
+
+  const photos=(Array.isArray(data.photos)&&data.photos.filter(Boolean).length)?data.photos.filter(Boolean):defaultPhotos;
+  fotoPrincipal.src = photos[0];
+
+  galeriaFinal.innerHTML = '';
+  photos.slice(0,3).forEach(src=>{
+    const img = document.createElement('img');
+    img.src = src;
+    galeriaFinal.appendChild(img);
+  });
+
+  nomeMusicaFinal.textContent = data.musicName || 'Trilha sonora da história';
+
+  if(data.musicSrc){
+    audioFinal.src = data.musicSrc;
+  }
+}
+
+function baixarArte(){
+  window.print();
+}
+
+function compartilharArte(){
+  if(navigator.share){
+    navigator.share({
+      title:'Minha retrospectiva LoveBlast',
+      text:'Olha essa retrospectiva que eu criei ❤️',
+      url:window.location.href
+    });
+  }else{
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copiado!');
+  }
+}
+
+hydrate();
+</script>
 </body>
 </html>
