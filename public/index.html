@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>LoveBlast</title>
-
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -28,38 +27,47 @@ header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  padding:24px 40px;
+  padding:20px 40px;
   position:sticky;
   top:0;
   z-index:20;
-  background:rgba(5,5,8,.72);
+  background:rgba(5,5,8,.82);
   backdrop-filter:blur(14px);
   border-bottom:1px solid rgba(255,45,120,.15);
 }
 .logo{
-  font-size:30px;
+  font-size:26px;
   font-weight:900;
   background:linear-gradient(90deg,#ff2d78,#ff8a00);
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
+  flex-shrink:0;
 }
+nav{display:flex;gap:4px}
 nav a{
   color:#fff;
   text-decoration:none;
-  margin:0 14px;
-  font-size:14px;
+  padding:8px 12px;
+  font-size:13px;
   font-weight:700;
+  border-radius:8px;
+  transition:.2s;
 }
+nav a:hover{background:rgba(255,45,120,.12)}
 .btn{
   border:1px solid #ff2d78;
   background:linear-gradient(90deg,#ff2d78,#ff6b1a);
   color:#fff;
-  padding:16px 26px;
+  padding:14px 22px;
   border-radius:12px;
   font-weight:800;
   cursor:pointer;
   box-shadow:0 0 30px rgba(255,45,120,.35);
+  font-size:14px;
+  white-space:nowrap;
+  transition:.2s ease;
 }
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 40px rgba(255,45,120,.5)}
 .btn:disabled{opacity:.65;cursor:not-allowed}
 .hero{
   display:grid;
@@ -68,17 +76,9 @@ nav a{
   padding:60px 40px;
   align-items:center;
 }
-.hero h1{
-  font-size:52px;
-  line-height:1.05;
-}
+.hero h1{font-size:clamp(32px,4vw,52px);line-height:1.05}
 .hero h1 span{color:#ff3b7d}
-.hero p{
-  margin:28px 0;
-  color:#d7d7d7;
-  font-size:20px;
-  line-height:1.5;
-}
+.hero p{margin:28px 0;color:#d7d7d7;font-size:18px;line-height:1.5}
 .categories{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -97,51 +97,74 @@ nav a{
   position:relative;
   overflow:hidden;
   cursor:pointer;
-  transition:.25s ease;
+  transition:.3s ease;
 }
-.card:hover,.card.active{
-  transform:translateY(-4px);
-  box-shadow:0 0 35px rgba(255,45,120,.32);
+.card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 0 40px rgba(255,45,120,.45);
   border-color:#ff6b1a;
+}
+.card.active{
+  border-color:#ff2d78;
+  box-shadow:0 0 40px rgba(255,45,120,.5);
+  transform:translateY(-4px);
 }
 .card::before{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.15));
+  background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.12));
+  transition:.3s;
 }
+.card:hover::before{background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05))}
 .card *{position:relative}
-.card .icon{font-size:32px;margin-bottom:10px;color:#ff2d78}
-.card h3{font-size:22px}
-.card p{font-size:14px;margin-top:6px;color:#ddd}
-
+.card .icon{font-size:28px;margin-bottom:8px}
+.card h3{font-size:20px;font-weight:900}
+.card p{font-size:13px;margin-top:4px;color:#ddd}
+.card.active::after{
+  content:"✓";
+  position:absolute;
+  top:12px;right:12px;
+  width:26px;height:26px;
+  border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  color:#fff;font-weight:900;font-size:14px;
+  z-index:2;
+  box-shadow:0 0 20px rgba(255,45,120,.6);
+}
 .section-title{
   text-align:center;
-  margin:40px 0 25px;
+  margin:50px 0 25px;
   letter-spacing:3px;
-  font-size:22px;
+  font-size:14px;
+  font-weight:900;
+  color:#bbb;
 }
+.section-title span{color:#ff3b7d;font-size:18px}
 .phones{
   display:grid;
   grid-template-columns:repeat(6,1fr);
-  gap:18px;
+  gap:16px;
   padding:0 28px;
 }
 .phone{
-  height:430px;
-  border:2px solid rgba(255,255,255,.18);
-  border-radius:28px;
+  height:420px;
+  border:2px solid rgba(255,255,255,.15);
+  border-radius:26px;
   background:#07070d;
   padding:18px;
   position:relative;
   overflow:hidden;
-  box-shadow:0 0 40px rgba(255,45,120,.15);
+  box-shadow:0 0 40px rgba(255,45,120,.12);
+  transition:.3s;
 }
+.phone:hover{border-color:rgba(255,45,120,.4);box-shadow:0 0 55px rgba(255,45,120,.2)}
 .phone::before{
   content:"";
   position:absolute;
   inset:0;
-  background:radial-gradient(circle at 50% 80%,rgba(255,45,120,.25),transparent 45%);
+  background:radial-gradient(circle at 50% 80%,rgba(255,45,120,.22),transparent 45%);
 }
 .phone-content{
   position:relative;
@@ -152,53 +175,56 @@ nav a{
   align-items:center;
   text-align:center;
 }
-.phone h2{font-size:26px;line-height:1.15}
+.phone h2{font-size:22px;line-height:1.2}
 .neon{color:#ff3b8d;text-shadow:0 0 20px #ff2d78}
-.big{font-size:72px!important;color:#ff2d78;text-shadow:0 0 25px #ff2d78}
+.big{font-size:60px!important;color:#ff2d78;text-shadow:0 0 25px #ff2d78;font-weight:900}
 .progress{
   position:absolute;
-  bottom:18px;
-  left:18px;
-  right:18px;
-  height:5px;
-  background:rgba(255,255,255,.15);
+  bottom:16px;left:16px;right:16px;
+  height:4px;
+  background:rgba(255,255,255,.12);
   border-radius:99px;
 }
 .progress span{
-  display:block;
-  height:100%;
-  width:35%;
-  background:#ff2d78;
+  display:block;height:100%;width:35%;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
   border-radius:99px;
 }
 .preview{
   margin:60px 28px;
-  border:1px solid rgba(255,45,120,.45);
+  border:1px solid rgba(255,45,120,.4);
   border-radius:22px;
-  padding:24px;
+  padding:28px;
   display:grid;
   grid-template-columns:1.5fr .7fr;
-  gap:20px;
+  gap:24px;
   background:rgba(255,255,255,.03);
+  align-items:center;
 }
 .preview-list{
   display:grid;
-  grid-template-columns:repeat(8,1fr);
+  grid-template-columns:repeat(4,1fr);
   gap:10px;
+  margin-top:16px;
 }
 .preview-item{
-  height:120px;
-  border:1px solid rgba(255,45,120,.5);
+  padding:16px 12px;
+  border:1px solid rgba(255,45,120,.4);
   border-radius:12px;
   display:flex;
   justify-content:center;
   align-items:center;
   text-align:center;
-  padding:10px;
-  font-size:13px;
+  font-size:12px;
+  font-weight:700;
   background:rgba(0,0,0,.35);
+  min-height:60px;
 }
-.locked{filter:blur(1px);opacity:.65}
+.preview-item.locked{
+  filter:blur(2px);
+  opacity:.5;
+  user-select:none;
+}
 .insights{
   display:grid;
   grid-template-columns:1fr 1.4fr;
@@ -206,453 +232,287 @@ nav a{
   padding:0 28px 60px;
 }
 .panel{
-  border:1px solid rgba(255,45,120,.4);
+  border:1px solid rgba(255,45,120,.35);
   border-radius:20px;
-  padding:24px;
+  padding:28px;
   background:rgba(255,255,255,.03);
 }
+.panel h2{font-size:18px;font-weight:900;margin-bottom:4px}
 .insight-grid{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:14px;
-  margin-top:20px;
+  gap:12px;
+  margin-top:18px;
 }
 .mini{
-  border:1px solid rgba(255,45,120,.4);
-  border-radius:16px;
-  padding:18px;
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:14px;
+  padding:16px 12px;
   text-align:center;
 }
 .mini strong{
   display:block;
   color:#ff3b8d;
-  font-size:26px;
+  font-size:22px;
   margin-bottom:6px;
 }
+.mini span{font-size:11px;color:#bbb}
 .phrase{
-  border:1px solid rgba(255,45,120,.5);
+  border:1px solid rgba(255,45,120,.4);
   border-radius:14px;
+  padding:16px;
+  margin:12px 0;
+  background:rgba(255,45,120,.07);
+  font-size:14px;
+  line-height:1.5;
+  color:#ddd;
+}
+/* === MODAL === */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(20px);
+  z-index:9999;
   padding:18px;
-  margin:14px 0;
-  background:rgba(255,45,120,.08);
 }
-
-/* MODAL */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(circle at top left, rgba(255,45,120,.25), transparent 35%),
-    radial-gradient(circle at bottom right, rgba(255,107,26,.18), transparent 35%),
-    rgba(0,0,0,.86);
-  backdrop-filter: blur(22px);
-  z-index: 9999;
-  padding: 18px;
+.modal-overlay.active{display:flex}
+.modal-box{
+  width:100%;
+  max-width:580px;
+  max-height:92vh;
+  overflow-y:auto;
+  background:linear-gradient(180deg,rgba(15,15,24,.98),rgba(8,8,14,.99));
+  border:1px solid rgba(255,45,120,.5);
+  border-radius:28px;
+  padding:32px;
+  box-shadow:0 0 80px rgba(255,45,120,.3),inset 0 0 40px rgba(255,255,255,.02);
+  position:relative;
 }
-
-.modal-overlay.active {
-  display: flex;
+.modal-box::-webkit-scrollbar{width:5px}
+.modal-box::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:20px}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  width:40px;height:40px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.07);
+  color:white;font-size:24px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;
 }
-
-.modal-box {
-  width: 100%;
-  max-width: 560px;
-  max-height: 92vh;
-  overflow-y: auto;
-  background: linear-gradient(180deg, rgba(15,15,24,.96), rgba(8,8,14,.98));
-  border: 1px solid rgba(255,45,120,.55);
-  border-radius: 30px;
-  padding: 34px;
-  box-shadow:
-    0 0 80px rgba(255,45,120,.32),
-    inset 0 0 40px rgba(255,255,255,.03);
-  position: relative;
+.modal-close:hover{background:rgba(255,45,120,.2)}
+.modal-box h2{
+  font-size:30px;line-height:1;margin-bottom:6px;
+  background:linear-gradient(90deg,#fff,#ff7aa9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
-
-.modal-box::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-box::-webkit-scrollbar-thumb {
-  background: #ff2d78;
-  border-radius: 20px;
-}
-
-.modal-close {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.07);
-  color: white;
-  font-size: 26px;
-  cursor: pointer;
-}
-
-.modal-box h2 {
-  font-size: 34px;
-  line-height: 1;
-  margin-bottom: 8px;
-  background: linear-gradient(90deg,#fff,#ff7aa9);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.modal-subtitle {
-  color: rgba(255,255,255,.58);
-  margin-bottom: 26px;
-  font-size: 15px;
-}
-
-.modal-box label {
-  display: block;
-  margin: 18px 0 8px;
-  font-weight: 800;
-  font-size: 13px;
-  color: #fff;
-}
-
+.modal-subtitle{color:rgba(255,255,255,.5);margin-bottom:24px;font-size:14px}
+.modal-box label{display:block;margin:16px 0 6px;font-weight:800;font-size:12px;letter-spacing:.05em;color:#ccc}
 .modal-box input,
-.modal-box textarea {
-  width: 100%;
-  background: rgba(255,255,255,.065);
-  border: 1px solid rgba(255,255,255,.13);
-  color: white;
-  padding: 15px 16px;
-  border-radius: 15px;
-  outline: none;
-  transition: .2s ease;
+.modal-box textarea{
+  width:100%;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  color:white;
+  padding:13px 15px;
+  border-radius:14px;
+  outline:none;
+  transition:.2s ease;
+  font-size:15px;
 }
-
 .modal-box input:focus,
-.modal-box textarea:focus {
-  border-color: #ff2d78;
-  box-shadow: 0 0 0 4px rgba(255,45,120,.12);
+.modal-box textarea:focus{
+  border-color:#ff2d78;
+  box-shadow:0 0 0 3px rgba(255,45,120,.14);
 }
-
-.modal-box input[type="file"] {
-  padding: 13px;
-  cursor: pointer;
+.modal-box textarea{height:100px;resize:none}
+/* File upload area */
+.file-drop{
+  border:2px dashed rgba(255,45,120,.4);
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+  position:relative;
+  background:rgba(255,45,120,.04);
 }
-
-.modal-box input[type="file"]::file-selector-button {
-  border: none;
-  background: linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color: white;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-weight: 800;
-  margin-right: 12px;
-  cursor: pointer;
+.file-drop:hover,.file-drop.drag-over{
+  border-color:#ff2d78;
+  background:rgba(255,45,120,.1);
 }
-
-.modal-box textarea {
-  height: 115px;
-  resize: none;
+.file-drop input[type="file"]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
 }
-
-.btn-full {
-  width: 100%;
-  margin-top: 20px;
-  border: none;
-  padding: 17px;
-  border-radius: 16px;
-  background: linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color: white;
-  font-weight: 900;
-  cursor: pointer;
-  box-shadow: 0 16px 45px rgba(255,45,120,.28);
+.file-drop .drop-icon{font-size:28px;margin-bottom:6px}
+.file-drop p{color:#aaa;font-size:13px}
+.file-drop p strong{color:#ff7aa9}
+/* Image preview grid */
+.img-preview-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
 }
-
-.btn-full.secondary {
-  background: rgba(255,255,255,.035);
-  border: 1px solid #ff2d78;
-  box-shadow: none;
+.img-preview-grid img{
+  width:100%;
+  height:80px;
+  object-fit:cover;
+  border-radius:10px;
+  border:2px solid rgba(255,45,120,.3);
 }
-
-@media(max-width:600px) {
-  .modal-box {
-    padding: 26px 20px;
-    border-radius: 24px;
-  }
-
-  .modal-box h2 {
-    font-size: 28px;
-  }
-}
-  .hidden{display:none!important}
-
-.final-experience {
-  background: #040407;
-  padding: 40px 20px;
-}
-
-.final-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  max-width: 1500px;
-  margin: auto;
-  border: 1px solid rgba(255,45,120,.25);
-}
-
-.final-panel {
-  min-height: 520px;
-  padding: 38px;
-  border: 1px solid rgba(255,45,120,.22);
-  background:
-    radial-gradient(circle at 80% 20%, rgba(255,45,120,.18), transparent 35%),
-    linear-gradient(160deg, #07070d, #14050b);
-  position: relative;
-  overflow: hidden;
-}
-
-.step {
-  font-size: 13px;
-  font-weight: 900;
-  color: white;
-  opacity: .85;
-}
-
-.brand {
-  color: #ff4b8b;
-  font-size: 28px;
-  font-weight: 900;
-  margin-top: 20px;
-}
-
-.abertura h1 {
-  font-size: clamp(54px, 8vw, 110px);
-  font-family: cursive;
-  margin-top: 80px;
-  font-weight: 400;
-}
-
-.abertura h1 b {
-  color: #ff2d78;
-}
-
-.final-panel h2 {
-  font-size: clamp(34px, 5vw, 70px);
-  line-height: 1.1;
-}
-
-.final-panel h2 span,
-.final-panel h3,
-.big-number,
-.insight-card b {
-  color: #ff2d78;
-  text-shadow: 0 0 25px rgba(255,45,120,.7);
-}
-
-.polaroid {
-  width: 300px;
-  background: white;
-  padding: 14px;
-  transform: rotate(-4deg);
-  margin: 40px auto;
-}
-
-.polaroid img {
-  width: 100%;
-  height: 300px;
-  object-fit: cover;
-}
-
-.time-item {
-  margin: 28px 0;
-  font-size: 24px;
-}
-
-.time-item strong {
-  color: #ff2d78;
-  margin-left: 12px;
-}
-
-.time-item p {
-  margin-left: 48px;
-  color: #ddd;
-  font-size: 18px;
-}
-
-.big-number {
-  display: block;
-  font-size: 82px;
-  font-weight: 900;
-  margin: 20px 0;
-}
-
-.insight-card {
-  margin-top: 24px;
-  padding: 24px;
-  border: 1px solid rgba(255,45,120,.35);
-  border-radius: 18px;
-  background: rgba(255,255,255,.04);
-  font-size: 22px;
-}
-
-.galeria-fotos {
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  height: 420px;
-}
-
-.galeria-fotos img {
-  width: 30%;
-  height: 330px;
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0,0,0,.45);
-}
-
-.galeria-fotos img:nth-child(2) {
-  width: 40%;
-  height: 390px;
-}
-
-.quote {
-  padding: 30px;
-  border: 1px solid rgba(255,45,120,.35);
-  border-radius: 18px;
-  margin-top: 24px;
-  background: rgba(255,255,255,.035);
-  font-size: 20px;
-  line-height: 1.5;
-}
-
-.musica-final audio {
-  width: 100%;
-  margin-top: 40px;
-}
-
-.carta {
-  background: #f1d7b4;
-  color: #321;
-  padding: 40px;
-  border-radius: 8px;
-  transform: rotate(-3deg);
-  max-width: 600px;
-  margin: 60px auto;
-  font-family: Georgia, serif;
-}
-
-.carta h2 {
-  color: #b9274f;
-  font-size: 42px;
-  margin-bottom: 24px;
-}
-
-.encerramento {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-.encerramento h2 {
-  color: #ff2d78;
-  text-transform: uppercase;
-  letter-spacing: 4px;
-}
-
-.compartilhar {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 22px;
-}
-
-.compartilhar button {
-  padding: 22px;
-  border-radius: 18px;
-  border: 1px solid #ff2d78;
-  background: rgba(255,255,255,.04);
-  color: white;
-  font-size: 20px;
-  font-weight: 900;
-  cursor: pointer;
-}
-
-@media(max-width: 800px) {
-  .final-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .final-panel {
-    min-height: 100vh;
-    padding: 28px 20px;
-  }
-
-  .galeria-fotos {
-    flex-direction: column;
-    height: auto;
-  }
-
-  .galeria-fotos img,
-  .galeria-fotos img:nth-child(2) {
-    width: 100%;
-    height: 260px;
-  }
-}
-
-.category-description{
+/* Music preview */
+.music-preview-box{
   margin-top:10px;
   padding:14px;
-  border:1px solid rgba(255,45,120,.25);
-  background:rgba(255,45,120,.07);
-  color:rgba(255,255,255,.78);
+  border:1px solid rgba(255,45,120,.35);
   border-radius:14px;
-  font-size:14px;
-  line-height:1.4;
+  background:rgba(255,45,120,.07);
+  display:none;
 }
-.card.active::after{
-  content:"✓";
-  position:absolute;
-  top:14px;
-  right:14px;
-  width:28px;
-  height:28px;
-  border-radius:50%;
-  display:grid;
-  place-items:center;
+.music-preview-box.visible{display:block}
+.music-preview-box audio{width:100%;margin-top:8px}
+.music-name{font-size:13px;color:#ff7aa9;font-weight:700}
+.music-error{color:#ff6b6b;font-size:13px;margin-top:6px;display:none}
+.btn-full{
+  width:100%;
+  margin-top:18px;
+  border:none;
+  padding:16px;
+  border-radius:15px;
   background:linear-gradient(90deg,#ff2d78,#ff6b1a);
-  color:#fff;
+  color:white;
   font-weight:900;
-  z-index:2;
-  box-shadow:0 0 24px rgba(255,45,120,.55);
+  cursor:pointer;
+  box-shadow:0 16px 40px rgba(255,45,120,.28);
+  font-size:16px;
+  transition:.2s;
 }
-.final-panel::after{
-  content:"";
-  position:absolute;
-  inset:auto -20% -40% -20%;
-  height:45%;
-  background:radial-gradient(circle, rgba(255,45,120,.22), transparent 60%);
-  pointer-events:none;
+.btn-full:hover{transform:translateY(-1px);box-shadow:0 20px 50px rgba(255,45,120,.4)}
+.btn-full.secondary{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,45,120,.6);
+  box-shadow:none;
 }
-.final-panel > *{position:relative;z-index:1}
-.notice-ok{
-  color:#ff7aa9;
-  font-size:13px;
-  margin-top:8px;
+.btn-full.secondary:hover{background:rgba(255,45,120,.1)}
+.preview-result{
+  margin-top:16px;
+  padding:16px;
+  border:1px solid rgba(255,45,120,.3);
+  border-radius:16px;
+  background:rgba(255,45,120,.06);
+  display:none;
 }
-
-
-/* INDEX_HIDE_FINAL_ART */
-#arteFinal,
-.final-experience,
-.final-grid,
-.extra {
-  display: none !important;
+.preview-result.active{display:block}
+.preview-result strong{color:#ff7aa9;font-size:15px}
+.preview-row{
+  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
 }
+.preview-row img{
+  height:70px;width:70px;
+  object-fit:cover;border-radius:10px;
+  border:2px solid rgba(255,45,120,.4);
+}
+.notice-ok{color:#ff7aa9;font-size:12px;margin-top:8px}
+.category-description{
+  margin-top:8px;padding:12px;
+  border:1px solid rgba(255,45,120,.2);
+  background:rgba(255,45,120,.06);
+  color:rgba(255,255,255,.75);
+  border-radius:12px;font-size:13px;line-height:1.4;
+}
+/* ===== RESPONSIVIDADE MOBILE ===== */
+@media(max-width:1024px){
+  .phones{grid-template-columns:repeat(3,1fr);gap:12px}
+  .phone{height:340px}
+  .phone h2{font-size:18px}
+  .big{font-size:48px!important}
+}
+@media(max-width:768px){
+  header{padding:16px 20px}
+  nav{display:none}
+  .hero{
+    grid-template-columns:1fr;
+    padding:36px 20px;
+    gap:28px;
+  }
+  .hero h1{font-size:32px}
+  .hero p{font-size:16px;margin:16px 0}
+  .categories{
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+  .card{min-height:160px}
+  .card h3{font-size:17px}
+  .phones{
+    grid-template-columns:repeat(2,1fr);
+    padding:0 16px;
+    gap:12px;
+  }
+  .phone{height:300px}
+  .phone h2{font-size:16px}
+  .big{font-size:42px!important}
+  .preview{
+    grid-template-columns:1fr;
+    margin:36px 16px;
+    padding:20px;
+  }
+  .preview-list{grid-template-columns:repeat(2,1fr)}
+  .insights{
+    grid-template-columns:1fr;
+    padding:0 16px 40px;
+    gap:16px;
+  }
+  .insight-grid{grid-template-columns:repeat(2,1fr)}
+  .section-title{margin:36px 0 18px;padding:0 16px}
+  .modal-box{padding:24px 18px;border-radius:22px}
+  .modal-box h2{font-size:26px}
+  .img-preview-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:480px){
+  header{padding:14px 16px}
+  .btn{padding:11px 16px;font-size:13px}
+  .hero{padding:28px 16px;gap:22px}
+  .hero h1{font-size:28px}
+  .categories{
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+  .card{min-height:140px;padding:14px}
+  .card .icon{font-size:22px;margin-bottom:6px}
+  .card h3{font-size:15px}
+  .card p{font-size:12px}
+  .phones{
+    grid-template-columns:1fr 1fr;
+    padding:0 12px;
+    gap:10px;
+    overflow-x:auto;
+    grid-template-columns:repeat(3,minmax(160px,1fr));
+  }
+  .phone{height:260px;padding:14px}
+  .phone h2{font-size:14px}
+  .big{font-size:36px!important}
+  .preview{margin:28px 12px;padding:16px}
+  .preview-list{grid-template-columns:repeat(2,1fr);gap:8px}
+  .preview-item{font-size:11px;padding:12px 8px;min-height:52px}
+  .insights{padding:0 12px 36px}
+  .insight-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .mini strong{font-size:18px}
+  .panel{padding:18px}
+  .modal-box{padding:20px 16px;border-radius:18px}
+  .modal-box h2{font-size:22px}
+  .img-preview-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .img-preview-grid img{height:66px}
+}
+/* HIDE final art on index */
+#arteFinal,.final-experience,.final-grid,.extra{display:none!important}
 </style>
 </head>
-
 <body>
 
 <header>
@@ -672,31 +532,30 @@ nav a{
     <p>Crie retrospectivas emocionantes para qualquer pessoa especial na sua vida.</p>
     <button class="btn js-open-modal">CRIAR MINHA RETROSPECTIVA ♡</button>
   </div>
-
   <div class="categories">
     <div class="card active" data-category="casal" style="background-image:url('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=700')">
       <div class="icon">♡</div><h3>Casal</h3><p>Celebre seu amor</p>
     </div>
     <div class="card" data-category="mae" style="background-image:url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=700')">
-      <div class="icon">♡</div><h3>Mãe</h3><p>Homenageie quem sempre esteve lá</p>
+      <div class="icon">🌷</div><h3>Mãe</h3><p>Homenageie quem sempre esteve lá</p>
     </div>
     <div class="card" data-category="pai" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=700')">
-      <div class="icon">♡</div><h3>Pai</h3><p>Celebre seu herói</p>
+      <div class="icon">🛡️</div><h3>Pai</h3><p>Celebre seu herói</p>
     </div>
     <div class="card" data-category="familia" style="background-image:url('https://images.unsplash.com/photo-1511895426328-dc8714191300?w=700')">
-      <div class="icon">♧</div><h3>Família</h3><p>Histórias que unem gerações</p>
+      <div class="icon">🏠</div><h3>Família</h3><p>Histórias que unem gerações</p>
     </div>
     <div class="card" data-category="amigos" style="background-image:url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700')">
-      <div class="icon">♧</div><h3>Amigos</h3><p>Parceiros de todas as horas</p>
+      <div class="icon">🤝</div><h3>Amigos</h3><p>Parceiros de todas as horas</p>
     </div>
     <div class="card" data-category="formatura" style="background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=700')">
-      <div class="icon">◇</div><h3>Formatura</h3><p>Seu esforço, sua conquista</p>
+      <div class="icon">🎓</div><h3>Formatura</h3><p>Seu esforço, sua conquista</p>
     </div>
     <div class="card" data-category="bebe" style="background-image:url('https://images.unsplash.com/photo-1546015720-b8b30df5aa27?w=700')">
-      <div class="icon">☻</div><h3>Bebê</h3><p>Cada fase, cada descoberta</p>
+      <div class="icon">🍼</div><h3>Bebê</h3><p>Cada fase, cada descoberta</p>
     </div>
     <div class="card" data-category="pet" style="background-image:url('https://images.unsplash.com/photo-1552053831-71594a27632d?w=700')">
-      <div class="icon">♨</div><h3>Pet</h3><p>Amor que tem quatro patas</p>
+      <div class="icon">🐾</div><h3>Pet</h3><p>Amor que tem quatro patas</p>
     </div>
   </div>
 </section>
@@ -704,23 +563,23 @@ nav a{
 <h2 id="exemplos" class="section-title">EXEMPLO DE RETROSPECTIVA — TEMA <span id="temaExemplo" class="neon">CASAL</span> ♡</h2>
 
 <section class="phones">
-  <div class="phone"><div class="phone-content"><h2>A história de vocês<br><span class="neon">como nunca antes.</span></h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><p>Vocês já criaram memórias há</p><h2 class="big">732</h2><h2>DIAS</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><p>Vocês trocaram</p><h2 class="big">18.432</h2><h2>MENSAGENS</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><p>A palavra mais usada foi:</p><h2 class="neon" style="font-size:54px">amor</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><h2>2024</h2><p>foi o ano</p><h2 class="neon">mais intenso 🔥</h2><div class="progress"><span></span></div></div></div>
-  <div class="phone"><div class="phone-content"><h2>Nossa <span class="neon">música</span></h2><p>trilha sonora da história</p><button class="btn js-open-modal" type="button">▶</button><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><h2 id="phone1Text">A história de vocês<br><span class="neon">como nunca antes.</span></h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><p id="phone2Label">Vocês já criaram memórias há</p><h2 class="big" id="phone2Num">732</h2><h2 id="phone2Unit">DIAS</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><p id="phone3Label">Vocês trocaram</p><h2 class="big">18.432</h2><h2 id="phone3Unit">MENSAGENS</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><p>A palavra mais usada foi:</p><h2 class="neon" id="phone4Word" style="font-size:46px">amor</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><h2>2024</h2><p>foi o ano</p><h2 class="neon" id="phone5Phrase">mais intenso 🔥</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><h2>Nossa <span class="neon">música</span></h2><p id="phone6Sub">trilha sonora da história</p><button class="btn js-open-modal" type="button" style="font-size:20px;padding:12px 20px">▶</button><div class="progress"><span></span></div></div></div>
 </section>
 
 <section id="como-funciona" class="preview">
   <div>
     <h2>PRÉVIA ANTES DO PAGAMENTO</h2>
-    <p style="color:#ccc;margin:10px 0 20px">Mostramos apenas uma parte da retrospectiva para aumentar a curiosidade.</p>
+    <p style="color:#aaa;margin:8px 0 16px;font-size:14px">Mostramos apenas uma parte da retrospectiva para aumentar a curiosidade.</p>
     <div class="preview-list">
       <div class="preview-item">Introdução ✓</div>
       <div class="preview-item">Tempo juntos ✓</div>
       <div class="preview-item">Primeira foto ✓</div>
-      <div class="preview-item">18.432 mensagens ✓</div>
+      <div class="preview-item">Mensagens ✓</div>
       <div class="preview-item locked">🔒 Palavra mais usada</div>
       <div class="preview-item locked">🔒 Horário favorito</div>
       <div class="preview-item locked">🔒 Galeria completa</div>
@@ -736,17 +595,16 @@ nav a{
   <div class="panel">
     <h2>INSIGHTS DA SUA CONVERSA <span class="neon">IA LoveBlast</span></h2>
     <div class="insight-grid">
-      <div class="mini"><strong>18.432</strong>Mensagens</div>
-      <div class="mini"><strong>amor</strong>Palavra mais usada</div>
-      <div class="mini"><strong>82</strong>vezes “eu te amo”</div>
-      <div class="mini"><strong>103</strong>vezes saudade</div>
-      <div class="mini"><strong>23:47</strong>Horário favorito</div>
-      <div class="mini"><strong>😂</strong>Emoji mais usado</div>
-      <div class="mini"><strong>Alto</strong>Nível emocional</div>
-      <div class="mini"><strong>Incrível</strong>Conexão forte</div>
+      <div class="mini"><strong>18.432</strong><span>Mensagens</span></div>
+      <div class="mini"><strong>amor</strong><span>Palavra mais usada</span></div>
+      <div class="mini"><strong>82</strong><span>vezes "eu te amo"</span></div>
+      <div class="mini"><strong>103</strong><span>vezes saudade</span></div>
+      <div class="mini"><strong>23:47</strong><span>Horário favorito</span></div>
+      <div class="mini"><strong>😂</strong><span>Emoji mais usado</span></div>
+      <div class="mini"><strong>Alto</strong><span>Nível emocional</span></div>
+      <div class="mini"><strong>Incrível</strong><span>Conexão forte</span></div>
     </div>
   </div>
-
   <div class="panel">
     <h2>FRASES GERADAS PARA VOCÊS</h2>
     <div class="phrase">Vocês transformaram mensagens simples em uma história extraordinária. ♡</div>
@@ -756,415 +614,338 @@ nav a{
   </div>
 </section>
 
+<!-- MODAL -->
 <div id="createModal" class="modal-overlay">
   <div class="modal-box">
     <button id="closeModal" class="modal-close" type="button">×</button>
-
     <h2>Criar retrospectiva</h2>
     <p class="modal-subtitle">Preencha os dados, envie fotos, música e conversa do WhatsApp.</p>
 
     <label>Categoria escolhida</label>
-    <input id="categoriaInput" type="text" value="casal" readonly>
-
+    <input id="categoriaInput" type="text" value="casal" readonly style="cursor:default;color:#ff7aa9">
     <div id="categoriaDescricao" class="category-description">Celebre seu amor com uma retrospectiva cinematográfica.</div>
 
     <label>Seu nome</label>
     <input id="nome1" type="text" placeholder="Ex: Robson">
 
-    <label>Nome da pessoa</label>
-    <input id="nome2" type="text" placeholder="Ex: Maria">
+    <label>Nome da pessoa especial</label>
+    <input id="nome2" type="text" placeholder="Ex: Paloma">
 
     <label>E-mail</label>
-    <input id="email" type="email" placeholder="cliente@email.com">
+    <input id="email" type="email" placeholder="seu@email.com">
 
-    <label>Fotos</label>
-    <input id="photos" type="file" accept="image/*" multiple>
+    <label>Fotos (até 6 imagens)</label>
+    <div class="file-drop" id="photoDropArea">
+      <input id="photos" type="file" accept="image/*" multiple>
+      <div class="drop-icon">📸</div>
+      <p><strong>Clique para adicionar fotos</strong><br>ou arraste aqui — JPG, PNG, WEBP</p>
+    </div>
+    <div id="imgPreviewGrid" class="img-preview-grid"></div>
 
-    <label>Música real</label>
-    <input id="music" type="file" accept="audio/mp3,audio/mpeg">
+    <label>Música (MP3)</label>
+    <div class="file-drop" id="musicDropArea">
+      <input id="music" type="file" accept="audio/mp3,audio/mpeg,audio/*">
+      <div class="drop-icon">🎵</div>
+      <p><strong>Clique para adicionar uma música</strong><br>Arquivos MP3</p>
+    </div>
+    <div class="music-error" id="musicError">❌ Formato não suportado. Use MP3.</div>
+    <div class="music-preview-box" id="musicPreviewBox">
+      <div class="music-name" id="musicPreviewName">🎵 Nome da música</div>
+      <audio id="previewAudio" controls style="width:100%;margin-top:8px"></audio>
+    </div>
 
-    <label>Conversa do WhatsApp</label>
-    <input id="whatsappFile" type="file" accept=".txt">
+    <label>Conversa do WhatsApp (.txt)</label>
+    <div class="file-drop">
+      <input id="whatsappFile" type="file" accept=".txt">
+      <div class="drop-icon">💬</div>
+      <p><strong>Exportar do WhatsApp</strong><br>Menu → Exportar conversa → Sem mídia</p>
+    </div>
 
     <label>Mensagem especial</label>
-    <textarea id="mensagem" placeholder="Escreva uma mensagem especial..."></textarea>
+    <textarea id="mensagem" placeholder="Escreva uma mensagem do coração..."></textarea>
 
-    <button id="previewBtn" class="btn-full" type="button">Ver prévia</button>
+    <button id="previewBtn" class="btn-full" type="button">✨ Ver prévia</button>
 
     <div id="previewResult" class="preview-result">
       <strong>Prévia criada ✨</strong>
-      <p id="previewText" style="color:#ccc;margin-top:8px"></p>
+      <p id="previewText" style="color:#ccc;margin-top:8px;font-size:14px"></p>
       <div id="previewImages" class="preview-row"></div>
-      <audio id="previewAudio" controls style="width:100%;margin-top:12px;display:none"></audio>
     </div>
 
-    <button id="payBtn" class="btn-full secondary" type="button">Finalizar pagamento</button>
+    <button id="payBtn" class="btn-full secondary" type="button">💳 Finalizar e pagar</button>
   </div>
 </div>
-<section id="arteFinal" class="final-experience hidden">
-  <div class="final-grid">
-
-    <div class="final-panel abertura">
-      <span class="step">01 ABERTURA</span>
-      <div class="brand">♡ LoveBlast</div>
-      <h1><span id="finalNome1">Robson</span> <b>&</b> <span id="finalNome2">Raa</span></h1>
-      <p>Algumas histórias não cabem em palavras.</p>
-    </div>
-
-    <div class="final-panel comeco">
-      <span class="step">02 COMEÇO DE TUDO</span>
-      <div class="polaroid">
-        <img id="fotoPrincipal" src="" alt="Foto principal">
-      </div>
-      <h2>Tudo começou <span>aqui.</span></h2>
-      <p>E desde então, cada detalhe faz sentido.</p>
-    </div>
-
-    <div class="final-panel timeline-final">
-      <span class="step">03 LINHA DO TEMPO</span>
-      <div class="time-item">❤️ <strong>2023</strong><p>Vocês se conheceram</p></div>
-      <div class="time-item">💬 <strong>2023</strong><p>Primeiras conversas</p></div>
-      <div class="time-item">✈️ <strong>2024</strong><p>Primeira viagem juntos</p></div>
-      <div class="time-item">🔥 <strong>2025</strong><p>E ainda parece o começo</p></div>
-    </div>
-
-    <div class="final-panel insights-final">
-      <span class="step">04 NOSSOS INSIGHTS</span>
-      <h2>Vocês trocaram</h2>
-      <strong class="big-number" id="totalMensagens">18.432</strong>
-      <p>mensagens</p>
-
-      <div class="insight-card">
-        A palavra mais usada foi:<br>
-        <b id="palavraMaisUsada">amor</b> ❤️
-      </div>
-
-      <div class="insight-card">
-        Vocês disseram<br>
-        <b id="saudadeCount">saudade 103 vezes</b>
-      </div>
-    </div>
-
-    <div class="final-panel galeria-final">
-      <span class="step">05 NOSSAS MEMÓRIAS</span>
-      <div id="galeriaFinal" class="galeria-fotos"></div>
-    </div>
-
-    <div class="final-panel frases-final">
-      <span class="step">06 FRASES QUE DEFINEM</span>
-      <div class="quote">“O carinho de vocês aparece mais nos detalhes do que nas declarações.”</div>
-      <div class="quote">“Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.”</div>
-      <div class="quote">“A saudade foi uma das emoções mais presentes da história de vocês.”</div>
-    </div>
-
-    <div class="final-panel musica-final">
-      <span class="step">07 NOSSA MÚSICA</span>
-      <h2>Nossa música ♡</h2>
-      <h3 id="nomeMusicaFinal">Música escolhida</h3>
-      <audio id="audioFinal" controls></audio>
-    </div>
-
-    <div class="final-panel carta-final">
-      <span class="step">08 MENSAGEM ESPECIAL</span>
-      <div class="carta">
-        <h2>Para <span id="cartaNome">Raa</span>,</h2>
-        <p id="mensagemFinal">Cada mensagem, cada risada, cada momento virou parte da nossa história.</p>
-      </div>
-    </div>
-
-    <div class="final-panel encerramento">
-      <span class="step">09 FINAL ÉPICO</span>
-      <h2>Algumas histórias merecem ser eternizadas.</h2>
-      <p>Obrigado por criar essa retrospectiva.</p>
-    </div>
-
-    <div class="final-panel compartilhar">
-      <span class="step">10 GUARDE & COMPARTILHE</span>
-      <button onclick="baixarArte()">⬇ Baixar</button>
-      <button onclick="compartilharArte()">🔗 Compartilhar</button>
-      <button onclick="location.href='/'">♡ Criar outra</button>
-    </div>
-
-  </div>
-</section>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   const STORAGE_KEY = 'loveblast_dados_retro';
 
   const CATEGORY_CONFIG = {
-    casal: {
-      label: 'CASAL',
-      modal: 'Celebre o amor de vocês com fotos, música, conversa do WhatsApp e insights emocionais.',
-      title: 'A história de vocês como nunca antes.',
-      intro: 'Algumas histórias não cabem em palavras.',
-      timeline: [
-        ['❤️', '2023', 'Vocês se conheceram'],
-        ['💬', '2023', 'Primeiras conversas'],
-        ['✈️', '2024', 'Primeira viagem juntos'],
-        ['🔥', '2025', 'E ainda parece o começo']
-      ],
-      quotes: [
-        'O carinho de vocês aparece mais nos detalhes do que nas declarações.',
-        'Mesmo quando o assunto era simples, vocês encontravam um jeito de permanecer juntos.',
-        'A saudade foi uma das emoções mais presentes da história de vocês.'
-      ],
-      final: 'Algumas histórias merecem ser eternizadas.'
+    casal:{
+      label:'CASAL',icon:'♡',accentColor:'#ff2d78',
+      modal:'Celebre o amor de vocês com fotos, música e momentos inesquecíveis.',
+      phone1:'A história de vocês<br><span class="neon">como nunca antes.</span>',
+      phone2label:'Vocês já criaram memórias há',phone2num:'732',phone2unit:'DIAS',
+      phone3label:'Vocês trocaram',phone3unit:'MENSAGENS',
+      phone4word:'amor',phone5:'mais intenso 🔥',phone6:'trilha sonora da história',
+      timeline:[['❤️','2023','Vocês se conheceram'],['💬','2023','Primeiras conversas'],['✈️','2024','Primeira viagem juntos'],['🔥','2025','E ainda parece o começo']],
+      quotes:['O carinho aparece mais nos detalhes do que nas grandes declarações.','Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos.','A saudade foi uma das emoções mais presentes nessa história.'],
+      final:'Algumas histórias merecem ser eternizadas.',
+      intro:'Algumas histórias não cabem em palavras.'
     },
-    mae: {
-      label: 'MÃE',
-      modal: 'Crie uma homenagem emocionante para quem sempre cuidou, protegeu e esteve presente.',
-      title: 'Uma homenagem para quem sempre foi lar.',
-      intro: 'Amor de mãe não cabe em palavras.',
-      timeline: [
-        ['🌷', 'Sempre', 'Ela esteve presente'],
-        ['🤍', 'Cuidado', 'Cada gesto virou memória'],
-        ['🏠', 'Lar', 'O abraço que acalma tudo'],
-        ['✨', 'Hoje', 'Uma homenagem para eternizar']
-      ],
-      quotes: [
-        'Algumas pessoas não apenas cuidam. Elas viram abrigo.',
-        'O amor dela aparece nos detalhes que ninguém vê.',
-        'Mãe é a primeira forma de amor que a vida ensina.'
-      ],
-      final: 'Alguns amores merecem ser eternizados.'
+    mae:{
+      label:'MÃE',icon:'🌷',accentColor:'#ff6b9d',
+      modal:'Crie uma homenagem emocionante para quem sempre cuidou e esteve presente.',
+      phone1:'Uma homenagem para<br><span class="neon">quem sempre foi lar.</span>',
+      phone2label:'Ela está presente há',phone2num:'∞',phone2unit:'ANOS',
+      phone3label:'Gestos de carinho',phone3unit:'MEMÓRIAS',
+      phone4word:'mãe',phone5:'mais amoroso 🌷',phone6:'a trilha sonora dela',
+      timeline:[['🌷','Sempre','Ela esteve presente'],['🤍','Cuidado','Cada gesto virou memória'],['🏠','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
+      quotes:['Algumas pessoas não apenas cuidam. Elas viram abrigo.','O amor dela aparece nos detalhes que ninguém vê.','Mãe é a primeira forma de amor que a vida ensina.'],
+      final:'Alguns amores merecem ser homenageados para sempre.',
+      intro:'O amor mais constante da vida.'
     },
-    pai: {
-      label: 'PAI',
-      modal: 'Monte uma retrospectiva para celebrar histórias, conselhos, força e presença.',
-      title: 'Uma história feita de exemplo e presença.',
-      intro: 'Alguns heróis não usam capa.',
-      timeline: [
-        ['🛡️', 'Proteção', 'Sempre esteve por perto'],
-        ['🧭', 'Exemplo', 'Ensinou mais por atitudes'],
-        ['💬', 'Conselhos', 'Palavras que ficaram'],
-        ['🔥', 'Hoje', 'Uma homenagem para guardar']
-      ],
-      quotes: [
-        'Pai é presença que guia, mesmo em silêncio.',
-        'Alguns ensinamentos ficam para sempre.',
-        'O amor também mora no cuidado silencioso.'
-      ],
-      final: 'Heróis de verdade merecem ser lembrados.'
+    pai:{
+      label:'PAI',icon:'🛡️',accentColor:'#ff8c42',
+      modal:'Monte uma retrospectiva celebrando histórias, conselhos, força e presença.',
+      phone1:'Uma história feita de<br><span class="neon">exemplo e presença.</span>',
+      phone2label:'Anos de proteção',phone2num:'∞',phone2unit:'ANOS',
+      phone3label:'Conselhos e histórias',phone3unit:'MEMÓRIAS',
+      phone4word:'herói',phone5:'mais presente 🛡️',phone6:'a trilha sonora dele',
+      timeline:[['🛡️','Proteção','Sempre esteve por perto'],['🧭','Exemplo','Ensinou mais por atitudes'],['💬','Conselhos','Palavras que ficaram'],['🔥','Hoje','Uma homenagem para guardar']],
+      quotes:['Pai é presença que guia, mesmo em silêncio.','Alguns ensinamentos ficam para sempre.','O amor também mora no cuidado silencioso.'],
+      final:'Heróis de verdade merecem ser lembrados.',
+      intro:'Alguns heróis não usam capa.'
     },
-    familia: {
-      label: 'FAMÍLIA',
-      modal: 'Crie uma retrospectiva familiar com momentos, gerações, fotos e mensagens especiais.',
-      title: 'A história de uma família inteira.',
-      intro: 'Tudo que importa começa em casa.',
-      timeline: [
-        ['🏠', 'Raízes', 'Onde tudo começou'],
-        ['📸', 'Memórias', 'Momentos que uniram todos'],
-        ['🫶', 'Presença', 'Cada pessoa faz parte'],
-        ['✨', 'Hoje', 'Uma história de gerações']
-      ],
-      quotes: [
-        'Família é onde a vida ganha significado.',
-        'Cada foto guarda um pedaço de todos vocês.',
-        'Algumas memórias atravessam gerações.'
-      ],
-      final: 'Histórias de família merecem durar para sempre.'
+    familia:{
+      label:'FAMÍLIA',icon:'🏠',accentColor:'#ffd700',
+      modal:'Crie uma retrospectiva familiar com momentos, gerações e mensagens especiais.',
+      phone1:'A história de uma<br><span class="neon">família inteira.</span>',
+      phone2label:'Gerações reunidas há',phone2num:'∞',phone2unit:'ANOS',
+      phone3label:'Momentos compartilhados',phone3unit:'MEMÓRIAS',
+      phone4word:'família',phone5:'mais unido 🏠',phone6:'a trilha da família',
+      timeline:[['🏠','Raízes','Onde tudo começou'],['📸','Memórias','Momentos que uniram todos'],['🫶','Presença','Cada pessoa faz parte'],['✨','Hoje','Uma história de gerações']],
+      quotes:['Família é onde a vida ganha significado.','Cada foto guarda um pedaço de todos vocês.','Algumas memórias atravessam gerações.'],
+      final:'Histórias de família merecem durar para sempre.',
+      intro:'Família é onde a história começa.'
     },
-    amigos: {
-      label: 'AMIGOS',
-      modal: 'Transforme amizade, risadas, surtos e conversas em um recap estilo Spotify Wrapped.',
-      title: 'A amizade de vocês como nunca antes.',
-      intro: 'Algumas amizades viram família.',
-      timeline: [
-        ['😂', 'Risadas', 'Momentos impossíveis de esquecer'],
-        ['💬', 'Conversas', 'Assuntos que só vocês entendem'],
-        ['🤝', 'Parceria', 'Um pelo outro sempre'],
-        ['🔥', 'Hoje', 'Mais histórias para viver']
-      ],
-      quotes: [
-        'Vocês transformaram dias comuns em histórias boas.',
-        'A amizade aparece nas piadas, nos conselhos e na presença.',
-        'Algumas pessoas chegam e ficam para sempre.'
-      ],
-      final: 'Amizades verdadeiras merecem ser eternizadas.'
+    amigos:{
+      label:'AMIGOS',icon:'🤝',accentColor:'#00d4ff',
+      modal:'Transforme amizade, risadas e conversas em um recap estilo Spotify Wrapped.',
+      phone1:'A amizade de vocês<br><span class="neon">como nunca antes.</span>',
+      phone2label:'Anos de parceria',phone2num:'5+',phone2unit:'ANOS',
+      phone3label:'Mensagens trocadas',phone3unit:'MEMÓRIAS',
+      phone4word:'parceiros',phone5:'mais hilário 😂',phone6:'a trilha dos amigos',
+      timeline:[['😂','Risadas','Momentos impossíveis de esquecer'],['💬','Conversas','Assuntos que só vocês entendem'],['🤝','Parceria','Um pelo outro sempre'],['🔥','Hoje','Mais histórias para viver']],
+      quotes:['Vocês transformaram dias comuns em histórias boas.','A amizade aparece nas piadas, nos conselhos e na presença.','Algumas pessoas chegam e ficam para sempre.'],
+      final:'Amizades verdadeiras merecem ser eternizadas.',
+      intro:'Algumas amizades viram família.'
     },
-    formatura: {
-      label: 'FORMATURA',
-      modal: 'Crie uma retrospectiva de conquista, esforço, superação e orgulho.',
-      title: 'Uma conquista que merece ser lembrada.',
-      intro: 'Todo esforço conta uma história.',
-      timeline: [
-        ['📚', 'Começo', 'O primeiro passo foi dado'],
-        ['☕', 'Rotina', 'Dias difíceis também fizeram parte'],
-        ['🎓', 'Conquista', 'O sonho virou realidade'],
-        ['✨', 'Hoje', 'Uma nova fase começa']
-      ],
-      quotes: [
-        'A conquista de hoje carrega todo esforço de ontem.',
-        'Cada etapa difícil também fez parte da vitória.',
-        'O diploma é só o começo de uma história maior.'
-      ],
-      final: 'Conquistas grandes merecem ser eternizadas.'
+    formatura:{
+      label:'FORMATURA',icon:'🎓',accentColor:'#9d4edd',
+      modal:'Crie uma retrospectiva de conquista, esforço, superação e orgulho.',
+      phone1:'Uma conquista que<br><span class="neon">merece ser lembrada.</span>',
+      phone2label:'Anos de dedicação',phone2num:'5',phone2unit:'ANOS',
+      phone3label:'Noites de estudo',phone3unit:'MEMÓRIAS',
+      phone4word:'vitória',phone5:'mais marcante 🎓',phone6:'a trilha da conquista',
+      timeline:[['📚','Começo','O primeiro passo foi dado'],['☕','Rotina','Dias difíceis também fizeram parte'],['🎓','Conquista','O sonho virou realidade'],['✨','Hoje','Uma nova fase começa']],
+      quotes:['A conquista de hoje carrega todo esforço de ontem.','Cada etapa difícil também fez parte da vitória.','O diploma é só o começo de uma história maior.'],
+      final:'Conquistas grandes merecem ser eternizadas.',
+      intro:'Todo esforço merece ser lembrado.'
     },
-    bebe: {
-      label: 'BEBÊ',
-      modal: 'Registre as primeiras fases, descobertas, sorrisos e momentos mais fofos.',
-      title: 'Pequenos momentos, memórias gigantes.',
-      intro: 'Cada descoberta virou amor.',
-      timeline: [
-        ['🍼', 'Começo', 'Tudo era novidade'],
-        ['👶', 'Sorrisos', 'Cada risada mudou o dia'],
-        ['🐾', 'Passinhos', 'Cada fase uma emoção'],
-        ['✨', 'Hoje', 'Um amor que só cresce']
-      ],
-      quotes: [
-        'Alguns pequenos momentos viram memórias enormes.',
-        'Cada sorriso conta uma nova descoberta.',
-        'O amor cresceu junto com cada fase.'
-      ],
-      final: 'Infâncias merecem ser guardadas com carinho.'
+    bebe:{
+      label:'BEBÊ',icon:'🍼',accentColor:'#ff9eb5',
+      modal:'Registre as primeiras fases, descobertas, sorrisos e momentos mais fofos.',
+      phone1:'Pequenos momentos,<br><span class="neon">memórias gigantes.</span>',
+      phone2label:'Dias de descobertas',phone2num:'365',phone2unit:'DIAS',
+      phone3label:'Sorrisos registrados',phone3unit:'MEMÓRIAS',
+      phone4word:'amor',phone5:'mais fofo 🍼',phone6:'canção de ninar',
+      timeline:[['🍼','Começo','Tudo era novidade'],['👶','Sorrisos','Cada risada mudou o dia'],['🐾','Passinhos','Cada fase uma emoção'],['✨','Hoje','Um amor que só cresce']],
+      quotes:['Alguns pequenos momentos viram memórias enormes.','Cada sorriso conta uma nova descoberta.','O amor cresceu junto com cada fase.'],
+      final:'Infâncias merecem ser guardadas com carinho.',
+      intro:'Cada descoberta virou amor.'
     },
-    pet: {
-      label: 'PET',
-      modal: 'Crie uma homenagem fofa para seu melhor amigo de quatro patas.',
-      title: 'Uma história de amor em quatro patas.',
-      intro: 'Alguns amores deixam pegadas.',
-      timeline: [
-        ['🐾', 'Chegada', 'A casa nunca mais foi igual'],
-        ['🎾', 'Bagunça', 'Cada travessura virou memória'],
-        ['❤️', 'Companhia', 'Sempre perto, sempre amor'],
-        ['✨', 'Hoje', 'Um melhor amigo para sempre']
-      ],
-      quotes: [
-        'Alguns anjos chegam com patas.',
-        'O amor deles é simples, puro e infinito.',
-        'Cada olhar parecia dizer: estou aqui.'
-      ],
-      final: 'Amores de quatro patas também merecem eternidade.'
+    pet:{
+      label:'PET',icon:'🐾',accentColor:'#ff9f43',
+      modal:'Crie uma homenagem fofa para seu melhor amigo de quatro patas.',
+      phone1:'Uma história de amor<br><span class="neon">em quatro patas.</span>',
+      phone2label:'Dias de companhia',phone2num:'∞',phone2unit:'DIAS',
+      phone3label:'Carinhos e brincadeiras',phone3unit:'MEMÓRIAS',
+      phone4word:'patinhas',phone5:'mais fofo 🐾',phone6:'trilha sonora do pet',
+      timeline:[['🐾','Chegada','A casa nunca mais foi igual'],['🎾','Bagunça','Cada travessura virou memória'],['❤️','Companhia','Sempre perto, sempre amor'],['✨','Hoje','Um melhor amigo para sempre']],
+      quotes:['Alguns anjos chegam com patas.','O amor deles é simples, puro e infinito.','Cada olhar parecia dizer: estou aqui.'],
+      final:'Amores de quatro patas também merecem eternidade.',
+      intro:'Amor também tem quatro patas.'
     }
   };
 
   let categoriaSelecionada = 'casal';
-  window.categoriaSelecionada = categoriaSelecionada;
 
   const modal = document.getElementById('createModal');
-  const closeModal = document.getElementById('closeModal');
   const categoriaInput = document.getElementById('categoriaInput');
   const categoriaDescricao = document.getElementById('categoriaDescricao');
 
-  function setText(selector, value) {
-    const el = document.querySelector(selector);
-    if (el) el.textContent = value;
-  }
-
+  // ---- CATEGORY LOGIC ----
   function aplicarCategoria(cat) {
     categoriaSelecionada = cat || 'casal';
-    window.categoriaSelecionada = categoriaSelecionada;
+    const cfg = CATEGORY_CONFIG[categoriaSelecionada] || CATEGORY_CONFIG.casal;
 
-    const config = CATEGORY_CONFIG[categoriaSelecionada] || CATEGORY_CONFIG.casal;
-
-    document.querySelectorAll('.card').forEach(c => {
-      c.classList.toggle('active', c.dataset.category === categoriaSelecionada);
-    });
+    document.querySelectorAll('.card').forEach(c =>
+      c.classList.toggle('active', c.dataset.category === categoriaSelecionada));
 
     if (categoriaInput) categoriaInput.value = categoriaSelecionada;
-    if (categoriaDescricao) categoriaDescricao.textContent = config.modal;
+    if (categoriaDescricao) categoriaDescricao.textContent = cfg.modal;
 
-    setText('#temaExemplo', config.label);
+    const temaEx = document.getElementById('temaExemplo');
+    if (temaEx) temaEx.textContent = cfg.label;
 
-    const firstPhone = document.querySelector('.phones .phone:first-child h2');
-    if (firstPhone) firstPhone.innerHTML = config.title.replace(' ', '<br><span class="neon">') + '</span>';
-
-    const finalTitle = document.querySelector('.encerramento h2');
-    if (finalTitle) finalTitle.textContent = config.final;
-
-    const quotes = document.querySelectorAll('.frases-final .quote');
-    config.quotes.forEach((q, i) => {
-      if (quotes[i]) quotes[i].textContent = '“' + q + '”';
-    });
-
-    const timeItems = document.querySelectorAll('.timeline-final .time-item');
-    config.timeline.forEach((item, i) => {
-      if (!timeItems[i]) return;
-      timeItems[i].innerHTML = `${item[0]} <strong>${item[1]}</strong><p>${item[2]}</p>`;
-    });
+    const p1 = document.getElementById('phone1Text');
+    if (p1) p1.innerHTML = cfg.phone1;
+    const p2l = document.getElementById('phone2Label');
+    if (p2l) p2l.textContent = cfg.phone2label;
+    const p2n = document.getElementById('phone2Num');
+    if (p2n) p2n.textContent = cfg.phone2num;
+    const p2u = document.getElementById('phone2Unit');
+    if (p2u) p2u.textContent = cfg.phone2unit;
+    const p3l = document.getElementById('phone3Label');
+    if (p3l) p3l.textContent = cfg.phone3label;
+    const p3u = document.getElementById('phone3Unit');
+    if (p3u) p3u.textContent = cfg.phone3unit;
+    const p4 = document.getElementById('phone4Word');
+    if (p4) p4.textContent = cfg.phone4word;
+    const p5 = document.getElementById('phone5Phrase');
+    if (p5) p5.textContent = cfg.phone5;
+    const p6 = document.getElementById('phone6Sub');
+    if (p6) p6.textContent = cfg.phone6;
   }
 
-  function abrirFormulario() {
-    if (!modal) return;
-    aplicarCategoria(categoriaSelecionada);
-    modal.classList.add('active');
+  // ---- MODAL ----
+  function abrirFormulario(cat) {
+    if (cat) aplicarCategoria(cat);
+    modal?.classList.add('active');
+    document.body.style.overflow = 'hidden';
   }
-
   function fecharFormulario() {
     modal?.classList.remove('active');
+    document.body.style.overflow = '';
   }
 
   document.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      aplicarCategoria(card.dataset.category || 'casal');
-      abrirFormulario();
-    });
+    card.addEventListener('click', () => abrirFormulario(card.dataset.category));
   });
-
   document.querySelectorAll('.js-open-modal').forEach(btn => {
-    btn.addEventListener('click', abrirFormulario);
+    btn.addEventListener('click', () => abrirFormulario());
+  });
+  document.getElementById('closeModal')?.addEventListener('click', fecharFormulario);
+  modal?.addEventListener('click', e => { if (e.target === modal) fecharFormulario(); });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fecharFormulario();
   });
 
-  closeModal?.addEventListener('click', fecharFormulario);
-
-  modal?.addEventListener('click', e => {
-    if (e.target === modal) fecharFormulario();
-  });
-
+  // ---- NAV SMOOTH SCROLL ----
   document.querySelectorAll('nav a[href^="#"]').forEach(link => {
     link.addEventListener('click', e => {
       const target = document.querySelector(link.getAttribute('href'));
       if (!target) return;
       e.preventDefault();
+      fecharFormulario();
       target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
-  function fileToDataURL(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
+  // ---- FILE: PHOTOS ----
+  const photosInput = document.getElementById('photos');
+  const imgPreviewGrid = document.getElementById('imgPreviewGrid');
 
+  photosInput?.addEventListener('change', () => {
+    imgPreviewGrid.innerHTML = '';
+    const files = Array.from(photosInput.files).slice(0, 6);
+    files.forEach(file => {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      imgPreviewGrid.appendChild(img);
+    });
+  });
+
+  // Drag-drop fotos
+  const photoDropArea = document.getElementById('photoDropArea');
+  photoDropArea?.addEventListener('dragover', e => { e.preventDefault(); photoDropArea.classList.add('drag-over'); });
+  photoDropArea?.addEventListener('dragleave', () => photoDropArea.classList.remove('drag-over'));
+  photoDropArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    photoDropArea.classList.remove('drag-over');
+    photosInput.files = e.dataTransfer.files;
+    photosInput.dispatchEvent(new Event('change'));
+  });
+
+  // ---- FILE: MUSIC ----
+  const musicInput = document.getElementById('music');
+  const musicPreviewBox = document.getElementById('musicPreviewBox');
+  const musicPreviewName = document.getElementById('musicPreviewName');
+  const previewAudio = document.getElementById('previewAudio');
+  const musicError = document.getElementById('musicError');
+
+  musicInput?.addEventListener('change', () => {
+    const file = musicInput.files?.[0];
+    musicError.style.display = 'none';
+    musicPreviewBox.classList.remove('visible');
+
+    if (!file) return;
+
+    // Verify audio
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/m4a', 'audio/x-m4a'];
+    const isValidExt = /\.(mp3|wav|ogg|aac|m4a)$/i.test(file.name);
+
+    if (!validTypes.includes(file.type) && !isValidExt) {
+      musicError.style.display = 'block';
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    previewAudio.src = url;
+    musicPreviewName.textContent = '🎵 ' + file.name.replace(/\.[^/.]+$/, '');
+    musicPreviewBox.classList.add('visible');
+  });
+
+  // Drag-drop musica
+  const musicDropArea = document.getElementById('musicDropArea');
+  musicDropArea?.addEventListener('dragover', e => { e.preventDefault(); musicDropArea.classList.add('drag-over'); });
+  musicDropArea?.addEventListener('dragleave', () => musicDropArea.classList.remove('drag-over'));
+  musicDropArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    musicDropArea.classList.remove('drag-over');
+    musicInput.files = e.dataTransfer.files;
+    musicInput.dispatchEvent(new Event('change'));
+  });
+
+  // ---- WHATSAPP ANALYSIS ----
   function analisarConversaWhatsApp(texto) {
     const clean = (texto || '').toLowerCase();
     const linhas = clean.split(/\r?\n/).filter(Boolean);
     const totalMessages = Math.max(linhas.length, 0);
-
     const loveCount = (clean.match(/eu te amo|te amo|amo você|amo vc/g) || []).length;
     const saudadeCount = (clean.match(/saudade|sdds|saudades/g) || []).length;
     const kkkCount = (clean.match(/kkk+/g) || []).length;
-
     const emojis = clean.match(/[\u{1F300}-\u{1FAFF}❤️💕💖💘💝😍😂😭🥺🔥✨]/gu) || [];
     const emojiMap = {};
     emojis.forEach(e => emojiMap[e] = (emojiMap[e] || 0) + 1);
     const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '❤️';
-
-    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro','amor']);
+    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro']);
     const words = clean.normalize('NFD').replace(/[\u0300-\u036f]/g,'').match(/\b[a-z]{4,}\b/g) || [];
     const wordMap = {};
-    words.forEach(w => {
-      if (!stop.has(w)) wordMap[w] = (wordMap[w] || 0) + 1;
-    });
-
+    words.forEach(w => { if (!stop.has(w)) wordMap[w] = (wordMap[w] || 0) + 1; });
     let topWord = Object.entries(wordMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
     if ((clean.match(/amor/g) || []).length >= 2) topWord = 'amor';
-
     const hourMap = {};
-    const hourMatches = texto.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g) || [];
-    hourMatches.forEach(h => {
+    (texto.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g) || []).forEach(h => {
       const hour = h.split(':')[0].padStart(2,'0');
       hourMap[hour] = (hourMap[hour] || 0) + 1;
     });
     const favoriteHour = Object.entries(hourMap).sort((a,b)=>b[1]-a[1])[0]?.[0];
     const favoriteTime = favoriteHour ? `${favoriteHour}:00` : '23:47';
-
     const emotionalLevel = loveCount + saudadeCount + kkkCount > 40 ? 'Muito alto' : loveCount + saudadeCount > 10 ? 'Alto' : 'Especial';
-
     return {
       totalMessages: totalMessages || 18432,
       topWord,
@@ -1175,379 +956,126 @@ document.addEventListener('DOMContentLoaded', () => {
       emotionalLevel,
       generatedPhrases: [
         `A palavra que mais marcou essa história foi: ${topWord}.`,
-        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — sinal de presença mesmo na distância.` : 'Mesmo nas mensagens simples, vocês criaram presença.',
-        kkkCount > 0 ? `O humor também fez parte: foram muitas risadas no caminho.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.'
+        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — sinal de presença mesmo na distância.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.',
+        kkkCount > 0 ? 'O humor também fez parte: foram muitas risadas no caminho.' : 'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
       ]
     };
   }
 
-  async function lerArquivoTexto(file) {
-    if (!file) return null;
-    return await file.text();
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
   }
 
-  function formatNumber(n) {
-    return Number(n || 0).toLocaleString('pt-BR');
-  }
-
-  function obterDadosRetrospectiva() {
-    try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-    } catch {
-      return {};
-    }
-  }
-
-  async function salvarDadosRetrospectivaLocal() {
+  async function salvarDadosLocal() {
     const nome1 = document.getElementById('nome1')?.value || 'Robson';
     const nome2 = document.getElementById('nome2')?.value || 'Raa';
-    const mensagem = document.getElementById('mensagem')?.value ||
-      'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
-
-    const fotos = Array.from(document.getElementById('photos')?.files || []).slice(0, 6);
+    const mensagem = document.getElementById('mensagem')?.value || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+    const fotos = Array.from(photosInput?.files || []).slice(0, 6);
     const fotosBase64 = [];
-
     for (const foto of fotos.slice(0, 3)) {
-      try {
-        fotosBase64.push(await fileToDataURL(foto));
-      } catch (error) {
-        console.warn('Não foi possível salvar uma foto localmente.', error);
-      }
+      try { fotosBase64.push(await fileToDataURL(foto)); } catch(e) {}
     }
-
-    const musica = document.getElementById('music')?.files?.[0];
+    const musica = musicInput?.files?.[0];
+    let musicSrc = null;
+    if (musica) {
+      try { musicSrc = await fileToDataURL(musica); } catch(e) {}
+    }
     const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
-    const textoWhats = await lerArquivoTexto(whatsappFile);
-    const insights = textoWhats ? analisarConversaWhatsApp(textoWhats) : {
-      totalMessages: 18432,
-      topWord: 'amor',
-      loveCount: 82,
-      saudadeCount: 103,
-      favoriteTime: '23:47',
-      topEmoji: '😂',
-      emotionalLevel: 'Alto',
-      generatedPhrases: [
-        'Vocês transformaram mensagens simples em uma história extraordinária.',
-        'O carinho aparece mais nos detalhes do que nas grandes frases.',
-        'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
-      ]
-    };
-
+    let insights = { totalMessages:18432, topWord:'amor', loveCount:82, saudadeCount:103, favoriteTime:'23:47', topEmoji:'😂', emotionalLevel:'Alto', generatedPhrases:['Vocês transformaram mensagens simples em uma história extraordinária.','O carinho aparece mais nos detalhes do que nas grandes frases.','Mesmo nas mensagens simples, vocês criaram um lar um no outro.'] };
+    if (whatsappFile) {
+      try { insights = analisarConversaWhatsApp(await whatsappFile.text()); } catch(e) {}
+    }
     const dados = {
-      nome1,
-      nome2,
-      mensagem,
+      nome1, nome2, mensagem,
       categoria: categoriaSelecionada,
-      fotos: fotosBase64,
-      musicaNome: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Música escolhida',
+      photos: fotosBase64,
+      musicSrc,
+      musicName: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Trilha sonora da história',
       insights,
       criadoEm: Date.now()
     };
-
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dados));
-    } catch (error) {
-      console.warn('LocalStorage cheio ou bloqueado. A arte usará dados padrão.', error);
+      localStorage.setItem('loveblastData', JSON.stringify(dados));
+    } catch(e) {
+      // If too large, save without media
+      const dadosSemMidia = { ...dados, photos: [], musicSrc: null };
+      try { localStorage.setItem('loveblastData', JSON.stringify(dadosSemMidia)); } catch(e2) {}
     }
-
     return dados;
   }
 
-  function preencherArteFinal(dados = {}) {
-    const config = CATEGORY_CONFIG[dados.categoria || categoriaSelecionada] || CATEGORY_CONFIG.casal;
-    aplicarCategoria(dados.categoria || categoriaSelecionada);
-
-    const nome1 = dados.nome1 || document.getElementById('nome1')?.value || 'Robson';
-    const nome2 = dados.nome2 || document.getElementById('nome2')?.value || 'Raa';
-    const mensagem = dados.mensagem || document.getElementById('mensagem')?.value ||
-      'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
-
-    setText('#finalNome1', nome1);
-    setText('#finalNome2', nome2);
-    setText('#cartaNome', nome2);
-    setText('#mensagemFinal', mensagem);
-
-    const insights = dados.insights || {};
-    setText('#totalMensagens', formatNumber(insights.totalMessages || 18432));
-    setText('#palavraMaisUsada', insights.topWord || 'amor');
-    setText('#saudadeCount', `saudade ${insights.saudadeCount || 103} vezes`);
-
-    const quotes = document.querySelectorAll('.frases-final .quote');
-    const generated = insights.generatedPhrases || config.quotes;
-    generated.slice(0, 3).forEach((q, i) => {
-      if (quotes[i]) quotes[i].textContent = '“' + q + '”';
-    });
-
-    const galeria = document.getElementById('galeriaFinal');
-    const fotoPrincipal = document.getElementById('fotoPrincipal');
-    if (galeria) galeria.innerHTML = '';
-
-    const fallbackFotos = [
-      'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',
-      'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=900',
-      'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=900'
-    ];
-
-    const fotos = dados.fotos && dados.fotos.length ? dados.fotos : fallbackFotos;
-
-    fotos.slice(0, 3).forEach((src, index) => {
-      const img = document.createElement('img');
-      img.src = src;
-      galeria?.appendChild(img);
-
-      if (index === 0 && fotoPrincipal) fotoPrincipal.src = src;
-    });
-
-    setText('#nomeMusicaFinal', dados.musicaNome || 'Música escolhida');
-  }
-
-  function mostrarArteFinal() {
-    preencherArteFinal(obterDadosRetrospectiva());
-
-    const arteFinal = document.getElementById('arteFinal');
-    arteFinal?.classList.remove('hidden');
-
-    setTimeout(() => {
-      arteFinal?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 300);
-  }
-
+  // ---- PREVIEW BUTTON ----
   document.getElementById('previewBtn')?.addEventListener('click', async () => {
-    const dados = await salvarDadosRetrospectivaLocal();
-
-    const nome1 = dados.nome1 || 'Você';
-    const nome2 = dados.nome2 || 'Pessoa especial';
-    const mensagem = dados.mensagem || 'Sua retrospectiva está quase pronta.';
-    const photos = Array.from(document.getElementById('photos')?.files || []);
-
-    setText('#previewText', `${nome1} & ${nome2} — ${CATEGORY_CONFIG[dados.categoria]?.label || 'CASAL'}. ${mensagem}`);
-
-    const previewImages = document.getElementById('previewImages');
-    if (previewImages) {
-      previewImages.innerHTML = '';
-      photos.slice(0, 4).forEach(file => {
-        const img = document.createElement('img');
-        img.src = URL.createObjectURL(file);
-        previewImages.appendChild(img);
-      });
-    }
-
-    const audio = document.getElementById('previewAudio');
-    const music = document.getElementById('music')?.files?.[0];
-
-    if (audio) {
-      if (music) {
-        audio.src = URL.createObjectURL(music);
-        audio.style.display = 'block';
-      } else {
-        audio.style.display = 'none';
+    const btn = document.getElementById('previewBtn');
+    btn.textContent = '⏳ Gerando prévia...';
+    btn.disabled = true;
+    try {
+      const dados = await salvarDadosLocal();
+      const cfg = CATEGORY_CONFIG[dados.categoria] || CATEGORY_CONFIG.casal;
+      const pr = document.getElementById('previewResult');
+      const pt = document.getElementById('previewText');
+      const pi = document.getElementById('previewImages');
+      if (pt) pt.textContent = `${dados.nome1} & ${dados.nome2} — ${cfg.label}. ${dados.mensagem}`;
+      if (pi) {
+        pi.innerHTML = '';
+        Array.from(photosInput?.files || []).slice(0, 4).forEach(file => {
+          const img = document.createElement('img');
+          img.src = URL.createObjectURL(file);
+          pi.appendChild(img);
+        });
       }
-    }
-
-    const pr = document.getElementById('previewResult');
-    pr?.classList.add('active');
-
-    const miniText = dados.insights
-      ? `Insight: ${formatNumber(dados.insights.totalMessages)} mensagens analisadas. Palavra marcante: ${dados.insights.topWord}.`
-      : '';
-    if (miniText && pr) {
-      let notice = pr.querySelector('.notice-ok');
-      if (!notice) {
-        notice = document.createElement('div');
-        notice.className = 'notice-ok';
-        pr.appendChild(notice);
-      }
-      notice.textContent = miniText;
+      if (pr) pr.classList.add('active');
+    } finally {
+      btn.textContent = '✨ Ver prévia';
+      btn.disabled = false;
     }
   });
 
+  // ---- PAY BUTTON ----
   document.getElementById('payBtn')?.addEventListener('click', async () => {
     const payBtn = document.getElementById('payBtn');
-
     const nome1 = document.getElementById('nome1')?.value.trim();
     const nome2 = document.getElementById('nome2')?.value.trim();
     const email = document.getElementById('email')?.value.trim();
-    const mensagem = document.getElementById('mensagem')?.value.trim();
-
     if (!nome1 || !nome2 || !email) {
       alert('Preencha nome, nome da pessoa e e-mail.');
       return;
     }
-
-    const formData = new FormData();
-    formData.append('nome1', nome1);
-    formData.append('nome2', nome2);
-    formData.append('email', email);
-    formData.append('mensagem', mensagem || '');
-    formData.append('categoria', categoriaSelecionada);
-
-    Array.from(document.getElementById('photos')?.files || []).forEach(file => {
-      formData.append('photos', file);
-    });
-
-    const music = document.getElementById('music')?.files?.[0];
-    if (music) formData.append('music', music);
-
-    const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
-    if (whatsappFile) formData.append('whatsappFile', whatsappFile);
-
+    payBtn.disabled = true;
+    payBtn.textContent = 'CRIANDO SESSÃO...';
     try {
-      await salvarDadosRetrospectivaLocal();
-
-      payBtn.disabled = true;
-      payBtn.textContent = 'CRIANDO SESSÃO...';
-
-      await salvarDadosLoveBlast();
-
-    const response = await fetch('/criar-sessao', {
-        method: 'POST',
-        body: formData
-      });
-
+      await salvarDadosLocal();
+      const formData = new FormData();
+      formData.append('nome1', nome1);
+      formData.append('nome2', nome2);
+      formData.append('email', email);
+      formData.append('mensagem', document.getElementById('mensagem')?.value || '');
+      formData.append('categoria', categoriaSelecionada);
+      Array.from(photosInput?.files || []).forEach(f => formData.append('photos', f));
+      const musicFile = musicInput?.files?.[0];
+      if (musicFile) formData.append('music', musicFile);
+      const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
+      if (whatsFile) formData.append('whatsappFile', whatsFile);
+      const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
       const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.erro || 'Erro ao iniciar pagamento.');
-      }
-
-      if (data.checkoutUrl) {
-        window.location.href = data.checkoutUrl;
-        return;
-      }
-
+      if (!response.ok) throw new Error(data.erro || 'Erro ao iniciar pagamento.');
+      if (data.checkoutUrl) { window.location.href = data.checkoutUrl; return; }
       alert('Não foi possível iniciar o pagamento.');
-
-    } catch (error) {
-      console.error(error);
+    } catch(error) {
       alert(error.message || 'Erro ao iniciar pagamento.');
       payBtn.disabled = false;
-      payBtn.textContent = 'Finalizar pagamento';
+      payBtn.textContent = '💳 Finalizar e pagar';
     }
   });
 
-  window.baixarArte = function baixarArte() {
-    window.print();
-  };
-
-  window.compartilharArte = function compartilharArte() {
-    if (navigator.share) {
-      navigator.share({
-        title: 'Minha retrospectiva LoveBlast',
-        text: 'Olha essa retrospectiva que eu criei ❤️',
-        url: window.location.href
-      });
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-      alert('Link copiado!');
-    }
-  };
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('pago') === '1') {
-    mostrarArteFinal();
-  }
-
+  // Init
   aplicarCategoria('casal');
 });
-
-function loveblastFileToDataURL(file) {
-  return new Promise(resolve => {
-    if (!file) return resolve(null);
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = () => resolve(null);
-    reader.readAsDataURL(file);
-  });
-}
-
-function analisarWhatsAppTexto(texto) {
-  const lower = (texto || '').toLowerCase();
-  const words = lower
-    .replace(/[^\p{L}\p{N}\s❤️😂🥰😍😭🤣💕💖]/gu, ' ')
-    .split(/\s+/)
-    .filter(w => w.length > 2);
-
-  const ignore = new Set(['que','com','para','uma','não','sim','por','dos','das','vou','você','voce','ele','ela','mas','meu','minha','seu','sua','tem','estou','estava','isso','aqui','hoje','amanhã','bom','boa']);
-  const counts = {};
-  words.forEach(w => {
-    if (!ignore.has(w)) counts[w] = (counts[w] || 0) + 1;
-  });
-
-  const topWord = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
-  const totalMessages = (texto.match(/\n/g) || []).length || Math.max(1, Math.round(words.length / 8));
-
-  return {
-    totalMessages,
-    topWord,
-    loveCount: (lower.match(/eu te amo|te amo/g) || []).length,
-    saudadeCount: (lower.match(/saudade|saudades/g) || []).length,
-    favoriteTime: '23:47',
-    emoji: '😂'
-  };
-}
-
-async function salvarDadosLoveBlast() {
-  const photosInput = document.getElementById('photos');
-  const musicInput = document.getElementById('music');
-  const whatsappInput = document.getElementById('whatsappFile');
-
-  const photoFiles = Array.from(photosInput?.files || []).slice(0, 6);
-  const photos = [];
-  for (const file of photoFiles) {
-    const dataUrl = await loveblastFileToDataURL(file);
-    if (dataUrl) if(dataUrl && dataUrl.length<1500000) photos.push(dataUrl);
-  }
-
-  let musicSrc = null;
-  let musicName = 'Trilha sonora da história';
-  const musicFile = musicInput?.files?.[0];
-  if (musicFile) {
-    musicSrc = await loveblastFileToDataURL(musicFile);
-    musicName = musicFile.name.replace(/\.[^/.]+$/, '');
-  }
-
-  let insights = {
-    totalMessages: 18432,
-    topWord: 'amor',
-    loveCount: 82,
-    saudadeCount: 103,
-    favoriteTime: '23:47',
-    emoji: '😂'
-  };
-
-  const whatsFile = whatsappInput?.files?.[0];
-  if (whatsFile) {
-    const text = await whatsFile.text();
-    insights = analisarWhatsAppTexto(text);
-  }
-
-  const data = {
-    nome1: document.getElementById('nome1')?.value?.trim() || 'Robson',
-    nome2: document.getElementById('nome2')?.value?.trim() || 'Raa',
-    email: document.getElementById('email')?.value?.trim() || '',
-    mensagem: document.getElementById('mensagem')?.value?.trim() || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
-    categoria: typeof categoriaSelecionada !== 'undefined' ? categoriaSelecionada : 'casal',
-    photos,
-    musicSrc,
-    musicName,
-    insights
-  };
-
-  try {
-    localStorage.setItem('loveblastData', JSON.stringify(data));
-  } catch (err) {
-    console.warn('Não foi possível salvar todos os dados localmente:', err);
-    delete data.photos;
-    delete data.musicSrc;
-    localStorage.setItem('loveblastData', JSON.stringify(data));
-  }
-
-  return data;
-}
-
 </script>
-
-<link rel="stylesheet" href="/loveblast-fixes.css">
-<script src="/loveblast-fixes.js"></script>
 </body>
 </html>
