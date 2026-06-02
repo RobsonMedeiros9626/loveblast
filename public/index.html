@@ -511,7 +511,22 @@ nav a:hover{background:rgba(255,45,120,.12)}
 }
 /* HIDE final art on index */
 #arteFinal,.final-experience,.final-grid,.extra{display:none!important}
+
+/* CSS VARIABLE support on index */
+:root{
+  --accent:#ff2d78;
+  --accent-rgb:255,45,120;
+  --glow:rgba(255,45,120,.7);
+}
+.card.active{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 40px rgba(var(--accent-rgb),.5)!important;
+}
+.card.active::after{
+  background:linear-gradient(90deg,var(--accent),var(--accent))!important;
+}
 </style>
+<link rel="stylesheet" href="/loveblast-sahred.css">
 </head>
 <body>
 
@@ -796,6 +811,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (categoriaInput) categoriaInput.value = categoriaSelecionada;
     if (categoriaDescricao) categoriaDescricao.textContent = cfg.modal;
 
+    // Apply accent color via CSS vars
+    if (window._lb && window._lb.getTheme) {
+      const t = window._lb.getTheme(categoriaSelecionada);
+      const r = document.documentElement;
+      r.style.setProperty('--accent', t.accent);
+      r.style.setProperty('--accent-rgb', t.accentRgb);
+      r.style.setProperty('--glow', t.glow);
+    }
+
     const temaEx = document.getElementById('temaExemplo');
     if (temaEx) temaEx.textContent = cfg.label;
 
@@ -1077,7 +1101,6 @@ document.addEventListener('DOMContentLoaded', () => {
   aplicarCategoria('casal');
 });
 </script>
-<link rel="stylesheet" href="/loveblast-shared.css">
 <script src="/loveblast-shared.js"></script>
 </body>
 </html>
