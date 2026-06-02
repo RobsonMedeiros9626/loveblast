@@ -541,130 +541,68 @@ function buildPanel(type,data,t,ins){
       </div>`;
 
     case 'foto': {
+      // Pick real photos or nothing — never show logo fallback here
       const realPhotos = photos.filter(Boolean);
-      const hasPhoto = realPhotos.length > 0;
-      const firstPhoto = hasPhoto ? realPhotos[0] : '';
-
-      // Date meta
-      let diasJuntos = '', dataFormatada = '';
-      if (data.dataInicio) {
-        const d = parseLocalDate(data.dataInicio);
-        const diff = Math.floor((new Date() - d) / 86400000);
-        diasJuntos = diff > 0 ? `${diff.toLocaleString('pt-BR')} dias desde então` : '';
-        dataFormatada = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
-      }
-
-      const captionName = data.nome2 || 'você';
-
-      return `<div class="panel p-maquina" id="painelMaquina">
-        <div class="panel-num" style="position:absolute;top:24px;left:28px;z-index:10">02 COMEÇO DE TUDO</div>
-
-        <!-- COUNTDOWN -->
-        <div class="mt-countdown" id="mtCountdown">
-          <div class="mt-num" id="mtNum">3</div>
-          <div class="mt-label" id="mtLabel">Voltando no tempo...</div>
-        </div>
-
-        <!-- POLAROID REVEAL (hidden initially) -->
-        <div class="mt-polaroid-wrap" id="mtReveal">
-          ${hasPhoto ? `
-          <div class="mt-polaroid">
-            <img src="${firstPhoto}" alt="Primeira memória" onerror="this.closest('.mt-polaroid').style.display='none'">
-            <div class="mt-polaroid-caption">📸 ${captionName}</div>
-          </div>` : `
-          <div style="width:240px;height:270px;border:2px dashed rgba(var(--ac-rgb),.3);border-radius:14px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;color:rgba(255,255,255,.3)">
-            <div style="font-size:40px">📸</div>
-            <div style="font-size:13px">Adicione uma foto</div>
-          </div>`}
-
-          <div>
-            <div class="mt-title">Sem perceber, <span>esse momento<br>mudaria tudo.</span></div>
+      const hasPhotos = realPhotos.length > 0;
+      // Build 3 stacked mini-photos (right column)
+      const stackImgs = hasPhotos
+        ? realPhotos.slice(0,3).map((src,i) => {
+            const rot = ['-4deg','2deg','-2deg'][i] || '0deg';
+            const top = [0, 60, 118][i] || i*58;
+            return `<img src="${src}" style="position:absolute;top:${top}px;right:0;width:140px;height:100px;object-fit:cover;border-radius:10px;border:3px solid rgba(255,255,255,.9);box-shadow:0 8px 28px rgba(0,0,0,.6);transform:rotate(${rot})" onerror="this.src.indexOf('unsplash')>-1?null:this.remove()">`;
+          }).join('')
+        : '';
+      return `<div class="panel p-comeco" style="display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#07070f,#130510)">
+        <div class="panel-num">02 NOSSAS MEMÓRIAS</div>
+        <div style="display:flex;align-items:center;gap:0;margin-top:20px;flex:1">
+          <!-- LEFT: text -->
+          <div style="flex:1;min-width:0;padding-right:${hasPhotos?'170px':'0'}">
+            <h2 style="font-size:clamp(28px,4.5vw,52px);font-weight:900;line-height:1.05">
+              Momentos que <span style="color:var(--ac);text-shadow:0 0 22px var(--glow)">ficam</span><br>para sempre.
+            </h2>
+            <p style="font-size:14px;margin-top:16px;color:rgba(255,255,255,.5);line-height:1.6">
+              Cada imagem carrega um pedaço<br>dessa história incrível.
+            </p>
+            ${hasPhotos ? `
+            <div style="display:flex;gap:8px;margin-top:24px;flex-wrap:wrap">
+              ${realPhotos.slice(0,4).map((src,i) =>
+                `<img src="${src}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:2px solid rgba(var(--ac-rgb),.5);box-shadow:0 4px 14px rgba(0,0,0,.4)" onerror="this.style.display='none'">`
+              ).join('')}
+              ${realPhotos.length > 4 ? `<div style="width:52px;height:52px;border-radius:8px;border:2px solid rgba(var(--ac-rgb),.3);background:rgba(var(--ac-rgb),.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--ac)">+${realPhotos.length-4}</div>` : ''}
+            </div>` : `
+            <div style="margin-top:24px;padding:14px 16px;border:1px dashed rgba(255,255,255,.15);border-radius:12px;font-size:13px;color:rgba(255,255,255,.3)">
+              📸 As fotos aparecerão aqui
+            </div>`}
           </div>
-
-          <div class="mt-meta">
-            ${dataFormatada ? `<div class="mt-meta-item">📅 ${dataFormatada}</div>` : ''}
-            ${diasJuntos    ? `<div class="mt-meta-item">❤️ ${diasJuntos}</div>`   : ''}
-            <div class="mt-meta-item">✨ A primeira memória</div>
-          </div>
+          <!-- RIGHT: stacked photos -->
+          ${hasPhotos ? `<div style="position:absolute;right:28px;top:50%;transform:translateY(-50%);width:160px;height:${Math.min(realPhotos.slice(0,3).length,3)*58+44}px">${stackImgs}</div>` : ''}
         </div>
       </div>`;
     }
-
 
     case 'timeline': {
-      const totalMsgs  = Number(ins.totalMessages || 18432).toLocaleString('pt-BR');
-      const topWord    = ins.topWord    || 'amor';
-      const topEmoji   = ins.topEmoji   || '😂';
-      const loveCount  = ins.loveCount  || 82;
-      const saudadeC   = ins.saudadeCount || 103;
-      const favTime    = ins.favoriteTime || '23:47';
-      const photoCount = (photos.filter(Boolean).length) || 0;
-      const emoLevel   = ins.emotionalLevel || 'Alto';
-      const totalRaw   = Number(ins.totalMessages || 18432);
-
-      // Intensity score visual
-      const intensity = totalRaw > 20000 ? '🔥🔥🔥 Extremo' : totalRaw > 10000 ? '🔥🔥 Alto' : '🔥 Especial';
-
-      // Auto-generated unique phrase
-      const phrases = ins.generatedPhrases || [];
-      const autoPhrase = phrases[0] || (
-        loveCount > 100
-          ? `Vocês disseram "eu te amo" <strong>${loveCount} vezes</strong>. Algumas histórias não precisam de explicação.`
-          : saudadeC > 50
-          ? `A palavra <strong>"saudade"</strong> apareceu ${saudadeC} vezes — presença mesmo na distância.`
-          : `Vocês trocaram <strong>${totalMsgs} mensagens</strong> e transformaram conversas simples em história.`
-      );
-
-      // "O que torna única" facts
-      const facts = [
-        { ico:'❤️', text:`<strong>"${topWord}"</strong> foi a palavra mais usada de toda a conversa` },
-        { ico:'😂', text:`O emoji favorito foi <strong>${topEmoji}</strong> — o humor também é amor` },
-        { ico:'🌙', text:`A maioria das conversas aconteceu perto das <strong>${favTime}</strong>` },
-        { ico:'💌', text:`Vocês disseram <strong>"eu te amo"</strong> pelo menos <strong>${loveCount} vezes</strong>` },
-        { ico:'💭', text:`<strong>"saudade"</strong> apareceu <strong>${saudadeC} vezes</strong> — presença mesmo longe` },
-      ];
-
-      const icCards = [
-        { ico:'❤️', label:'Palavra favorita',  val: topWord },
-        { ico:'😂', label:'Emoji favorito',     val: topEmoji },
-        { ico:'💌', label:'Eu te amo',          val: `${loveCount}×` },
-        { ico:'🥹', label:'Saudade',            val: `${saudadeC}×` },
-        { ico:'🕑', label:'Horário favorito',   val: favTime },
-        { ico:'💬', label:'Mensagens',          val: totalMsgs },
-        { ico:'🔥', label:'Intensidade',        val: intensity.replace(/🔥+\s/,'') },
-        { ico:'✨', label:'Nível emocional',    val: emoLevel },
-        { ico:'📷', label:'Fotos enviadas',     val: photoCount > 0 ? `${photoCount}` : '—' },
-      ].map(({ico,label,val}) => `
-        <div class="ic-card">
-          <span class="ic-icon">${ico}</span>
-          <div class="ic-label">${label}</div>
-          <div class="ic-val">${val}</div>
+      const tlYears=buildTimelineYears(data.dataInicio,t.timeline);
+      const tlStepper = tlYears.map(([ico,yr,desc], i) => `
+        <div style="display:flex;gap:16px;align-items:flex-start;position:relative">
+          <!-- connector line -->
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--ac);background:rgba(var(--ac-rgb),.15);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 16px rgba(var(--ac-rgb),.35);flex-shrink:0;z-index:1">${ico}</div>
+            ${i < tlYears.length-1 ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,rgba(var(--ac-rgb),.5),rgba(var(--ac-rgb),.1));margin:4px 0"></div>` : ''}
+          </div>
+          <!-- content -->
+          <div style="padding-bottom:${i < tlYears.length-1 ? '8px':'0'};padding-top:10px">
+            <div style="font-size:20px;font-weight:900;color:var(--ac);text-shadow:0 0 12px var(--glow);line-height:1">${yr}</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.75);margin-top:4px">${desc}</div>
+          </div>
         </div>`).join('');
-
-      const factsHTML = facts.map(({ico,text}) =>
-        `<div class="ic-fact"><span class="ic-fact-ico">${ico}</span><span>${text}</span></div>`
-      ).join('');
-
-      return `<div class="panel p-insights-cinema">
-        <div class="panel-num">03 INSIGHTS DA HISTÓRIA</div>
-        <h2 style="font-size:clamp(18px,2.8vw,30px);font-weight:900;margin:12px 0 0;line-height:1.15">
-          A conversa de <span style="color:var(--ac);text-shadow:0 0 18px var(--glow)">${data.nome1||'vocês'} &amp; ${data.nome2||''}</span>
+      return `<div class="panel p-timeline" style="background:linear-gradient(160deg,#05050e,#0f0308)">
+        <div class="panel-num">03 LINHA DO TEMPO</div>
+        <h2 style="font-size:clamp(20px,3vw,34px);font-weight:900;margin:14px 0 22px;line-height:1.1">
+          A história de <span style="color:var(--ac);text-shadow:0 0 18px var(--glow)">${data.nome1||'vocês'}</span>
         </h2>
-
-        <!-- 3-col card grid -->
-        <div class="ic-grid">${icCards}</div>
-
-        <!-- auto phrase -->
-        <div class="ic-unique">${autoPhrase}</div>
-
-        <!-- "O que torna única" -->
-        <div class="ic-unique-section">
-          <h4>✦ O que torna essa história única</h4>
-          <div class="ic-facts">${factsHTML}</div>
-        </div>
+        <div style="display:flex;flex-direction:column">${tlStepper}</div>
       </div>`;
     }
-
 
     case 'insights':
       const total=Number(ins.totalMessages||18432);
@@ -1050,9 +988,8 @@ function hydrate(raw){
     set('starDateLabel','Configure a data de início');
   }
 
-  // Carousels + QR + Máquina do Tempo
+  // Carousels + QR
   initCarousels();
-  initMaquinaDoTempo();
   setTimeout(()=>buildQR(location.href),500);
 }
 
@@ -1134,75 +1071,6 @@ function getMoonPhaseName(p){if(p<.03||p>.97)return'🌑 Lua nova';if(p<.22)retu
 function getSeason(d){const m=d.getMonth(),dy=d.getDate();if(m===11&&dy>=21||m<=1||(m===2&&dy<21))return'☀️ Verão';if(m===2&&dy>=21||m<=4||(m===5&&dy<21))return'🍂 Outono';if(m===5&&dy>=21||m<=7||(m===8&&dy<23))return'❄️ Inverno';return'🌸 Primavera';}
 function getZodiac(d){const m=d.getMonth()+1,dy=d.getDate();if((m===3&&dy>=21)||(m===4&&dy<=19))return'♈ Áries';if((m===4&&dy>=20)||(m===5&&dy<=20))return'♉ Touro';if((m===5&&dy>=21)||(m===6&&dy<=20))return'♊ Gêmeos';if((m===6&&dy>=21)||(m===7&&dy<=22))return'♋ Câncer';if((m===7&&dy>=23)||(m===8&&dy<=22))return'♌ Leão';if((m===8&&dy>=23)||(m===9&&dy<=22))return'♍ Virgem';if((m===9&&dy>=23)||(m===10&&dy<=22))return'♎ Libra';if((m===10&&dy>=23)||(m===11&&dy<=21))return'♏ Escorpião';if((m===11&&dy>=22)||(m===12&&dy<=21))return'♐ Sagitário';if((m===12&&dy>=22)||(m===1&&dy<=19))return'♑ Capricórnio';if((m===1&&dy>=20)||(m===2&&dy<=18))return'♒ Aquário';return'♓ Peixes';}
 function populateStarFacts(d){const p=getMoonPhase(d);set('moonPhase',getMoonPhaseName(p));set('starSeason',getSeason(d));set('starSign',getZodiac(d));set('starDay',['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()]+'.');}
-
-/* ============================================================
-   MÁQUINA DO TEMPO — countdown + polaroid reveal
-============================================================ */
-function initMaquinaDoTempo() {
-  const countdown = document.getElementById('mtCountdown');
-  const reveal    = document.getElementById('mtReveal');
-  const numEl     = document.getElementById('mtNum');
-  const lblEl     = document.getElementById('mtLabel');
-  if (!countdown || !reveal) return;
-
-  const steps = [
-    { num:'3',  lbl:'Voltando no tempo...' },
-    { num:'2',  lbl:'Carregando memórias...' },
-    { num:'1',  lbl:'Quase lá...' },
-    { num:'✨', lbl:'A primeira memória' },
-  ];
-
-  let i = 0;
-  const tick = () => {
-    if (i >= steps.length) {
-      countdown.style.display = 'none';
-      reveal.classList.add('visible');
-      // animate counters in ic-val elements after reveal
-      setTimeout(animateInsightCounters, 400);
-      return;
-    }
-    const s = steps[i++];
-    numEl.textContent = s.num;
-    lblEl.textContent = s.lbl;
-    // re-trigger pulse
-    numEl.style.animation = 'none';
-    void numEl.offsetWidth;
-    numEl.style.animation = '';
-    setTimeout(tick, i === steps.length ? 600 : 800);
-  };
-
-  // Use IntersectionObserver so it starts when panel scrolls into view
-  const obs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      obs.disconnect();
-      setTimeout(tick, 300);
-    }
-  }, { threshold: 0.3 });
-  const panel = document.getElementById('painelMaquina');
-  if (panel) obs.observe(panel);
-}
-
-/* ─── Animate insight counters (numbers count up) ─── */
-function animateInsightCounters() {
-  document.querySelectorAll('.ic-val').forEach(el => {
-    const raw = el.textContent.trim();
-    // Only animate pure numbers or numbers with × suffix
-    const m = raw.match(/^([\d.]+)([×]?)$/);
-    if (!m) return;
-    const target = parseFloat(m[1].replace(/\./g,''));
-    const suffix = m[2] || '';
-    const duration = 1000;
-    const start = performance.now();
-    const update = now => {
-      const p = Math.min((now - start) / duration, 1);
-      const ease = 1 - Math.pow(1 - p, 3);
-      const cur = Math.round(target * ease);
-      el.textContent = cur.toLocaleString('pt-BR') + suffix;
-      if (p < 1) requestAnimationFrame(update);
-    };
-    requestAnimationFrame(update);
-  });
-}
 
 /* ============================================================
    CARROSSEL — galeria de fotos
