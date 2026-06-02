@@ -189,7 +189,7 @@ async function saveRetrospective(req, body) {
     categoria: body.categoria || 'casal',
     dataInicio: body.dataInicio || '',
     insights,
-    photos,
+    photos: photos.slice(0, 10),
     musicSrc,
     musicLink,
     musicName,
@@ -268,7 +268,7 @@ app.post(
           {
             price_data: {
               currency: 'brl',
-              unit_amount: Number(process.env.PRICE_CENTS) || 1990,
+              unit_amount: Number(process.env.PRICE_CENTS) || 999,
               product_data: {
                 name: 'LoveBlast - Retrospectiva Premium',
                 description: `Retrospectiva ${categoria} para ${nome1} & ${nome2}`
