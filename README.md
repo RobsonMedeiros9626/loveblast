@@ -129,14 +129,7 @@ HTML baixado no dispositivo do usuário ✅
 
 ---
 
-## 7. Testar pagamento
 
-No modo teste do Stripe, use o cartão:
-- **Número:** `4242 4242 4242 4242`
-- **Validade:** qualquer data futura
-- **CVC:** qualquer 3 dígitos
-
----
 
 ## 8. Deploy em produção
 
