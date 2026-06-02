@@ -19,8 +19,8 @@ const stripe = process.env.STRIPE_SECRET_KEY
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 25 * 1024 * 1024,
-    fieldSize: 30 * 1024 * 1024,
+    fileSize: 60 * 1024 * 1024,
+    fieldSize: 40 * 1024 * 1024,
     fields: 40
   }
 });
@@ -63,6 +63,8 @@ function saveDataUrl(req, id, dataUrl, label, index) {
     'audio/mpeg': '.mp3',
     'audio/mp3': '.mp3',
     'audio/mp4': '.m4a',
+    'audio/m4a': '.m4a',
+    'audio/x-m4a': '.m4a',
     'audio/aac': '.aac',
     'audio/ogg': '.ogg',
     'audio/wav': '.wav',
