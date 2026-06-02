@@ -690,7 +690,8 @@ nav a:hover{background:rgba(255,45,120,.12)}
       <div id="previewImages" class="preview-row"></div>
     </div>
 
-    <button id="payBtn" class="btn-full secondary" type="button">💳 Finalizar e pagar</button>
+    <button id="payBtn" class="btn-full secondary" type="button" id="payBtn">💳 Finalizar e pagar</button>
+    <p id="localModeNotice" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.4);border-radius:10px;font-size:12px;color:#ffb380;text-align:center">⚡ Modo local: clique em "Ver prévia" para visualizar a retrospectiva direto. Para cobrar pagamento, rode o servidor (<code>npm start</code>).</p>
   </div>
 </div>
 
@@ -1075,10 +1076,23 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Preencha nome, nome da pessoa e e-mail.');
       return;
     }
+
+    // Detecta se está rodando localmente (file://) — sem servidor
+    const isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+    await salvarDadosLocal();
+
+    if (isLocal) {
+      // Modo local: só salva os dados e abre a retrospectiva diretamente
+      // (sem servidor de pagamento disponível)
+      const viewPath = location.href.replace('index.html', 'view.html');
+      window.open(viewPath, '_blank');
+      return;
+    }
+
     payBtn.disabled = true;
     payBtn.textContent = 'CRIANDO SESSÃO...';
     try {
-      await salvarDadosLocal();
       const formData = new FormData();
       formData.append('nome1', nome1);
       formData.append('nome2', nome2);
@@ -1106,6 +1120,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Init
   aplicarCategoria('casal');
+
+  // Show local mode notice if opened as file://
+  if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    const notice = document.getElementById('localModeNotice');
+    const payBtn2 = document.getElementById('payBtn');
+    if (notice) notice.style.display = 'block';
+    if (payBtn2) {
+      payBtn2.textContent = '👁 Ver retrospectiva (modo local)';
+      payBtn2.style.background = 'linear-gradient(90deg,#ff6b1a,#ff2d78)';
+    }
+  }
 });
 </script>
 <script src="/loveblast-shared.js"></script>
