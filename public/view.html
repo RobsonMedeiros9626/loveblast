@@ -418,6 +418,21 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
 /* ============================================================
    THEMES
 ============================================================ */
+/* ============================================================
+   PARSE DATE — evita bug de timezone UTC (ex: 2025-04-20 vira 19/04)
+   Força interpretação como horário local (meio-dia local)
+============================================================ */
+function parseLocalDate(str){
+  if(!str) return new Date();
+  // Accepts "YYYY-MM-DD" from <input type="date">
+  const parts = str.split('-');
+  if(parts.length === 3){
+    const y=parseInt(parts[0],10), m=parseInt(parts[1],10)-1, d=parseInt(parts[2],10);
+    return new Date(y, m, d, 12, 0, 0); // noon local time — never crosses midnight
+  }
+  return new Date(str);
+}
+
 const THEMES={
   casal:{ac:'#ff2d78',acRgb:'255,45,120',glow:'rgba(255,45,120,.75)',bg:'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=900',intro:'ALGUMAS HISTÓRIAS NÃO CABEM EM PALAVRAS.',start:'E desde então, cada detalhe faz sentido.',label:'mensagens',word:'amor',wordIco:'❤️',saudadeIco:'💭',saudade:i=>`saudade ${i.saudadeCount||103} vezes`,musicTitle:'Nossa música',finalPhrase:'ALGUMAS HISTÓRIAS MERECEM SER ETERNIZADAS.',counterLabel:'desde que se conheceram',timeline:[['❤️','2023','Vocês se conheceram'],['💬','2023','Primeiras conversas'],['✈️','2024','Primeira viagem juntos'],['🔥','2025','E ainda parece o começo']],quotes:['O carinho aparece mais nos detalhes do que nas grandes declarações.','Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos.','A saudade foi uma das emoções mais presentes nessa história.']},
   mae:{ac:'#ff6b9d',acRgb:'255,107,157',glow:'rgba(255,107,157,.75)',bg:'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=900',intro:'O AMOR MAIS CONSTANTE DA VIDA.',start:'Tudo começou com cuidado, colo e presença.',label:'momentos especiais',word:'cuidado',wordIco:'🌷',saudadeIco:'🤍',saudade:()=>'cuidado em cada detalhe',musicTitle:'A música dela',finalPhrase:'ALGUNS AMORES MERECEM SER HOMENAGEADOS PARA SEMPRE.',counterLabel:'de amor incondicional',timeline:[['🌷','Sempre','Ela esteve presente'],['🤍','Cuidado','Cada gesto virou memória'],['🏠','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],quotes:['Algumas pessoas não apenas cuidam. Elas viram abrigo.','O amor dela aparece nos detalhes que quase ninguém vê.','Mãe é a primeira forma de amor que a vida ensina.']},
@@ -512,18 +527,21 @@ function hydrate(raw){
   // ── COUNTER
   set('counterSub',t.counterLabel);
   if(data.dataInicio){
-    startCounter(new Date(data.dataInicio));
-    const d=new Date(data.dataInicio);
-    set('counterDate',d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}));
+    // parseLocalDate evita o bug de timezone UTC que muda o dia
+    const d = parseLocalDate(data.dataInicio);
+    startCounter(d);
+    const dateStr = d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+    set('counterDate', dateStr);
     drawStarMap(d);
     populateStarFacts(d);
-    set('starDateLabel',`Céu de ${d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}`);
+    set('starDateLabel', `Céu de ${dateStr}`);
   } else {
-    // fallback: 2 anos atrás
-    const fallback=new Date();fallback.setFullYear(fallback.getFullYear()-2);
-    startCounter(fallback);
-    set('counterDate',fallback.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}));
-    drawStarMap(fallback);populateStarFacts(fallback);
+    // sem data: mostra contador zerado com aviso
+    set('counterDate','—');
+    set('counterSub','Preencha a data de início no formulário');
+    ['cnt-years','cnt-months','cnt-days','cnt-hours','cnt-mins','cnt-secs'].forEach(id=>set(id,'—'));
+    const today = new Date();
+    drawStarMap(today); populateStarFacts(today);
     set('starDateLabel','Configure a data de início para ver o mapa real');
   }
 
@@ -563,7 +581,7 @@ function buildTimelineYears(dataInicio, themeTimeline){
   // If no start date, return theme defaults unchanged
   if(!dataInicio) return themeTimeline;
 
-  const start = new Date(dataInicio);
+  const start = parseLocalDate(dataInicio);
   const startYear = start.getFullYear();
   const now = new Date();
   const currentYear = now.getFullYear();
