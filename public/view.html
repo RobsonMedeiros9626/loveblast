@@ -209,7 +209,110 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
 .dl-spinner{width:52px;height:52px;border-radius:50%;border:4px solid rgba(var(--ac-rgb),.2);border-top-color:var(--ac);animation:spin .75s linear infinite}
 .dl-overlay p{color:var(--ac);font-size:17px;font-weight:700}
 
-/* RESPONSIVE */
+/* ── CARROSSEL DE FOTOS ── */
+.carousel-wrap{
+  position:relative;
+  margin-top:22px;
+  overflow:hidden;
+  border-radius:16px;
+}
+.carousel-track{
+  display:flex;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+  will-change:transform;
+}
+.carousel-track img{
+  width:100%;
+  height:380px;
+  object-fit:cover;
+  flex-shrink:0;
+  border-radius:16px;
+  box-shadow:0 14px 44px rgba(0,0,0,.6);
+}
+.carousel-btn{
+  position:absolute;
+  top:50%;transform:translateY(-50%);
+  width:44px;height:44px;
+  border-radius:50%;
+  border:1px solid rgba(255,255,255,.25);
+  background:rgba(0,0,0,.55);
+  backdrop-filter:blur(8px);
+  color:#fff;font-size:20px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;
+  z-index:4;
+  line-height:1;
+  padding:0;
+}
+.carousel-btn:hover{
+  background:rgba(var(--ac-rgb),.7);
+  border-color:var(--ac);
+  transform:translateY(-50%) scale(1.08);
+}
+.carousel-btn.prev{left:12px}
+.carousel-btn.next{right:12px}
+.carousel-dots{
+  display:flex;gap:7px;justify-content:center;
+  margin-top:14px;
+}
+.carousel-dots span{
+  width:8px;height:8px;border-radius:50%;
+  background:rgba(255,255,255,.2);
+  cursor:pointer;
+  transition:.25s;
+  flex-shrink:0;
+}
+.carousel-dots span.active{
+  background:var(--ac);
+  box-shadow:0 0 10px var(--glow);
+  width:22px;border-radius:99px;
+}
+.carousel-counter{
+  position:absolute;
+  bottom:14px;right:14px;
+  background:rgba(0,0,0,.6);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:99px;
+  padding:4px 12px;
+  font-size:12px;font-weight:900;
+  color:rgba(255,255,255,.85);
+  z-index:4;
+  letter-spacing:.05em;
+}
+
+/* collage carousel */
+.collage-wrap{position:relative}
+.collage-carousel{
+  display:flex;
+  transition:transform .45s cubic-bezier(.4,0,.2,1);
+}
+.collage-slide{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  width:100%;
+  flex-shrink:0;
+  padding-top:2px;
+}
+.collage-slide img{
+  width:100%;height:180px;object-fit:cover;border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+}
+.collage-slide img:first-child{grid-column:1/-1;height:200px}
+
+/* responsive */
+@media(max-width:900px){
+  .carousel-track img{height:280px}
+}
+@media(max-width:520px){
+  .carousel-track img{height:240px}
+  .carousel-btn{width:36px;height:36px;font-size:16px}
+}
+
+/* ── RESPONSIVE ORIGINAL ── */
+
 @media(max-width:900px){
   .retro-grid{grid-template-columns:1fr}
   .panel{min-height:auto;padding:26px 18px}
@@ -287,7 +390,7 @@ const THEMES={
     hasCounter:true,hasInsights:true,hasMusicPlayer:true,
     timeline:[['❤️','início','Se conheceram'],['💬','+1 ano','Primeiras conversas'],['✈️','+2 anos','Primeira viagem'],['🔥','hoje','E ainda parece o começo']],
     quotes:['O carinho aparece mais nos detalhes do que nas grandes declarações.','Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos.','A saudade foi uma das emoções mais presentes nessa história.'],
-    panels:['abertura','foto','timeline','insights','galeria','frases','musica','carta','estrelas','final','share'],
+    panels:['abertura','foto','timeline','insights','galeria','frases','musica','carta','counter','estrelas','final','share'],
     extra:[['💗','Carinho','Muito alto'],['😂','Humor','Presente'],['💬','Comunicação','Frequente'],['🔥','Intensidade','Alta'],['🤝','Conexão','Forte']],
   },
   mae:{
@@ -494,22 +597,59 @@ function buildPanel(type,data,t,ins){
         </div>
       </div>`;
 
-    case 'galeria':
-      const gPics=photos.slice(0,3);
-      const gImgs=gPics.map((src,i)=>`<img src="${src}" alt="Memória" ${i===1?'class="tall"':''} onerror="this.src='${photos_fallback[i%3]}'">`).join('');
+    case 'galeria': {
+      const allGPics = photos.length ? photos : photos_fallback;
+      const gSlides = allGPics.map((src,i) =>
+        `<img src="${src}" alt="Foto ${i+1}" onerror="this.src='${photos_fallback[i%3]}'">`
+      ).join('');
+      const gDots = allGPics.map((_,i) =>
+        `<span class="${i===0?'active':''}" onclick="carouselGo('gal',${i})"></span>`
+      ).join('');
       return `<div class="panel p-gallery">
         <div class="panel-num">05 NOSSAS MEMÓRIAS</div>
-        <div class="gallery-row">${gImgs}</div>
+        <div class="carousel-wrap" id="carouselGal">
+          <div class="carousel-track" id="galTrack" style="width:${allGPics.length*100}%">
+            ${gSlides}
+          </div>
+          ${allGPics.length>1?`
+          <button class="carousel-btn prev" onclick="carouselStep('gal',-1)" aria-label="anterior">&#8249;</button>
+          <button class="carousel-btn next" onclick="carouselStep('gal',1)" aria-label="próxima">&#8250;</button>
+          <div class="carousel-counter"><span id="galCurr">1</span>/${allGPics.length}</div>`:''}
+        </div>
+        ${allGPics.length>1?`<div class="carousel-dots" id="galDots">${gDots}</div>`:''}
       </div>`;
+    }
 
-    case 'galeria_collage':
-      const cPics=photos.slice(0,4);
-      const cImgs=cPics.map((src,i)=>`<img src="${src}" alt="Memória" onerror="this.src='${photos_fallback[i%3]}'">`).join('');
-      const panelN=type==='galeria_collage'?(cat==='familia'?'04':'05'):'05';
+    case 'galeria_collage': {
+      const allCPics = photos.length ? photos : photos_fallback;
+      const panelN = type==='galeria_collage'?(cat==='familia'?'04':'05'):'05';
+      // Group into slides of 3 (1 wide + 2 small)
+      const slides = [];
+      for(let i=0;i<allCPics.length;i+=3){
+        const chunk=allCPics.slice(i,i+3);
+        while(chunk.length<3)chunk.push(chunk[0]||photos_fallback[0]);
+        slides.push(chunk);
+      }
+      const slidesHTML = slides.map(chunk =>
+        `<div class="collage-slide">
+          ${chunk.map((src,si)=>`<img src="${src}" alt="foto" onerror="this.src='${photos_fallback[si%3]}'">`).join('')}
+        </div>`).join('');
+      const cDots = slides.map((_,i)=>
+        `<span class="${i===0?'active':''}" onclick="carouselGo('coll',${i})"></span>`
+      ).join('');
       return `<div class="panel p-gallery">
         <div class="panel-num">${panelN} NOSSAS MEMÓRIAS</div>
-        <div class="gallery-collage">${cImgs}</div>
+        <div class="collage-wrap" style="overflow:hidden;margin-top:20px" id="carouselColl">
+          <div class="collage-carousel" id="collTrack" style="width:${slides.length*100}%">
+            ${slidesHTML}
+          </div>
+          ${slides.length>1?`
+          <button class="carousel-btn prev" style="top:45%" onclick="carouselStep('coll',-1)" aria-label="anterior">&#8249;</button>
+          <button class="carousel-btn next" style="top:45%" onclick="carouselStep('coll',1)" aria-label="próxima">&#8250;</button>`:''}
+        </div>
+        ${slides.length>1?`<div class="carousel-dots" id="collDots">${cDots}</div>`:''}
       </div>`;
+    }
 
     case 'frases':
       const qs=ins.generatedPhrases||t.quotes;
@@ -776,20 +916,33 @@ function hydrate(raw){
 
   // Counter + stars
   const dateStr=data.dataInicio;
+  const hasCounterPanel=!!document.getElementById('cnt-years');
+
   if(dateStr){
     const d=parseLocalDate(dateStr);
-    startCounter(d);
+    if(hasCounterPanel) startCounter(d);
     const label=d.toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
     set('counterDate',label);
     set('starDateLabel',`Céu de ${label}`);
     drawStarMap(d);populateStarFacts(d);
+  } else if(hasCounterPanel){
+    // Sem data: iniciar contador a partir de 1 ano atrás como placeholder
+    // e mostrar aviso no "Desde"
+    const fallback=new Date();fallback.setFullYear(fallback.getFullYear()-1);
+    startCounter(fallback);
+    const el=document.getElementById('counterDate');
+    if(el){
+      el.innerHTML='<span style="font-size:11px;color:rgba(255,255,255,.35);font-weight:400">Preencha a data de início no formulário</span>';
+    }
+    const today=new Date();drawStarMap(today);populateStarFacts(today);
+    set('starDateLabel','Configure a data de início');
   } else {
-    ['cnt-years','cnt-months','cnt-days','cnt-hours','cnt-mins','cnt-secs'].forEach(id=>set(id,'—'));
     const today=new Date();drawStarMap(today);populateStarFacts(today);
     set('starDateLabel','Configure a data de início');
   }
 
-  // QR
+  // Carousels + QR
+  initCarousels();
   setTimeout(()=>buildQR(location.href),500);
 }
 
@@ -871,6 +1024,73 @@ function getMoonPhaseName(p){if(p<.03||p>.97)return'🌑 Lua nova';if(p<.22)retu
 function getSeason(d){const m=d.getMonth(),dy=d.getDate();if(m===11&&dy>=21||m<=1||(m===2&&dy<21))return'☀️ Verão';if(m===2&&dy>=21||m<=4||(m===5&&dy<21))return'🍂 Outono';if(m===5&&dy>=21||m<=7||(m===8&&dy<23))return'❄️ Inverno';return'🌸 Primavera';}
 function getZodiac(d){const m=d.getMonth()+1,dy=d.getDate();if((m===3&&dy>=21)||(m===4&&dy<=19))return'♈ Áries';if((m===4&&dy>=20)||(m===5&&dy<=20))return'♉ Touro';if((m===5&&dy>=21)||(m===6&&dy<=20))return'♊ Gêmeos';if((m===6&&dy>=21)||(m===7&&dy<=22))return'♋ Câncer';if((m===7&&dy>=23)||(m===8&&dy<=22))return'♌ Leão';if((m===8&&dy>=23)||(m===9&&dy<=22))return'♍ Virgem';if((m===9&&dy>=23)||(m===10&&dy<=22))return'♎ Libra';if((m===10&&dy>=23)||(m===11&&dy<=21))return'♏ Escorpião';if((m===11&&dy>=22)||(m===12&&dy<=21))return'♐ Sagitário';if((m===12&&dy>=22)||(m===1&&dy<=19))return'♑ Capricórnio';if((m===1&&dy>=20)||(m===2&&dy<=18))return'♒ Aquário';return'♓ Peixes';}
 function populateStarFacts(d){const p=getMoonPhase(d);set('moonPhase',getMoonPhaseName(p));set('starSeason',getSeason(d));set('starSign',getZodiac(d));set('starDay',['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'][d.getDay()]+'.');}
+
+/* ============================================================
+   CARROSSEL — galeria de fotos
+============================================================ */
+const _carState = {};
+
+function carouselGo(id, idx) {
+  const cfg = _getCarCfg(id);
+  if (!cfg) return;
+  _carState[id] = Math.max(0, Math.min(idx, cfg.total - 1));
+  _updateCar(id, cfg);
+}
+
+function carouselStep(id, dir) {
+  const cfg = _getCarCfg(id);
+  if (!cfg) return;
+  const cur = _carState[id] || 0;
+  _carState[id] = (cur + dir + cfg.total) % cfg.total;
+  _updateCar(id, cfg);
+}
+
+function _getCarCfg(id) {
+  const ids = {
+    gal:  { track: 'galTrack',  dots: 'galDots',  curr: 'galCurr'  },
+    coll: { track: 'collTrack', dots: 'collDots', curr: 'collCurr' },
+  };
+  const el = ids[id];
+  if (!el) return null;
+  const track = document.getElementById(el.track);
+  if (!track) return null;
+  const total = id === 'gal'
+    ? track.querySelectorAll('img').length
+    : track.querySelectorAll('.collage-slide').length;
+  return { ...el, track, total };
+}
+
+function _updateCar(id, cfg) {
+  const idx = _carState[id] || 0;
+  cfg.track.style.transform = `translateX(-${idx * (100 / cfg.total)}%)`;
+
+  // dots
+  const dotsEl = document.getElementById(cfg.dots);
+  if (dotsEl) dotsEl.querySelectorAll('span').forEach((s, i) =>
+    s.classList.toggle('active', i === idx));
+
+  // counter
+  const currEl = document.getElementById(cfg.curr);
+  if (currEl) currEl.textContent = idx + 1;
+}
+
+// Swipe support for carousel
+function _initSwipe(wrapId, id) {
+  const el = document.getElementById(wrapId);
+  if (!el) return;
+  let sx = 0;
+  el.addEventListener('touchstart', e => { sx = e.touches[0].clientX; }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - sx;
+    if (Math.abs(dx) > 40) carouselStep(id, dx < 0 ? 1 : -1);
+  }, { passive: true });
+}
+
+// Init swipe after grid is built
+function initCarousels() {
+  _initSwipe('carouselGal', 'gal');
+  _initSwipe('carouselColl', 'coll');
+}
 
 /* ============================================================
    QR CODE
