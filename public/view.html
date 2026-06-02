@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>LoveBlast — Retrospectiva</title>
+<link rel="stylesheet" href="/loveblast-sahred.css">
 <style>
+/* ── RESET + BASE ── */
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
 body{
@@ -14,317 +16,399 @@ body{
   overflow-x:hidden;
 }
 body::before{
-  content:"";
-  position:fixed;inset:0;
+  content:"";position:fixed;inset:0;
   background:
-    radial-gradient(circle at 20% 5%,rgba(255,45,120,.22),transparent 35%),
-    radial-gradient(circle at 90% 20%,rgba(255,107,26,.16),transparent 35%),
-    radial-gradient(circle at 50% 85%,rgba(255,45,120,.14),transparent 40%);
+    radial-gradient(circle at 20% 8%,rgba(var(--accent-rgb),.2),transparent 32%),
+    radial-gradient(circle at 85% 18%,rgba(255,107,26,.14),transparent 32%),
+    radial-gradient(circle at 50% 88%,rgba(var(--accent-rgb),.12),transparent 38%);
   z-index:-2;
+  transition:background .6s;
 }
 body::after{
-  content:"";
-  position:fixed;inset:0;
-  background-image:radial-gradient(rgba(255,45,120,.55) 1px,transparent 1px);
+  content:"";position:fixed;inset:0;
+  background-image:radial-gradient(rgba(var(--accent-rgb),.45) 1px,transparent 1px);
   background-size:38px 38px;
-  opacity:.05;
-  z-index:-1;
+  opacity:.045;z-index:-1;
 }
+
+/* ── TOPBAR ── */
 .topbar{
   height:68px;
   display:flex;align-items:center;justify-content:space-between;
   padding:0 28px;
-  background:rgba(3,3,6,.82);
+  background:rgba(3,3,6,.85);
   backdrop-filter:blur(18px);
-  border-bottom:1px solid rgba(255,45,120,.2);
+  border-bottom:1px solid rgba(var(--accent-rgb),.18);
   position:sticky;top:0;z-index:10;
+  transition:border-color .4s;
 }
 .logo{
   font-size:24px;font-weight:900;
-  background:linear-gradient(90deg,#ff2d78,#ff8a00);
+  background:linear-gradient(90deg,var(--accent),#ff8a00);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
 }
 .actions{display:flex;gap:10px;align-items:center}
 .action-btn{
-  border:1px solid rgba(255,45,120,.7);
+  border:1px solid rgba(var(--accent-rgb),.65);
   background:rgba(255,255,255,.05);
-  color:#fff;
-  padding:10px 16px;
-  border-radius:12px;
-  font-weight:900;font-size:13px;
-  cursor:pointer;
-  transition:.2s;
+  color:#fff;padding:10px 18px;
+  border-radius:12px;font-weight:900;font-size:13px;
+  cursor:pointer;transition:.2s;
 }
-.action-btn:hover{background:rgba(255,45,120,.15)}
+.action-btn:hover{background:rgba(var(--accent-rgb),.15)}
 .action-btn.primary{
-  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
-  box-shadow:0 0 28px rgba(255,45,120,.35);
+  background:linear-gradient(90deg,var(--accent),var(--accent));
+  box-shadow:0 0 28px rgba(var(--accent-rgb),.35);
   border-color:transparent;
 }
-.action-btn.primary:hover{box-shadow:0 0 40px rgba(255,45,120,.5)}
-.final-experience{padding:36px 16px 80px}
+
+/* ── MAIN LAYOUT ── */
+.final-experience{padding:32px 16px 80px}
 .final-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  max-width:1500px;
-  margin:auto;
-  border:1px solid rgba(255,45,120,.22);
-  box-shadow:0 0 80px rgba(255,45,120,.1);
-  border-radius:2px;
-  overflow:hidden;
+  max-width:1400px;margin:auto;
+  border:1px solid rgba(var(--accent-rgb),.2);
+  box-shadow:0 0 80px rgba(var(--accent-rgb),.08);
+  border-radius:4px;overflow:hidden;
 }
+
+/* ── PANELS ── */
 .final-panel{
-  min-height:520px;
-  padding:42px;
-  border:1px solid rgba(255,45,120,.2);
+  min-height:520px;padding:42px;
+  border:1px solid rgba(var(--accent-rgb),.18);
   background:
-    radial-gradient(circle at 80% 20%,rgba(255,45,120,.16),transparent 38%),
+    radial-gradient(circle at 80% 20%,rgba(var(--accent-rgb),.14),transparent 40%),
     linear-gradient(160deg,rgba(7,7,13,.97),rgba(20,5,11,.97));
-  position:relative;
-  overflow:hidden;
+  position:relative;overflow:hidden;
+  transition:background .5s, border-color .4s;
 }
 .final-panel::before{
-  content:"";
-  position:absolute;inset:-20%;
-  background:radial-gradient(circle,rgba(255,255,255,.07),transparent 30%);
+  content:"";position:absolute;inset:-20%;
+  background:radial-gradient(circle,rgba(255,255,255,.06),transparent 30%);
   opacity:.1;pointer-events:none;
 }
-.final-panel > *{position:relative;z-index:1}
+.final-panel>*{position:relative;z-index:1}
 .step{
   font-size:12px;font-weight:900;
-  color:white;opacity:.7;
-  letter-spacing:.1em;
-  text-transform:uppercase;
+  color:#fff;opacity:.6;
+  letter-spacing:.12em;text-transform:uppercase;
 }
-.brand{color:#ff4b8b;font-size:26px;font-weight:900;margin-top:22px}
+
+/* ── PANEL 01: ABERTURA ── */
 .abertura{display:flex;flex-direction:column;justify-content:center}
+.brand{
+  font-size:22px;font-weight:900;margin-top:24px;
+  color:var(--accent);
+  display:flex;align-items:center;gap:6px;
+}
 .abertura h1{
-  font-size:clamp(50px,7vw,100px);
+  font-size:clamp(52px,7.5vw,106px);
   font-family:"Brush Script MT","Segoe Script",cursive;
-  margin-top:50px;font-weight:400;line-height:1.05;
+  margin-top:40px;font-weight:400;line-height:1.05;
 }
-.abertura h1 b{color:#ff2d78}
-.abertura p{margin-top:20px;color:#eee;font-size:17px}
-.final-panel h2{font-size:clamp(30px,4.5vw,64px);line-height:1.05}
-.highlight,.final-panel h2 span,.final-panel h3,.big-number,.insight-card b{
-  color:#ff2d78;text-shadow:0 0 25px rgba(255,45,120,.7);
+.abertura h1 b{color:var(--accent)}
+.abertura .subtitle{
+  margin-top:22px;
+  font-size:13px;font-weight:900;
+  letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(255,255,255,.55);
 }
+
+/* ── PANEL 02: COMEÇO ── */
 .polaroid{
-  width:clamp(200px,50%,300px);
+  width:clamp(180px,50%,290px);
   background:#fff;padding:12px;
   transform:rotate(-4deg);
-  margin:38px auto 30px;
-  box-shadow:0 24px 55px rgba(0,0,0,.45);
+  margin:36px auto 28px;
+  box-shadow:0 22px 50px rgba(0,0,0,.5);
 }
-.polaroid img{width:100%;height:260px;object-fit:cover;display:block}
-.comeco p{font-size:17px;margin-top:14px;color:#eee;max-width:420px}
+.polaroid img{width:100%;height:250px;object-fit:cover;display:block}
+.comeco h2{font-size:clamp(28px,4.5vw,60px);line-height:1.05}
+.comeco h2 span{color:var(--accent);text-shadow:0 0 22px var(--glow)}
+.comeco p{font-size:16px;margin-top:12px;color:#ddd;max-width:400px}
+
+/* ── PANEL 03: TIMELINE ── */
 .timeline-final{display:flex;flex-direction:column;justify-content:center}
 .time-item{
-  margin:16px 0;
+  margin:14px 0;
   display:grid;
   grid-template-columns:44px 90px 1fr;
-  gap:12px;align-items:center;font-size:20px;
+  gap:10px;align-items:center;
 }
 .time-item .emoji{
   width:40px;height:40px;
-  border:1px solid rgba(255,45,120,.55);
+  border:1px solid rgba(var(--accent-rgb),.5);
   display:flex;align-items:center;justify-content:center;
-  border-radius:50%;background:rgba(255,45,120,.1);
+  border-radius:50%;background:rgba(var(--accent-rgb),.1);
   font-size:18px;
 }
-.time-item strong{color:#ff2d78;font-size:20px}
-.time-item p{color:#ddd;font-size:16px}
-.insights-final h2{font-size:38px}
+.time-item strong{color:var(--accent);font-size:19px}
+.time-item p{color:#ccc;font-size:15px}
+
+/* ── PANEL 04: INSIGHTS — split layout ── */
+.insights-final{
+  display:grid;
+  grid-template-rows:auto 1fr 1fr;
+}
+.insights-split{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:16px;
+  align-items:start;
+}
+.ins-left h2{font-size:clamp(22px,3vw,38px);line-height:1.1}
+.ins-left h2 span{display:block}
 .big-number{
   display:block;
-  font-size:80px;font-weight:900;
-  margin:16px 0 0;
+  font-size:clamp(54px,8vw,86px);font-weight:900;
+  margin:10px 0 4px;
+  color:var(--accent);text-shadow:0 0 22px var(--glow);
   line-height:1;
 }
-.insights-final > p{font-size:26px;font-weight:900;margin-bottom:18px}
+.mensagens-sub{font-size:clamp(14px,2vw,22px);font-weight:900;margin-bottom:12px}
+.ins-equiv{
+  font-size:14px;color:var(--accent);font-weight:700;margin-top:6px;
+}
+.ins-right{display:flex;flex-direction:column;gap:12px}
 .insight-card{
-  margin-top:16px;padding:22px;
-  border:1px solid rgba(255,45,120,.32);
+  padding:18px;
+  border:1px solid rgba(var(--accent-rgb),.3);
   border-radius:16px;
   background:rgba(255,255,255,.04);
-  font-size:20px;
+  font-size:16px;line-height:1.4;
 }
-.insight-card b{font-size:32px}
+.insight-card b{
+  display:block;
+  font-size:clamp(24px,4vw,36px);
+  color:var(--accent);text-shadow:0 0 20px var(--glow);
+  margin-top:4px;
+}
+.insight-card .card-emoji{
+  display:inline-block;
+  background:rgba(var(--accent-rgb),.15);
+  border:1px solid rgba(var(--accent-rgb),.4);
+  border-radius:50%;
+  width:34px;height:34px;
+  line-height:34px;text-align:center;font-size:18px;
+  float:right;margin:-4px 0 0 8px;
+}
+
+/* ── PANEL 05: GALLERY ── */
 .galeria-final{display:flex;flex-direction:column}
+.galeria-final>.step{margin-bottom:0}
 .galeria-fotos{
-  display:flex;gap:14px;align-items:center;justify-content:center;
-  height:380px;margin-top:30px;
+  display:flex;gap:12px;align-items:center;justify-content:center;
+  height:360px;margin-top:28px;
 }
 .galeria-fotos img{
-  width:30%;height:320px;
-  object-fit:cover;border-radius:18px;
-  box-shadow:0 16px 50px rgba(0,0,0,.45);
+  width:30%;height:300px;
+  object-fit:cover;border-radius:16px;
+  box-shadow:0 14px 40px rgba(var(--accent-rgb),.2);
   flex-shrink:0;
+  transition:transform .3s;
 }
-.galeria-fotos img:nth-child(2){width:38%;height:360px}
-.galeria-fotos.single img{width:60%;height:360px}
+.galeria-fotos img:hover{transform:scale(1.02)}
+.galeria-fotos img:nth-child(2){width:36%;height:340px}
+.galeria-fotos.single img{width:55%;height:340px}
+
+/* ── PANEL 06: QUOTES ── */
+.frases-final{display:flex;flex-direction:column;justify-content:center;gap:2px}
+.frases-final .step{margin-bottom:16px}
 .quote{
-  padding:24px;
-  border:1px solid rgba(255,45,120,.3);
-  border-radius:16px;
-  margin:14px 0;
+  padding:20px;
+  border:1px solid rgba(var(--accent-rgb),.25);
+  border-radius:14px;margin:8px 0;
   background:rgba(255,255,255,.03);
-  font-size:18px;line-height:1.55;color:#eee;
+  font-size:17px;line-height:1.55;color:#eee;
+  position:relative;
 }
-/* Music section */
+.quote::before{
+  content:'"';
+  position:absolute;top:-6px;left:14px;
+  font-size:48px;font-family:Georgia,serif;
+  color:var(--accent);opacity:.5;
+  line-height:1;
+}
+
+/* ── PANEL 07: MUSIC ── */
+.musica-final h2{font-size:clamp(26px,4vw,52px);margin-top:14px}
+.musica-final h2 span{color:var(--accent);text-shadow:0 0 20px var(--glow)}
+.musica-final h3{color:var(--accent);font-size:18px;margin:8px 0 4px;font-weight:700}
+.musica-final .sub{color:rgba(255,255,255,.5);font-size:14px;margin-bottom:24px}
 .music-card{
-  margin-top:32px;
-  display:flex;align-items:center;gap:24px;
+  display:flex;align-items:center;gap:22px;
+  margin-top:20px;
 }
 .disc{
-  width:90px;height:90px;
-  border-radius:50%;
-  border:3px solid #ff2d78;
+  width:88px;height:88px;border-radius:50%;
+  border:3px solid var(--accent);
   background:radial-gradient(circle,#1a0610,#050508);
   position:relative;flex-shrink:0;
-  box-shadow:0 0 30px rgba(255,45,120,.4);
+  box-shadow:0 0 28px rgba(var(--accent-rgb),.4);
   animation:spin 8s linear infinite paused;
 }
-.disc::after{content:"";position:absolute;inset:35%;border-radius:50%;background:#ff2d78}
+.disc::after{
+  content:"";position:absolute;
+  inset:32%;border-radius:50%;
+  background:var(--accent);
+}
 .disc.playing{animation-play-state:running}
 @keyframes spin{to{transform:rotate(360deg)}}
 #audioFinal{
-  width:100%;margin-top:14px;
-  filter:hue-rotate(300deg) saturate(1.5);
+  width:100%;margin-top:12px;
+  accent-color:var(--accent);
+  filter:hue-rotate(var(--hue-rotate,300deg)) saturate(1.5);
 }
+
+/* Hue per theme */
+:root[style*="--accent: #ff2d78"] { --hue-rotate: 300deg }
+:root[style*="--accent: #ff6b9d"] { --hue-rotate: 320deg }
+:root[style*="--accent: #ff8c42"] { --hue-rotate: 20deg  }
+:root[style*="--accent: #ffd700"] { --hue-rotate: 45deg  }
+:root[style*="--accent: #00d4ff"] { --hue-rotate: 180deg }
+:root[style*="--accent: #9d4edd"] { --hue-rotate: 260deg }
+:root[style*="--accent: #ff9eb5"] { --hue-rotate: 330deg }
+:root[style*="--accent: #ff9f43"] { --hue-rotate: 30deg  }
+
+#semMusicaMsg{color:rgba(255,255,255,.45);font-size:14px;margin-top:12px}
+
+/* ── PANEL 08: CARTA ── */
+.carta-final{display:flex;flex-direction:column;justify-content:center}
 .carta{
-  background:linear-gradient(135deg,#f5e6c8,#f0d5a0);
+  background:linear-gradient(135deg,#f7edcf,#eddfa3);
   color:#2a1505;
-  padding:36px;border-radius:10px;
-  transform:rotate(-2deg);
-  margin:28px auto;
-  max-width:540px;
+  padding:32px;border-radius:10px;
+  transform:rotate(-2.5deg);
+  margin:24px auto 0;
+  max-width:500px;width:100%;
   font-family:Georgia,serif;
-  box-shadow:0 14px 40px rgba(0,0,0,.5);
+  box-shadow:0 12px 40px rgba(0,0,0,.55);
+  position:relative;
 }
-.carta h2{color:#9e2244;font-size:38px;margin-bottom:18px;font-family:cursive}
-.carta p{font-size:17px;line-height:1.7;color:#3a1a08}
+.carta::before{
+  content:"";position:absolute;
+  top:8px;right:12px;
+  width:20px;height:20px;
+  background:radial-gradient(circle,#b8242a,#7a0d10);
+  border-radius:50% 50% 0 50%;
+  transform:rotate(45deg);
+  box-shadow:0 2px 8px rgba(0,0,0,.4);
+}
+.carta h2{
+  font-family:cursive;
+  color:#9e2244;font-size:36px;
+  margin-bottom:16px;line-height:1;
+}
+.carta h2 span{color:#c0395a}
+.carta p{font-size:16px;line-height:1.75;color:#3a1808}
+
+/* ── PANEL 09: ENCERRAMENTO ── */
 .encerramento{
   display:flex;flex-direction:column;justify-content:center;
   text-align:center;align-items:center;
 }
-.heart{font-size:72px;color:#ff2d78;margin-bottom:22px;animation:pulse 1.5s ease infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-.encerramento h2{
-  color:#ff2d78;text-transform:uppercase;letter-spacing:3px;
-  font-size:clamp(20px,3vw,36px);line-height:1.3;
+.heart{
+  font-size:68px;
+  color:var(--accent);
+  margin-bottom:20px;
+  animation:pulse 1.5s ease-in-out infinite;
 }
-.encerramento p{color:#aaa;margin-top:18px;font-size:16px}
-.compartilhar{display:flex;flex-direction:column;justify-content:center;gap:16px}
-.compartilhar h2{font-size:clamp(24px,3.5vw,52px);margin-bottom:10px}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.encerramento h2{
+  color:var(--accent);text-transform:uppercase;letter-spacing:4px;
+  font-size:clamp(18px,3vw,34px);line-height:1.3;
+  text-shadow:0 0 22px var(--glow);
+}
+.encerramento p{color:rgba(255,255,255,.5);margin-top:16px;font-size:15px}
+
+/* ── PANEL 10: SHARE ── */
+.compartilhar{display:flex;flex-direction:column;justify-content:center;gap:14px}
+.compartilhar h2{font-size:clamp(22px,3.5vw,50px);line-height:1.1}
+.preview-phone{
+  position:absolute;bottom:-20px;right:-10px;
+  width:130px;opacity:.4;
+  border:2px solid rgba(var(--accent-rgb),.3);
+  border-radius:16px;overflow:hidden;
+  transform:rotate(5deg);
+}
 .share-grid{
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  gap:12px;margin-top:10px;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin-top:8px;
 }
 .share-grid button{
-  padding:20px 12px;min-height:100px;
+  padding:18px 10px;min-height:90px;
   border-radius:16px;
-  border:1px solid rgba(255,45,120,.55);
-  background:rgba(255,255,255,.05);
-  color:white;font-size:14px;font-weight:900;
+  border:1px solid rgba(var(--accent-rgb),.5);
+  background:rgba(255,255,255,.04);
+  color:white;font-size:13px;font-weight:900;
   cursor:pointer;transition:.2s;line-height:1.5;
 }
 .share-grid button:hover{
-  background:rgba(255,45,120,.15);
-  border-color:#ff2d78;
-  transform:translateY(-2px);
+  background:rgba(var(--accent-rgb),.15);
+  border-color:var(--accent);
+  transform:translateY(-3px);
 }
+
+/* ── EXTRA SECTION ── */
 .extra{
-  max-width:1500px;margin:0 auto;padding:24px;
-  border:1px solid rgba(255,45,120,.22);
+  max-width:1400px;margin:0 auto;padding:22px 28px;
+  border:1px solid rgba(var(--accent-rgb),.18);
   border-top:0;
   background:rgba(255,255,255,.02);
 }
-.extra h3{font-size:14px;letter-spacing:.08em;margin-bottom:16px;font-weight:900;color:#bbb}
-.extra-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.extra h3{font-size:12px;letter-spacing:.1em;margin-bottom:14px;font-weight:900;color:rgba(255,255,255,.5)}
+.extra-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
 .extra-item{
-  padding:18px 12px;
-  border:1px solid rgba(255,45,120,.2);
+  padding:16px 10px;
+  border:1px solid rgba(var(--accent-rgb),.18);
   border-radius:14px;
-  background:rgba(255,255,255,.03);
-  text-align:center;font-size:13px;color:#ccc;
+  background:rgba(255,255,255,.025);
+  text-align:center;font-size:12px;color:#bbb;
 }
-.extra-item strong{display:block;color:#ff2d78;font-size:17px;margin-top:8px;font-weight:900}
-.fade-in{animation:fadeUp .9s ease both}
-@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+.extra-item strong{
+  display:block;color:var(--accent);
+  font-size:16px;margin-top:8px;font-weight:900;
+  text-shadow:0 0 12px var(--glow);
+}
 
-/* DOWNLOAD BUTTON OVERLAY */
+/* ── ANIMATIONS ── */
+.fade-in{animation:fadeUp .9s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+/* ── DOWNLOAD OVERLAY ── */
 .download-loading{
-  position:fixed;inset:0;background:rgba(3,3,6,.95);
-  z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:18px;
+  position:fixed;inset:0;background:rgba(3,3,6,.96);
+  z-index:9999;display:none;align-items:center;justify-content:center;
+  flex-direction:column;gap:18px;
 }
 .download-loading.active{display:flex}
-.download-loading p{color:#ff7aa9;font-size:18px;font-weight:700}
+.download-loading p{color:var(--accent);font-size:18px;font-weight:700}
 .spinner{
-  width:50px;height:50px;border-radius:50%;
-  border:4px solid rgba(255,45,120,.25);
-  border-top-color:#ff2d78;
-  animation:spinAnim .8s linear infinite;
+  width:52px;height:52px;border-radius:50%;
+  border:4px solid rgba(var(--accent-rgb),.2);
+  border-top-color:var(--accent);
+  animation:spinAnim .75s linear infinite;
 }
 @keyframes spinAnim{to{transform:rotate(360deg)}}
 
-/* PRINT STYLES — Clean PDF */
+/* ── PRINT ── */
 @media print{
-  body::before,body::after{display:none!important}
-  .topbar,.download-loading{display:none!important}
+  body::before,body::after,.topbar,.download-loading{display:none!important}
   body{background:#030306!important}
   .final-experience{padding:0!important}
   .final-grid{
-    display:grid!important;
     grid-template-columns:repeat(2,1fr)!important;
-    break-inside:avoid;
-    border:none!important;
-    box-shadow:none!important;
+    border:none!important;box-shadow:none!important;
   }
   .final-panel{
-    min-height:auto!important;
-    padding:30px!important;
+    min-height:auto!important;padding:28px!important;
     page-break-inside:avoid;
     -webkit-print-color-adjust:exact;
     print-color-adjust:exact;
-    background:#0a020a!important;
-    border:1px solid #3a0a1a!important;
   }
-  .final-panel::before{display:none!important}
-  audio,video{display:none!important}
-  .extra{display:block!important}
-  .share-grid button,
-  .action-btn{display:none!important}
-}
-
-/* RESPONSIVE */
-@media(max-width:900px){
-  .topbar{padding:0 16px;height:60px}
-  .actions{gap:8px}
-  .action-btn{padding:9px 12px;font-size:12px}
-  .final-grid{grid-template-columns:1fr}
-  .final-panel{min-height:auto;padding:28px 20px}
-  .abertura h1{font-size:clamp(48px,12vw,72px)}
-  .time-item{grid-template-columns:38px 70px 1fr;font-size:17px}
-  .galeria-fotos{flex-direction:column;height:auto}
-  .galeria-fotos img,
-  .galeria-fotos img:nth-child(2){width:100%;height:240px;transform:none}
-  .music-card{flex-direction:column;align-items:flex-start}
-  .share-grid{grid-template-columns:1fr}
-  .extra-grid{grid-template-columns:repeat(2,1fr)}
-  .carta{transform:none;padding:24px}
-  .polaroid{transform:none;margin:24px auto 20px}
-}
-@media(max-width:480px){
-  .final-panel{padding:22px 16px}
-  .abertura h1{font-size:clamp(38px,12vw,56px)}
-  .final-panel h2{font-size:clamp(24px,7vw,38px)}
-  .big-number{font-size:60px}
-  .insight-card{font-size:16px}
-  .insight-card b{font-size:24px}
-  .quote{font-size:15px;padding:18px}
-  .extra-grid{grid-template-columns:1fr 1fr}
-  .disc{width:70px;height:70px}
+  audio,.share-grid button,.action-btn{display:none!important}
 }
 </style>
 </head>
@@ -338,7 +422,6 @@ body::after{
   </div>
 </header>
 
-<!-- Download overlay -->
 <div class="download-loading" id="downloadLoading">
   <div class="spinner"></div>
   <p>Preparando sua retrospectiva...</p>
@@ -347,13 +430,15 @@ body::after{
 <main class="final-experience">
   <section id="arteFinal" class="final-grid fade-in">
 
+    <!-- 01 ABERTURA -->
     <div class="final-panel abertura">
       <span class="step">01 ABERTURA</span>
       <div class="brand">♡ LoveBlast</div>
       <h1><span id="finalNome1">Robson</span> <b>&</b> <span id="finalNome2">Raa</span></h1>
-      <p id="fraseAbertura">Algumas histórias não cabem em palavras.</p>
+      <p class="subtitle" id="fraseAbertura">ALGUMAS HISTÓRIAS NÃO CABEM EM PALAVRAS.</p>
     </div>
 
+    <!-- 02 COMEÇO -->
     <div class="final-panel comeco">
       <span class="step">02 COMEÇO DE TUDO</span>
       <div class="polaroid">
@@ -363,31 +448,44 @@ body::after{
       <p id="textoCategoria">E desde então, cada detalhe faz sentido.</p>
     </div>
 
+    <!-- 03 TIMELINE -->
     <div class="final-panel timeline-final">
       <span class="step">03 LINHA DO TEMPO</span>
       <div id="timelineItems"></div>
     </div>
 
+    <!-- 04 INSIGHTS -->
     <div class="final-panel insights-final">
       <span class="step">04 NOSSOS INSIGHTS</span>
-      <h2>Vocês trocaram</h2>
-      <strong class="big-number" id="totalMensagens">18.432</strong>
-      <p id="mensagensLabel">mensagens</p>
-      <div class="insight-card">
-        A palavra mais usada foi:<br>
-        <b id="palavraMaisUsada">amor</b> ❤️
-      </div>
-      <div class="insight-card">
-        Vocês disseram<br>
-        <b id="saudadeCount">saudade 103 vezes</b>
+      <div class="insights-split">
+        <div class="ins-left">
+          <h2>Vocês trocaram</h2>
+          <strong class="big-number" id="totalMensagens">18.432</strong>
+          <p class="mensagens-sub" id="mensagensLabel">mensagens</p>
+          <p class="ins-equiv">Isso equivale a<br><strong id="insEquiv">12 livros inteiros.</strong></p>
+        </div>
+        <div class="ins-right">
+          <div class="insight-card">
+            A palavra mais usada foi:
+            <span class="card-emoji" id="wordEmoji">❤️</span>
+            <b id="palavraMaisUsada">amor</b>
+          </div>
+          <div class="insight-card">
+            Vocês disseram
+            <b id="saudadeCount">saudade 103 vezes</b>
+            <span class="card-emoji">💭</span>
+          </div>
+        </div>
       </div>
     </div>
 
+    <!-- 05 GALERIA -->
     <div class="final-panel galeria-final">
       <span class="step">05 NOSSAS MEMÓRIAS</span>
       <div id="galeriaFinal" class="galeria-fotos"></div>
     </div>
 
+    <!-- 06 FRASES -->
     <div class="final-panel frases-final">
       <span class="step">06 FRASES QUE DEFINEM</span>
       <div class="quote" id="quote1"></div>
@@ -395,22 +493,22 @@ body::after{
       <div class="quote" id="quote3"></div>
     </div>
 
+    <!-- 07 MÚSICA -->
     <div class="final-panel musica-final">
       <span class="step">07 NOSSA MÚSICA</span>
-      <h2>Nossa <span>música</span> ♡</h2>
+      <h2 id="musicaTitle">Nossa <span>música</span> ♡</h2>
       <h3 id="nomeMusicaFinal">Trilha sonora da história</h3>
-      <p style="color:#aaa;font-size:15px;margin-top:12px">Toque para reviver esse momento.</p>
+      <p class="sub">Toque para reviver esse momento.</p>
       <div class="music-card">
         <div class="disc" id="disc"></div>
-        <div style="flex:1">
+        <div style="flex:1;min-width:0">
           <audio id="audioFinal" controls></audio>
-          <p id="semMusicaMsg" style="color:#888;font-size:14px;margin-top:8px;display:none">
-            Nenhuma música foi adicionada.
-          </p>
+          <p id="semMusicaMsg" style="display:none">Nenhuma música foi adicionada.</p>
         </div>
       </div>
     </div>
 
+    <!-- 08 CARTA -->
     <div class="final-panel carta-final">
       <span class="step">08 MENSAGEM ESPECIAL</span>
       <div class="carta">
@@ -419,15 +517,18 @@ body::after{
       </div>
     </div>
 
+    <!-- 09 ENCERRAMENTO -->
     <div class="final-panel encerramento">
       <span class="step">09 FINAL ÉPICO</span>
       <div class="heart">♡</div>
-      <h2 id="fraseFinal">Algumas histórias merecem ser eternizadas.</h2>
+      <h2 id="fraseFinal">ALGUMAS HISTÓRIAS MERECEM SER ETERNIZADAS.</h2>
       <p>Obrigado por criar essa retrospectiva.</p>
+      <div class="heart" style="font-size:30px;margin-top:20px">♡</div>
     </div>
 
+    <!-- 10 COMPARTILHE -->
     <div class="final-panel compartilhar">
-      <span class="step">10 GUARDE & COMPARTILHE</span>
+      <span class="step">10 GUARDE &amp; COMPARTILHE</span>
       <h2>Sua retrospectiva<br>está pronta.</h2>
       <div class="share-grid">
         <button onclick="iniciarDownload()">⬇<br>Baixar<br><small>sua retrospectiva</small></button>
@@ -438,6 +539,7 @@ body::after{
 
   </section>
 
+  <!-- EXTRA -->
   <section class="extra">
     <h3>EXTRA: O QUE ESSA HISTÓRIA REVELA</h3>
     <div class="extra-grid">
@@ -451,256 +553,65 @@ body::after{
 </main>
 
 <script>
-// ===== CATEGORY CONFIGS (mirroring index.html) =====
-const CATEGORY_CONFIG = {
-  casal:{
-    label:'CASAL',
-    abertura:'Algumas histórias não cabem em palavras.',
-    comeco:'E desde então, cada detalhe faz sentido.',
-    mensagensLabel:'mensagens',
-    timeline:[['❤️','2023','Vocês se conheceram'],['💬','2023','Primeiras conversas'],['✈️','2024','Primeira viagem juntos'],['🔥','2025','E ainda parece o começo']],
-    q1:'"O carinho aparece mais nos detalhes do que nas grandes declarações."',
-    q2:'"Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos."',
-    q3:'"A saudade foi uma das emoções mais presentes nessa história."',
-    final:'Algumas histórias merecem ser eternizadas.'
-  },
-  mae:{
-    label:'MÃE',
-    abertura:'O amor mais constante da vida.',
-    comeco:'Tudo começou com cuidado, colo e presença.',
-    mensagensLabel:'momentos especiais',
-    timeline:[['🌷','Sempre','Ela esteve presente'],['🤍','Cuidado','Cada gesto virou memória'],['🏠','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
-    q1:'"Mãe é quem transforma cuidado em amor todos os dias."',
-    q2:'"Alguns abraços carregam a força de uma vida inteira."',
-    q3:'"Essa homenagem existe porque algumas presenças são eternas."',
-    final:'Alguns amores merecem ser homenageados para sempre.'
-  },
-  pai:{
-    label:'PAI',
-    abertura:'Alguns heróis não usam capa.',
-    comeco:'Tudo começou com exemplo, proteção e presença.',
-    mensagensLabel:'momentos especiais',
-    timeline:[['🛡️','Proteção','Sempre esteve por perto'],['🧭','Exemplo','Ensinou mais por atitudes'],['💬','Conselhos','Palavras que ficaram'],['🔥','Hoje','Uma homenagem para guardar']],
-    q1:'"Pai é presença que guia, mesmo em silêncio."',
-    q2:'"O exemplo dele virou parte de quem você é."',
-    q3:'"Alguns gestos simples carregam amor gigante."',
-    final:'Heróis de verdade merecem ser lembrados.'
-  },
-  familia:{
-    label:'FAMÍLIA',
-    abertura:'Família é onde a história começa.',
-    comeco:'Cada encontro virou parte de uma memória maior.',
-    mensagensLabel:'memórias compartilhadas',
-    timeline:[['🏠','Raízes','Onde tudo começou'],['📸','Memórias','Momentos que uniram todos'],['🫶','Presença','Cada pessoa faz parte'],['✨','Hoje','Uma história de gerações']],
-    q1:'"Família é feita de risadas, apoio e lembranças que ficam."',
-    q2:'"O lar não é só um lugar, é quem caminha com você."',
-    q3:'"Cada foto guarda uma parte da história de vocês."',
-    final:'Histórias de família atravessam gerações.'
-  },
-  amigos:{
-    label:'AMIGOS',
-    abertura:'Algumas amizades viram família.',
-    comeco:'Tudo começou com risadas e virou parceria.',
-    mensagensLabel:'mensagens e memórias',
-    timeline:[['😂','Risadas','Momentos impossíveis de esquecer'],['💬','Conversas','Assuntos que só vocês entendem'],['🤝','Parceria','Um pelo outro sempre'],['🔥','Hoje','Mais histórias para viver']],
-    q1:'"Vocês transformaram dias comuns em histórias boas."',
-    q2:'"A amizade aparece nas piadas, nos conselhos e na presença."',
-    q3:'"Algumas pessoas chegam e ficam para sempre."',
-    final:'Amizades verdadeiras merecem ser eternizadas.'
-  },
-  formatura:{
-    label:'FORMATURA',
-    abertura:'Todo esforço merece ser lembrado.',
-    comeco:'Tudo começou com um sonho e muita coragem.',
-    mensagensLabel:'dias de dedicação',
-    timeline:[['📚','Começo','O primeiro passo foi dado'],['☕','Rotina','Dias difíceis também fizeram parte'],['🎓','Conquista','O sonho virou realidade'],['✨','Hoje','Uma nova fase começa']],
-    q1:'"A conquista de hoje carrega todo esforço de ontem."',
-    q2:'"Cada etapa difícil também fez parte da vitória."',
-    q3:'"O diploma é só o começo de uma história maior."',
-    final:'Conquistas grandes merecem ser eternizadas.'
-  },
-  bebe:{
-    label:'BEBÊ',
-    abertura:'Cada descoberta virou amor.',
-    comeco:'Tudo começou com amor, cuidado e encanto.',
-    mensagensLabel:'momentos registrados',
-    timeline:[['🍼','Começo','Tudo era novidade'],['👶','Sorrisos','Cada risada mudou o dia'],['🐾','Passinhos','Cada fase uma emoção'],['✨','Hoje','Um amor que só cresce']],
-    q1:'"Cada sorriso pequeno virou uma memória gigante."',
-    q2:'"O tempo passa rápido, mas esses momentos ficam."',
-    q3:'"Essa história é feita de amor em sua forma mais pura."',
-    final:'Infâncias merecem ser guardadas com carinho.'
-  },
-  pet:{
-    label:'PET',
-    abertura:'Amor também tem quatro patas.',
-    comeco:'Tudo começou com bagunça, carinho e companhia.',
-    mensagensLabel:'memórias com o pet',
-    timeline:[['🐾','Chegada','A casa nunca mais foi igual'],['🎾','Bagunça','Cada travessura virou memória'],['❤️','Companhia','Sempre perto, sempre amor'],['✨','Hoje','Um melhor amigo para sempre']],
-    q1:'"Alguns animais chegam e viram parte da família."',
-    q2:'"O amor mais sincero às vezes vem com patas."',
-    q3:'"Cada brincadeira virou uma memória feliz."',
-    final:'Alguns companheiros deixam marcas eternas.'
+/* ── LOCAL HYDRATION (before shared.js runs) ── */
+(function(){
+  function getData(){
+    try{ const d=JSON.parse(localStorage.getItem('loveblastData')||'null'); return d&&typeof d==='object'?d:null; }catch{return null;}
   }
-};
 
-// Default photos fallback
-const defaultPhotos = [
-  'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=1000',
-  'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=1000',
-  'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=1000'
-];
-
-function getData() {
-  const saved = localStorage.getItem('loveblastData');
-  if (saved) { try { return JSON.parse(saved); } catch(e) {} }
-  return {
-    nome1:'Robson', nome2:'Raa', categoria:'casal',
-    mensagem:'Cada mensagem, cada risada, cada momento virou parte da nossa história.',
-    insights:{ totalMessages:18432, topWord:'amor', saudadeCount:103, loveCount:82, favoriteTime:'23:47', topEmoji:'😂', emotionalLevel:'Alto' },
-    photos:[], musicSrc:null, musicName:'Trilha sonora da história'
-  };
-}
-
-function hydrate() {
-  const data = getData();
-  const cat = CATEGORY_CONFIG[data.categoria] || CATEGORY_CONFIG.casal;
-  const insights = data.insights || {};
-
-  // Names
-  document.getElementById('finalNome1').textContent = data.nome1 || 'Robson';
-  document.getElementById('finalNome2').textContent = data.nome2 || 'Raa';
-  document.getElementById('cartaNome').textContent = data.nome2 || 'Raa';
-  document.getElementById('mensagemFinal').textContent = data.mensagem || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
-
-  // Category texts
-  document.getElementById('fraseAbertura').textContent = cat.abertura;
-  document.getElementById('textoCategoria').textContent = cat.comeco;
-  document.getElementById('mensagensLabel').textContent = cat.mensagensLabel;
-  document.getElementById('quote1').textContent = cat.q1;
-  document.getElementById('quote2').textContent = cat.q2;
-  document.getElementById('quote3').textContent = cat.q3;
-  document.getElementById('fraseFinal').textContent = cat.final;
-
-  // Timeline
-  const timelineEl = document.getElementById('timelineItems');
-  timelineEl.innerHTML = '';
-  cat.timeline.forEach(([emoji, year, desc]) => {
-    timelineEl.innerHTML += `
-      <div class="time-item">
-        <span class="emoji">${emoji}</span>
-        <strong>${year}</strong>
-        <p>${desc}</p>
-      </div>`;
-  });
-
-  // Insights
-  document.getElementById('totalMensagens').textContent = Number(insights.totalMessages || 18432).toLocaleString('pt-BR');
-  document.getElementById('palavraMaisUsada').textContent = insights.topWord || 'amor';
-  document.getElementById('saudadeCount').textContent = `saudade ${insights.saudadeCount || 103} vezes`;
-
-  // Extra
-  document.getElementById('nivelCarinho').textContent = insights.emotionalLevel || 'Muito alto';
-  document.getElementById('humor').textContent = insights.loveCount > 50 ? 'Muito presente' : 'Presente';
-  document.getElementById('comunicacao').textContent = insights.totalMessages > 10000 ? 'Muito frequente' : 'Frequente';
-  document.getElementById('intensidade').textContent = insights.emotionalLevel || 'Alta';
-  document.getElementById('conexao').textContent = 'Forte';
-
-  // Photos
-  const photos = (Array.isArray(data.photos) && data.photos.filter(Boolean).length)
-    ? data.photos.filter(Boolean) : defaultPhotos;
-  const fotoPrincipal = document.getElementById('fotoPrincipal');
-  if (fotoPrincipal) fotoPrincipal.src = photos[0];
-
-  const galeriaFinal = document.getElementById('galeriaFinal');
-  galeriaFinal.innerHTML = '';
-  const photoSlice = photos.slice(0, 3);
-  if (photoSlice.length === 1) galeriaFinal.classList.add('single');
-  photoSlice.forEach(src => {
-    const img = document.createElement('img');
-    img.src = src;
-    img.alt = 'Memória';
-    galeriaFinal.appendChild(img);
-  });
-
-  // Music
-  document.getElementById('nomeMusicaFinal').textContent = data.musicName || 'Trilha sonora da história';
-  const audioFinal = document.getElementById('audioFinal');
-  const semMusicaMsg = document.getElementById('semMusicaMsg');
-  const disc = document.getElementById('disc');
-  if (data.musicSrc) {
-    audioFinal.src = data.musicSrc;
-    audioFinal.style.display = 'block';
-    semMusicaMsg.style.display = 'none';
-    audioFinal.addEventListener('play', () => disc.classList.add('playing'));
-    audioFinal.addEventListener('pause', () => disc.classList.remove('playing'));
-    audioFinal.addEventListener('ended', () => disc.classList.remove('playing'));
-  } else {
-    audioFinal.style.display = 'none';
-    semMusicaMsg.style.display = 'block';
+  // Calc book equivalent
+  function booksEquiv(n){
+    const b=Math.round(n/1500);
+    return b<=0?'muitas conversas':b===1?'1 livro inteiro':`${b} livros inteiros.`;
   }
-}
 
-// ===== DOWNLOAD (html2canvas) =====
-function iniciarDownload() {
-  const overlay = document.getElementById('downloadLoading');
+  function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+
+  // Pre-hydrate from localStorage so page looks good instantly
+  const data=getData();
+  if(data){
+    const ins=data.insights||{};
+    const msgs=Number(ins.totalMessages||18432);
+    const equiv=document.getElementById('insEquiv');
+    if(equiv) equiv.textContent=booksEquiv(msgs);
+  }
+})();
+
+/* ── DOWNLOAD ── */
+function iniciarDownload(){
+  const overlay=document.getElementById('downloadLoading');
   overlay.classList.add('active');
-
-  // Use html2canvas for screenshot-based PDF/PNG
-  if (typeof html2canvas !== 'undefined') {
-    gerarDownloadComCanvas(overlay);
-  } else {
-    // Load html2canvas dynamically
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-    script.onload = () => gerarDownloadComCanvas(overlay);
-    script.onerror = () => {
-      overlay.classList.remove('active');
-      window.print(); // fallback
-    };
-    document.head.appendChild(script);
+  if(typeof html2canvas!=='undefined'){
+    _doCanvas(overlay);
+  }else{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+    s.onload=()=>_doCanvas(overlay);
+    s.onerror=()=>{overlay.classList.remove('active');window.print();};
+    document.head.appendChild(s);
   }
 }
-
-async function gerarDownloadComCanvas(overlay) {
-  try {
-    const arteFinal = document.getElementById('arteFinal');
-    const canvas = await html2canvas(arteFinal, {
-      backgroundColor: '#030306',
-      scale: 1.5,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-      windowWidth: 1400,
+async function _doCanvas(overlay){
+  try{
+    const el=document.getElementById('arteFinal');
+    const canvas=await html2canvas(el,{
+      backgroundColor:'#030306',scale:1.6,
+      useCORS:true,allowTaint:true,logging:false,
+      windowWidth:1400,
     });
-    const link = document.createElement('a');
-    link.download = 'retrospectiva-loveblast.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
-  } catch(e) {
-    window.print();
-  } finally {
-    overlay.classList.remove('active');
-  }
+    const a=document.createElement('a');
+    a.download='retrospectiva-loveblast.png';
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  }catch(e){window.print();}
+  finally{overlay.classList.remove('active');}
 }
 
-function compartilharArte() {
-  if (navigator.share) {
-    navigator.share({
-      title: 'Minha retrospectiva LoveBlast',
-      text: 'Olha essa retrospectiva que eu criei ❤️',
-      url: window.location.href
-    });
-  } else {
-    navigator.clipboard.writeText(window.location.href)
-      .then(() => alert('Link copiado! Compartilhe com quem ama. ❤️'))
-      .catch(() => alert('Copie o link da barra de endereço para compartilhar.'));
-  }
+function compartilharArte(){
+  if(navigator.share) navigator.share({title:'Minha retrospectiva LoveBlast',text:'Olha essa retrospectiva ❤️',url:location.href}).catch(()=>{});
+  else if(navigator.clipboard) navigator.clipboard.writeText(location.href).then(()=>alert('Link copiado! ❤️'));
 }
-
-// Init
-hydrate();
 </script>
-<link rel="stylesheet" href="/loveblast-shared.css">
 <script src="/loveblast-shared.js"></script>
 </body>
 </html>
