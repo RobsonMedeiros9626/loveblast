@@ -737,7 +737,7 @@ nav a:hover{background:rgba(255,45,120,.12)}
     <!-- FEATURES 2-col grid -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-bottom:32px;font-size:14px;color:rgba(255,255,255,.8)">
       <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Retrospectiva completa</div>
-      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Até 6 fotos + carrossel</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Até 10 fotos + carrossel</div>
       <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Música via YouTube/Spotify</div>
       <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>QR Code imprimível</div>
       <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Mapa estelar da data</div>
@@ -1519,22 +1519,27 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // Detecta se está rodando localmente (file://) — sem servidor
+    // Modo local — abre view.html sem servidor
     const isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-
-    await salvarDadosLocal();
-
     if (isLocal) {
-      // Modo local: só salva os dados e abre a retrospectiva diretamente
-      // (sem servidor de pagamento disponível)
-      const viewPath = location.href.replace('index.html', 'view.html');
-      window.open(viewPath, '_blank');
+      // Salva dados mínimos (sem base64 das fotos) só para preview local
+      const localData = {
+        nome1, nome2,
+        email,
+        mensagem: document.getElementById('mensagem')?.value || '',
+        categoria: categoriaSelecionada,
+        dataInicio: document.getElementById('dataInicio')?.value || '',
+      };
+      try { localStorage.setItem('loveblastData', JSON.stringify(localData)); } catch(e) {}
+      window.open(location.href.replace('index.html','view.html'), '_blank');
       return;
     }
 
     payBtn.disabled = true;
     payBtn.textContent = 'CRIANDO SESSÃO...';
+
     try {
+      // ── Build FormData directly — NO base64 conversion, NO salvarDadosLocal ──
       const formData = new FormData();
       formData.append('nome1', nome1);
       formData.append('nome2', nome2);
@@ -1542,13 +1547,13 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('mensagem', document.getElementById('mensagem')?.value || '');
       formData.append('categoria', categoriaSelecionada);
       const dataInicioVal = document.getElementById('dataInicio')?.value || '';
-      if(dataInicioVal) formData.append('dataInicio', dataInicioVal);
-      // Send insights from WhatsApp analysis
-      const insightsDados = await salvarDadosLocal();
-      if (insightsDados.insights) {
-        formData.append('insights', JSON.stringify(insightsDados.insights));
-      }
-      Array.from(photosInput?.files || []).forEach(f => formData.append('photos', f));
+      if (dataInicioVal) formData.append('dataInicio', dataInicioVal);
+
+      // Photos — raw files, no conversion
+      Array.from(photosInput?.files || []).slice(0, 10)
+        .forEach(f => formData.append('photos', f));
+
+      // Music — raw file or link
       const md2 = getMusicData();
       if (md2.musicFile) {
         formData.append('music', md2.musicFile);
@@ -1557,16 +1562,19 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('musicLink', md2.musicLink);
         formData.append('musicName', 'Música via link');
       }
+
+      // WhatsApp — parse insights client-side ONLY (no base64)
       const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
       if (whatsFile) {
-        // Send the file as-is (txt or zip); server will handle both
         formData.append('whatsappFile', whatsFile);
-        // Also send pre-parsed insights so server doesn't need to re-parse
-        const insightsDados2 = await salvarDadosLocal();
-        if (insightsDados2.insights) {
-          formData.set('insights', JSON.stringify(insightsDados2.insights));
-        }
+        // Parse insights quickly without converting to base64
+        try {
+          const txt = await extractWhatsAppText(whatsFile);
+          const parsedInsights = analisarConversaWhatsApp(txt);
+          formData.append('insights', JSON.stringify(parsedInsights));
+        } catch(e) { /* server will try to parse itself */ }
       }
+
       const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data.erro || 'Erro ao iniciar pagamento.');
@@ -1575,7 +1583,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch(error) {
       alert(error.message || 'Erro ao iniciar pagamento.');
       payBtn.disabled = false;
-      payBtn.textContent = '💳 Finalizar e pagar';
+      payBtn.textContent = '💳 Pagar R$ 9,99';
     }
   });
 
