@@ -660,24 +660,67 @@ nav a:hover{background:rgba(255,45,120,.12)}
     </div>
     <div id="imgPreviewGrid" class="img-preview-grid"></div>
 
-    <label>Música (MP3)</label>
-    <div class="file-drop" id="musicDropArea">
-      <input id="music" type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.webm">
-      <div class="drop-icon">🎵</div>
-      <p><strong>Clique para adicionar uma música</strong><br>Arquivos MP3</p>
-    </div>
-    <div class="music-error" id="musicError">❌ Formato não suportado. Use MP3.</div>
-    <div class="music-preview-box" id="musicPreviewBox">
-      <div class="music-name" id="musicPreviewName">🎵 Nome da música</div>
-      <audio id="previewAudio" controls style="width:100%;margin-top:8px"></audio>
+    <label>Música 🎵</label>
+    <!-- Tabs -->
+    <div style="display:flex;gap:0;margin-bottom:12px;border:1px solid rgba(255,45,120,.3);border-radius:12px;overflow:hidden">
+      <button type="button" id="musicTabYt" onclick="switchMusicTab('yt')"
+        style="flex:1;padding:10px;background:rgba(255,45,120,.18);border:none;color:#fff;font-weight:900;font-size:13px;cursor:pointer;border-right:1px solid rgba(255,45,120,.3)">
+        ▶ YouTube / Link
+      </button>
+      <button type="button" id="musicTabFile" onclick="switchMusicTab('file')"
+        style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,.5);font-weight:900;font-size:13px;cursor:pointer">
+        📁 Arquivo MP3
+      </button>
     </div>
 
-    <label>Conversa do WhatsApp (.txt)</label>
-    <div class="file-drop">
-      <input id="whatsappFile" type="file" accept=".txt">
-      <div class="drop-icon">💬</div>
-      <p><strong>Exportar do WhatsApp</strong><br>Menu → Exportar conversa → Sem mídia</p>
+    <!-- TAB YouTube/Link -->
+    <div id="musicPanelYt">
+      <input id="musicLink" type="url" placeholder="Cole o link do YouTube, Spotify, SoundCloud..."
+        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;padding:13px 15px;border-radius:14px;outline:none;font-size:15px;transition:.2s">
+      <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.5">
+        ✅ YouTube: <code>youtube.com/watch?v=...</code><br>
+        ✅ Spotify: <code>open.spotify.com/track/...</code><br>
+        ✅ SoundCloud, Deezer, qualquer link público
+      </p>
+      <div id="ytPreviewWrap" style="margin-top:12px;display:none">
+        <div id="ytEmbed" style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,45,120,.3)"></div>
+        <p id="ytLinkName" style="margin-top:8px;font-size:13px;color:#ff7aa9;font-weight:700"></p>
+      </div>
     </div>
+
+    <!-- TAB Arquivo -->
+    <div id="musicPanelFile" style="display:none">
+      <div class="file-drop" id="musicDropArea">
+        <input id="music" type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.webm">
+        <div class="drop-icon">🎵</div>
+        <p><strong>Clique para adicionar um arquivo de música</strong><br>MP3, M4A, AAC, OGG, WAV</p>
+      </div>
+      <div class="music-error" id="musicError">❌ Formato não suportado. Use MP3 ou M4A.</div>
+      <div class="music-preview-box" id="musicPreviewBox">
+        <div class="music-name" id="musicPreviewName">🎵 Nome da música</div>
+        <audio id="previewAudio" controls style="width:100%;margin-top:8px"></audio>
+      </div>
+    </div>
+
+    <label>Conversa do WhatsApp <span style="font-weight:400;color:rgba(255,255,255,.5)">(opcional)</span></label>
+    <div class="file-drop" id="wppDropArea">
+      <input id="whatsappFile" type="file" accept=".txt,.zip,text/plain,application/zip">
+      <div class="drop-icon">💬</div>
+      <p><strong>Envie o .txt ou o .zip do WhatsApp</strong><br>Ambos os formatos são aceitos automaticamente</p>
+    </div>
+    <div id="wppStatus" style="display:none;margin-top:8px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700"></div>
+    <details style="margin-top:10px">
+      <summary style="font-size:12px;color:rgba(255,255,255,.45);cursor:pointer">Como exportar? (passo a passo)</summary>
+      <div style="margin-top:10px;padding:12px;background:rgba(255,255,255,.04);border-radius:10px;font-size:12px;color:rgba(255,255,255,.6);line-height:1.8">
+        <strong style="color:#ff7aa9">Android:</strong><br>
+        Abra a conversa → ⋮ Menu → Mais → Exportar conversa → Sem mídia<br>
+        Salve ou envie o arquivo <strong>.txt</strong> para você mesmo<br><br>
+        <strong style="color:#ff7aa9">iPhone:</strong><br>
+        Abra a conversa → Nome do contato → Exportar conversa<br>
+        O arquivo chega como <strong>.zip</strong> — pode enviar direto, o site extrai automaticamente<br><br>
+        <strong style="color:#ff7aa9">💡 Dica:</strong> Escolha sempre "Sem mídia" para o arquivo ficar pequeno.
+      </div>
+    </details>
 
     <label>Mensagem especial</label>
     <textarea id="mensagem" placeholder="Escreva uma mensagem do coração..."></textarea>
@@ -882,7 +925,139 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ---- FILE: PHOTOS ----
+  // ============================================================
+  // MUSIC TABS — YouTube link vs arquivo local
+  // ============================================================
+  let musicMode = 'yt'; // 'yt' | 'file'
+
+  window.switchMusicTab = function(tab) {
+    musicMode = tab;
+    const ytPanel  = document.getElementById('musicPanelYt');
+    const filePanel= document.getElementById('musicPanelFile');
+    const ytBtn    = document.getElementById('musicTabYt');
+    const fileBtn  = document.getElementById('musicTabFile');
+    if (tab === 'yt') {
+      ytPanel.style.display   = 'block';
+      filePanel.style.display = 'none';
+      ytBtn.style.background  = 'rgba(255,45,120,.18)';
+      ytBtn.style.color       = '#fff';
+      fileBtn.style.background= 'transparent';
+      fileBtn.style.color     = 'rgba(255,255,255,.5)';
+    } else {
+      ytPanel.style.display   = 'none';
+      filePanel.style.display = 'block';
+      fileBtn.style.background= 'rgba(255,45,120,.18)';
+      fileBtn.style.color     = '#fff';
+      ytBtn.style.background  = 'transparent';
+      ytBtn.style.color       = 'rgba(255,255,255,.5)';
+    }
+  };
+
+  // YouTube/link preview
+  function extractYouTubeId(url) {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    return m ? m[1] : null;
+  }
+  function extractSpotifyId(url) {
+    const m = url.match(/spotify\.com\/track\/([A-Za-z0-9]+)/);
+    return m ? m[1] : null;
+  }
+
+  document.getElementById('musicLink')?.addEventListener('input', function() {
+    const url = this.value.trim();
+    const wrap = document.getElementById('ytPreviewWrap');
+    const embed = document.getElementById('ytEmbed');
+    const nameLbl= document.getElementById('ytLinkName');
+    if (!url) { wrap.style.display='none'; return; }
+
+    const ytId = extractYouTubeId(url);
+    if (ytId) {
+      embed.innerHTML = `<iframe width="100%" height="100" src="https://www.youtube.com/embed/${ytId}?autoplay=0" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="display:block"></iframe>`;
+      nameLbl.textContent = '▶ YouTube — prévia carregada';
+      wrap.style.display = 'block';
+      return;
+    }
+    const spId = extractSpotifyId(url);
+    if (spId) {
+      embed.innerHTML = `<iframe src="https://open.spotify.com/embed/track/${spId}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media" style="display:block"></iframe>`;
+      nameLbl.textContent = '🎵 Spotify — prévia carregada';
+      wrap.style.display = 'block';
+      return;
+    }
+    // Outros links: só mostrar o nome
+    wrap.style.display = 'block';
+    embed.innerHTML = '';
+    nameLbl.textContent = '🔗 Link adicionado: ' + url.slice(0,60);
+  });
+
+  // Helpers para salvar dados de música
+  function getMusicData() {
+    if (musicMode === 'yt') {
+      const url = document.getElementById('musicLink')?.value.trim() || '';
+      return { musicLink: url, musicName: url ? ('Música via link') : '', musicFile: null };
+    } else {
+      const file = document.getElementById('music')?.files?.[0] || null;
+      return { musicLink: '', musicName: file ? file.name.replace(/\.[^/.]+$/,'') : '', musicFile: file };
+    }
+  }
+
+  // ============================================================
+  // WHATSAPP ZIP/TXT — aceita ambos os formatos
+  // ============================================================
+  async function extractWhatsAppText(file) {
+    const name = file.name.toLowerCase();
+
+    // .txt direto
+    if (name.endsWith('.txt')) return await file.text();
+
+    // .zip — extrai o primeiro .txt dentro dele
+    if (name.endsWith('.zip') || file.type === 'application/zip') {
+      // Load JSZip dynamically
+      if (typeof JSZip === 'undefined') {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const zip = await JSZip.loadAsync(file);
+      // Find the first .txt file in the zip
+      const txtFile = Object.values(zip.files).find(f => !f.dir && f.name.endsWith('.txt'));
+      if (!txtFile) throw new Error('Nenhum arquivo .txt encontrado no ZIP.');
+      return await txtFile.async('string');
+    }
+
+    throw new Error('Formato não reconhecido. Use .txt ou .zip.');
+  }
+
+  // WhatsApp file change handler
+  document.getElementById('whatsappFile')?.addEventListener('change', async function() {
+    const file = this.files?.[0];
+    const status = document.getElementById('wppStatus');
+    if (!file) { status.style.display='none'; return; }
+
+    status.style.display = 'block';
+    status.style.background = 'rgba(255,255,255,.06)';
+    status.style.color = '#ccc';
+    status.textContent = '⏳ Lendo conversa...';
+
+    try {
+      const text = await extractWhatsAppText(file);
+      const lines = text.split('\n').filter(Boolean).length;
+      status.style.background = 'rgba(255,45,120,.1)';
+      status.style.border = '1px solid rgba(255,45,120,.3)';
+      status.style.color = '#ff7aa9';
+      status.textContent = `✅ Conversa carregada! ${lines.toLocaleString('pt-BR')} linhas detectadas.`;
+    } catch(e) {
+      status.style.background = 'rgba(255,100,100,.1)';
+      status.style.border = '1px solid rgba(255,100,100,.3)';
+      status.style.color = '#ff8888';
+      status.textContent = '❌ ' + (e.message || 'Erro ao ler o arquivo.');
+    }
+  });
+
+    // ---- FILE: PHOTOS ----
   const photosInput = document.getElementById('photos');
   const imgPreviewGrid = document.getElementById('imgPreviewGrid');
 
@@ -1008,31 +1183,40 @@ document.addEventListener('DOMContentLoaded', () => {
     for (const foto of fotos.slice(0, 3)) {
       try { fotosBase64.push(await fileToDataURL(foto)); } catch(e) {}
     }
-    const musica = musicInput?.files?.[0];
-    let musicSrc = null;
-    if (musica) {
-      try { musicSrc = await fileToDataURL(musica); } catch(e) {}
+
+    // Music: link or file
+    const md = getMusicData();
+    let musicSrc = null, musicName = 'Trilha sonora da história', musicLink = '';
+    if (md.musicLink) {
+      musicLink = md.musicLink;
+      musicName = 'Música via link';
+    } else if (md.musicFile) {
+      try { musicSrc = await fileToDataURL(md.musicFile); } catch(e) {}
+      musicName = md.musicName || 'Trilha sonora da história';
     }
+
+    // WhatsApp: txt or zip
     const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
     let insights = { totalMessages:18432, topWord:'amor', loveCount:82, saudadeCount:103, favoriteTime:'23:47', topEmoji:'😂', emotionalLevel:'Alto', generatedPhrases:['Vocês transformaram mensagens simples em uma história extraordinária.','O carinho aparece mais nos detalhes do que nas grandes frases.','Mesmo nas mensagens simples, vocês criaram um lar um no outro.'] };
     if (whatsappFile) {
-      try { insights = analisarConversaWhatsApp(await whatsappFile.text()); } catch(e) {}
+      try {
+        const txt = await extractWhatsAppText(whatsappFile);
+        insights = analisarConversaWhatsApp(txt);
+      } catch(e) { console.warn('WhatsApp parse error:', e); }
     }
+
     const dataInicio = document.getElementById('dataInicio')?.value || '';
     const dados = {
-      nome1, nome2, mensagem,
-      dataInicio,
+      nome1, nome2, mensagem, dataInicio,
       categoria: categoriaSelecionada,
       photos: fotosBase64,
-      musicSrc,
-      musicName: musica ? musica.name.replace(/\.[^/.]+$/, '') : 'Trilha sonora da história',
+      musicSrc, musicName, musicLink,
       insights,
       criadoEm: Date.now()
     };
     try {
       localStorage.setItem('loveblastData', JSON.stringify(dados));
     } catch(e) {
-      // If too large, save without media
       const dadosSemMidia = { ...dados, photos: [], musicSrc: null };
       try { localStorage.setItem('loveblastData', JSON.stringify(dadosSemMidia)); } catch(e2) {}
     }
@@ -1107,13 +1291,24 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('insights', JSON.stringify(insightsDados.insights));
       }
       Array.from(photosInput?.files || []).forEach(f => formData.append('photos', f));
-      const musicFile = musicInput?.files?.[0];
-      if (musicFile) {
-        formData.append('music', musicFile);
-        formData.append('musicName', musicFile.name.replace(/\.[^/.]+$/, ''));
+      const md2 = getMusicData();
+      if (md2.musicFile) {
+        formData.append('music', md2.musicFile);
+        formData.append('musicName', md2.musicName);
+      } else if (md2.musicLink) {
+        formData.append('musicLink', md2.musicLink);
+        formData.append('musicName', 'Música via link');
       }
       const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
-      if (whatsFile) formData.append('whatsappFile', whatsFile);
+      if (whatsFile) {
+        // Send the file as-is (txt or zip); server will handle both
+        formData.append('whatsappFile', whatsFile);
+        // Also send pre-parsed insights so server doesn't need to re-parse
+        const insightsDados2 = await salvarDadosLocal();
+        if (insightsDados2.insights) {
+          formData.set('insights', JSON.stringify(insightsDados2.insights));
+        }
+      }
       const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
       const data = await response.json();
       if (!response.ok) throw new Error(data.erro || 'Erro ao iniciar pagamento.');
