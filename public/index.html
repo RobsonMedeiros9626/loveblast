@@ -400,24 +400,107 @@ nav a:hover{background:rgba(255,45,120,.12)}
   box-shadow:none;
 }
 .btn-full.secondary:hover{background:rgba(255,45,120,.1)}
-.preview-result{
-  margin-top:16px;
-  padding:16px;
-  border:1px solid rgba(255,45,120,.3);
-  border-radius:16px;
-  background:rgba(255,45,120,.06);
-  display:none;
-}
+.preview-result{margin-top:16px;display:none}
 .preview-result.active{display:block}
-.preview-result strong{color:#ff7aa9;font-size:15px}
-.preview-row{
-  display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;
+
+/* ── MINI RETROSPECTIVA PRÉVIA ── */
+.mini-retro{
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:20px;
+  overflow:hidden;
+  background:#07060f;
+  max-height:520px;
+  overflow-y:auto;
+  scroll-behavior:smooth;
 }
-.preview-row img{
-  height:70px;width:70px;
-  object-fit:cover;border-radius:10px;
-  border:2px solid rgba(255,45,120,.4);
+.mini-retro::-webkit-scrollbar{width:4px}
+.mini-retro::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:99px}
+.mini-panel{
+  padding:22px 20px;
+  border-bottom:1px solid rgba(255,45,120,.15);
+  position:relative;
+  overflow:hidden;
 }
+.mini-panel::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 80% 10%,rgba(255,45,120,.1),transparent 55%);
+  pointer-events:none;
+}
+.mini-panel>*{position:relative;z-index:1}
+.mini-num{font-size:10px;font-weight:900;letter-spacing:.15em;color:rgba(255,255,255,.35);margin-bottom:6px}
+.mini-title{font-size:22px;font-weight:900;color:#fff;line-height:1.1}
+.mini-title span{color:#ff2d78;text-shadow:0 0 16px rgba(255,45,120,.7)}
+.mini-sub{font-size:13px;color:rgba(255,255,255,.5);margin-top:6px}
+.mini-names{
+  font-family:'Dancing Script',cursive;
+  font-size:clamp(32px,8vw,48px);
+  color:#fff;line-height:1;margin:10px 0 6px;
+}
+.mini-names .amp{color:#ff2d78}
+.mini-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border:1px solid rgba(255,45,120,.4);
+  border-radius:99px;background:rgba(255,45,120,.1);
+  font-size:12px;font-weight:900;color:#ff2d78;margin-top:10px;
+}
+/* photo strip */
+.mini-photos{display:flex;gap:8px;margin-top:14px;overflow-x:auto;padding-bottom:4px}
+.mini-photos::-webkit-scrollbar{height:3px}
+.mini-photos::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:99px}
+.mini-photos img{
+  width:90px;height:90px;object-fit:cover;
+  border-radius:12px;border:2px solid rgba(255,45,120,.35);flex-shrink:0;
+}
+.mini-photos .mp-locked{
+  width:90px;height:90px;border-radius:12px;
+  border:2px dashed rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;background:rgba(255,255,255,.04);
+  flex-direction:column;gap:2px;
+}
+.mini-photos .mp-locked span{font-size:10px;color:rgba(255,255,255,.3);font-weight:700}
+/* insight numbers */
+.mini-insight-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.mini-icard{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,45,120,.22);
+  border-radius:12px;padding:12px;
+}
+.mini-icard .iv{font-size:24px;font-weight:900;color:#ff2d78;display:block;line-height:1}
+.mini-icard .il{font-size:11px;color:rgba(255,255,255,.45);margin-top:4px}
+/* timeline rows */
+.mini-tl{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.mini-tl-item{display:flex;align-items:center;gap:10px}
+.mini-tl-ico{
+  width:32px;height:32px;border-radius:50%;
+  border:1.5px solid #ff2d78;background:rgba(255,45,120,.12);
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+}
+.mini-tl-yr{font-size:14px;font-weight:900;color:#ff2d78;min-width:50px}
+.mini-tl-desc{font-size:13px;color:rgba(255,255,255,.65)}
+/* locked overlay */
+.mini-locked{
+  padding:22px 20px;border-bottom:1px solid rgba(255,45,120,.1);
+  display:flex;align-items:center;gap:14px;
+  background:rgba(0,0,0,.35);
+}
+.mini-locked .lock-ico{font-size:22px;opacity:.4}
+.mini-locked .lock-text{font-size:13px;color:rgba(255,255,255,.3);font-weight:700}
+/* scroll hint */
+.mini-scroll-hint{
+  text-align:center;padding:10px;
+  font-size:11px;color:rgba(255,45,120,.5);
+  letter-spacing:.05em;font-weight:700;
+}
+/* carta mini */
+.mini-carta{
+  background:linear-gradient(135deg,#f8eac4,#f0d890);
+  color:#2a1008;padding:18px;border-radius:10px;
+  transform:rotate(-1deg);margin-top:12px;
+  font-family:Georgia,serif;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+.mini-carta h4{font-family:cursive;font-size:20px;color:#9e1a3a;margin-bottom:8px}
+.mini-carta p{font-size:13px;line-height:1.7;color:#3a1505}
 .notice-ok{color:#ff7aa9;font-size:12px;margin-top:8px}
 .category-description{
   margin-top:8px;padding:12px;
@@ -728,9 +811,9 @@ nav a:hover{background:rgba(255,45,120,.12)}
     <button id="previewBtn" class="btn-full" type="button">✨ Ver prévia</button>
 
     <div id="previewResult" class="preview-result">
-      <strong>Prévia criada ✨</strong>
-      <p id="previewText" style="color:#ccc;margin-top:8px;font-size:14px"></p>
-      <div id="previewImages" class="preview-row"></div>
+      <div class="mini-retro" id="miniRetro">
+        <!-- preenchido via JS -->
+      </div>
     </div>
 
     <button id="payBtn" class="btn-full secondary" type="button" id="payBtn">💳 Finalizar e pagar</button>
@@ -1241,20 +1324,120 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.disabled = true;
     try {
       const dados = await salvarDadosLocal();
-      const cfg = CATEGORY_CONFIG[dados.categoria] || CATEGORY_CONFIG.casal;
-      const pr = document.getElementById('previewResult');
-      const pt = document.getElementById('previewText');
-      const pi = document.getElementById('previewImages');
-      if (pt) pt.textContent = `${dados.nome1} & ${dados.nome2} — ${cfg.label}. ${dados.mensagem}`;
-      if (pi) {
-        pi.innerHTML = '';
-        Array.from(photosInput?.files || []).slice(0, 4).forEach(file => {
-          const img = document.createElement('img');
-          img.src = URL.createObjectURL(file);
-          pi.appendChild(img);
-        });
+      const pr  = document.getElementById('previewResult');
+      const box = document.getElementById('miniRetro');
+      if (!box) return;
+
+      const cat = dados.categoria || 'casal';
+      const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.casal;
+      const n1  = dados.nome1 || 'Você';
+      const n2  = dados.nome2 || 'Pessoa especial';
+      const ins = dados.insights || {};
+      const total = Number(ins.totalMessages || 18432).toLocaleString('pt-BR');
+      const books = Math.round(Number(ins.totalMessages || 18432) / 1500);
+
+      // Collect photo object URLs from input
+      const photoFiles = Array.from(photosInput?.files || []).slice(0, 6);
+      const photoUrls  = photoFiles.map(f => URL.createObjectURL(f));
+
+      // Timeline with real years
+      const tl = cfg.timeline || [['❤️','Início','Se conheceram'],['💬','+1 ano','Primeiras conversas'],['✈️','+2 anos','Aventuras'],['🔥','Hoje','E ainda é o começo']];
+      const tlHTML = tl.map(([ico, yr, desc]) =>
+        `<div class="mini-tl-item">
+          <div class="mini-tl-ico">${ico}</div>
+          <div class="mini-tl-yr">${yr}</div>
+          <div class="mini-tl-desc">${desc}</div>
+        </div>`).join('');
+
+      // Photos panel — show real photos + locked placeholders
+      const visiblePhotos = photoUrls.slice(0, 3);
+      const photosHTML = [
+        ...visiblePhotos.map(src => `<img src="${src}" alt="foto">`),
+        `<div class="mp-locked"><span>🔒</span><span>GALERIA</span></div>`,
+        `<div class="mp-locked"><span>🔒</span><span>MAIS</span></div>`,
+      ].join('');
+
+      // Music info
+      const hasMusicLink = !!dados.musicLink;
+      const hasMusicFile = !!dados.musicSrc;
+      const musicName = dados.musicName || 'Trilha sonora da história';
+
+      // Detect YouTube ID for thumbnail
+      let ytThumb = '';
+      if (hasMusicLink) {
+        const ytM = dados.musicLink.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([-\w]{11})/);
+        if (ytM) ytThumb = `<img src="https://img.youtube.com/vi/${ytM[1]}/mqdefault.jpg"
+          style="width:100%;height:80px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid rgba(255,45,120,.3)">`;
       }
+
+      box.innerHTML = `
+        <!-- 01 ABERTURA -->
+        <div class="mini-panel" style="background:linear-gradient(135deg,#0d0018,#1a0414)">
+          <div class="mini-num">01 ABERTURA</div>
+          <div class="mini-names"><span>${n1}</span> <span class="amp">&</span> <span>${n2}</span></div>
+          <div class="mini-sub">${cfg.intro || 'Algumas histórias não cabem em palavras.'}</div>
+          <div class="mini-badge">${cfg.icon || '♡'} ${cfg.label || 'CASAL'}</div>
+        </div>
+
+        <!-- 02 FOTOS -->
+        <div class="mini-panel">
+          <div class="mini-num">02 NOSSAS MEMÓRIAS</div>
+          <div class="mini-title">Momentos <span>inesquecíveis</span></div>
+          <div class="mini-photos">${photosHTML}</div>
+        </div>
+
+        <!-- 03 LINHA DO TEMPO -->
+        <div class="mini-panel">
+          <div class="mini-num">03 LINHA DO TEMPO</div>
+          <div class="mini-title">A <span>história</span> de vocês</div>
+          <div class="mini-tl">${tlHTML}</div>
+        </div>
+
+        <!-- 04 INSIGHTS -->
+        <div class="mini-panel">
+          <div class="mini-num">04 NOSSOS INSIGHTS</div>
+          <div class="mini-title">Vocês trocaram</div>
+          <div style="font-size:40px;font-weight:900;color:#ff2d78;text-shadow:0 0 20px rgba(255,45,120,.7);margin:8px 0 2px">${total}</div>
+          <div style="font-size:15px;font-weight:900;color:#fff;margin-bottom:12px">mensagens — ${books} livros inteiros</div>
+          <div class="mini-insight-row">
+            <div class="mini-icard"><span class="iv">${ins.topWord || 'amor'}</span><span class="il">palavra mais usada</span></div>
+            <div class="mini-icard"><span class="iv">${ins.saudadeCount || 103}x</span><span class="il">saudade</span></div>
+            <div class="mini-icard"><span class="iv">${ins.topEmoji || '😂'}</span><span class="il">emoji favorito</span></div>
+            <div class="mini-icard"><span class="iv">${ins.favoriteTime || '23:47'}</span><span class="il">horário favorito</span></div>
+          </div>
+        </div>
+
+        <!-- 05 MÚSICA -->
+        <div class="mini-panel">
+          <div class="mini-num">07 NOSSA MÚSICA ♡</div>
+          <div class="mini-title">Nossa <span>trilha sonora</span></div>
+          <div class="mini-sub" style="margin-top:8px">${musicName}</div>
+          ${ytThumb}
+          ${!hasMusicLink && !hasMusicFile ? '<div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.3)">Nenhuma música adicionada ainda</div>' : ''}
+        </div>
+
+        <!-- 06 MENSAGEM -->
+        <div class="mini-panel">
+          <div class="mini-num">08 MENSAGEM ESPECIAL</div>
+          <div class="mini-carta">
+            <h4>Para ${n2},</h4>
+            <p>${dados.mensagem || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.'}</p>
+          </div>
+        </div>
+
+        <!-- LOCKED -->
+        <div class="mini-locked"><span class="lock-ico">🔒</span><span class="lock-text">CONTADOR AO VIVO — disponível após pagamento</span></div>
+        <div class="mini-locked"><span class="lock-ico">🔒</span><span class="lock-text">MAPA ESTELAR DA DATA ESPECIAL — disponível após pagamento</span></div>
+        <div class="mini-locked"><span class="lock-ico">🔒</span><span class="lock-text">FINAL ÉPICO + QR CODE — disponível após pagamento</span></div>
+
+        <div class="mini-scroll-hint">▲ ROLE PARA CIMA PARA VER MAIS ▲</div>
+      `;
+
       if (pr) pr.classList.add('active');
+
+      // Scroll preview into view
+      setTimeout(() => box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+
     } finally {
       btn.textContent = '✨ Ver prévia';
       btn.disabled = false;
