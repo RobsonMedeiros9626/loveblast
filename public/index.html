@@ -646,6 +646,9 @@ nav a:hover{background:rgba(255,45,120,.12)}
     <label>Nome da pessoa especial</label>
     <input id="nome2" type="text" placeholder="Ex: Paloma">
 
+    <label>Data em que se conheceram</label>
+    <input id="dataInicio" type="date" style="color-scheme:dark">
+
     <label>E-mail</label>
     <input id="email" type="email" placeholder="seu@email.com">
 
@@ -1014,8 +1017,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (whatsappFile) {
       try { insights = analisarConversaWhatsApp(await whatsappFile.text()); } catch(e) {}
     }
+    const dataInicio = document.getElementById('dataInicio')?.value || '';
     const dados = {
       nome1, nome2, mensagem,
+      dataInicio,
       categoria: categoriaSelecionada,
       photos: fotosBase64,
       musicSrc,
@@ -1080,6 +1085,8 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('email', email);
       formData.append('mensagem', document.getElementById('mensagem')?.value || '');
       formData.append('categoria', categoriaSelecionada);
+      const dataInicioVal = document.getElementById('dataInicio')?.value || '';
+      if(dataInicioVal) formData.append('dataInicio', dataInicioVal);
       Array.from(photosInput?.files || []).forEach(f => formData.append('photos', f));
       const musicFile = musicInput?.files?.[0];
       if (musicFile) formData.append('music', musicFile);
