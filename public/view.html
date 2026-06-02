@@ -879,15 +879,46 @@ function compartilharArte(){
 (async function init(){
   const params=new URLSearchParams(location.search);
   const id=params.get('id'),sid=params.get('session_id');
-  let data=null;
+
+  // Se tem id ou session_id na URL, SEMPRE busca do servidor
+  // NUNCA usa localStorage como fallback (evita mostrar dados de outra pessoa)
   if(id||sid){
     try{
-      const ep=id?`/api/retrospectiva/${encodeURIComponent(id)}?pago=1`:`/api/retrospectiva-por-sessao/${encodeURIComponent(sid)}?pago=1`;
-      const r=await fetch(ep);if(r.ok){data=await r.json();try{localStorage.setItem('loveblastData',JSON.stringify(data));}catch{}}
-    }catch{}
+      const ep=id
+        ?`/api/retrospectiva/${encodeURIComponent(id)}?pago=1`
+        :`/api/retrospectiva-por-sessao/${encodeURIComponent(sid)}?pago=1`;
+      const r=await fetch(ep);
+      if(r.ok){
+        const data=await r.json();
+        // Salva no localStorage com a chave específica deste id
+        try{localStorage.setItem('loveblastData_'+data.id,JSON.stringify(data));}catch{}
+        hydrate(data);
+        return;
+      }
+      // Servidor retornou erro
+      mostrarErroCarregamento('Não foi possível carregar a retrospectiva. Tente novamente.');
+    }catch(e){
+      mostrarErroCarregamento('Erro de conexão. Verifique sua internet e tente novamente.');
+    }
+    return;
   }
-  hydrate(data||getData()||{});
+
+  // Sem id na URL: abre do localStorage local (modo local/preview)
+  const local=getData();
+  if(local){hydrate(local);}
+  else{mostrarErroCarregamento('Nenhuma retrospectiva encontrada. Crie uma nova em loveblast.');}
 })();
+
+function mostrarErroCarregamento(msg){
+  const grid=document.getElementById('arteFinal');
+  if(grid) grid.innerHTML=`
+    <div style="grid-column:1/-1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:20px;padding:40px;text-align:center">
+      <div style="font-size:64px">💔</div>
+      <h2 style="font-size:28px;color:#ff2d78;font-weight:900">Ops, algo deu errado</h2>
+      <p style="color:rgba(255,255,255,.6);font-size:16px;max-width:400px">${msg}</p>
+      <button onclick="location.reload()" style="padding:14px 28px;background:linear-gradient(90deg,#ff2d78,#ff6b1a);border:none;border-radius:12px;color:#fff;font-weight:900;font-size:15px;cursor:pointer">Tentar novamente</button>
+    </div>`;
+}
 </script>
 </body>
 </html>
