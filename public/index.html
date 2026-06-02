@@ -1207,6 +1207,8 @@ document.addEventListener('DOMContentLoaded', () => {
       status.style.border = '1px solid rgba(255,45,120,.3)';
       status.style.color = '#ff7aa9';
       status.textContent = `✅ Conversa carregada! ${lines.toLocaleString('pt-BR')} linhas detectadas.`;
+      // Cache insights so payBtn doesn't need to re-parse
+      try { window._cachedInsights = analisarConversaWhatsApp(text); } catch(e) {}
     } catch(e) {
       status.style.background = 'rgba(255,100,100,.1)';
       status.style.border = '1px solid rgba(255,100,100,.3)';
@@ -1563,16 +1565,13 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('musicName', 'Música via link');
       }
 
-      // WhatsApp — parse insights client-side ONLY (no base64)
+      // WhatsApp — send raw file, server parses it (fast)
       const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
       if (whatsFile) {
         formData.append('whatsappFile', whatsFile);
-        // Parse insights quickly without converting to base64
-        try {
-          const txt = await extractWhatsAppText(whatsFile);
-          const parsedInsights = analisarConversaWhatsApp(txt);
-          formData.append('insights', JSON.stringify(parsedInsights));
-        } catch(e) { /* server will try to parse itself */ }
+        // Use pre-parsed insights if already done during preview (instant)
+        const cachedInsights = window._cachedInsights;
+        if (cachedInsights) formData.append('insights', JSON.stringify(cachedInsights));
       }
 
       const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
