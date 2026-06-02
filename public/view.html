@@ -540,25 +540,69 @@ function buildPanel(type,data,t,ins){
         <div class="category-badge">${t.badgeIcon} ${t.badgeLabel}</div>
       </div>`;
 
-    case 'foto':
-      return `<div class="panel p-comeco">
-        <div class="panel-num">02 COMEÇO DE TUDO</div>
-        <div class="photo-wrap">
-          <img src="${photos[0]}" alt="Foto principal" onerror="this.src='${photos_fallback[0]}'">
+    case 'foto': {
+      // Pick real photos or nothing — never show logo fallback here
+      const realPhotos = photos.filter(Boolean);
+      const hasPhotos = realPhotos.length > 0;
+      // Build 3 stacked mini-photos (right column)
+      const stackImgs = hasPhotos
+        ? realPhotos.slice(0,3).map((src,i) => {
+            const rot = ['-4deg','2deg','-2deg'][i] || '0deg';
+            const top = [0, 60, 118][i] || i*58;
+            return `<img src="${src}" style="position:absolute;top:${top}px;right:0;width:140px;height:100px;object-fit:cover;border-radius:10px;border:3px solid rgba(255,255,255,.9);box-shadow:0 8px 28px rgba(0,0,0,.6);transform:rotate(${rot})" onerror="this.src.indexOf('unsplash')>-1?null:this.remove()">`;
+          }).join('')
+        : '';
+      return `<div class="panel p-comeco" style="display:flex;flex-direction:column;justify-content:center;background:linear-gradient(135deg,#07070f,#130510)">
+        <div class="panel-num">02 NOSSAS MEMÓRIAS</div>
+        <div style="display:flex;align-items:center;gap:0;margin-top:20px;flex:1">
+          <!-- LEFT: text -->
+          <div style="flex:1;min-width:0;padding-right:${hasPhotos?'170px':'0'}">
+            <h2 style="font-size:clamp(28px,4.5vw,52px);font-weight:900;line-height:1.05">
+              Momentos que <span style="color:var(--ac);text-shadow:0 0 22px var(--glow)">ficam</span><br>para sempre.
+            </h2>
+            <p style="font-size:14px;margin-top:16px;color:rgba(255,255,255,.5);line-height:1.6">
+              Cada imagem carrega um pedaço<br>dessa história incrível.
+            </p>
+            ${hasPhotos ? `
+            <div style="display:flex;gap:8px;margin-top:24px;flex-wrap:wrap">
+              ${realPhotos.slice(0,4).map((src,i) =>
+                `<img src="${src}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;border:2px solid rgba(var(--ac-rgb),.5);box-shadow:0 4px 14px rgba(0,0,0,.4)" onerror="this.style.display='none'">`
+              ).join('')}
+              ${realPhotos.length > 4 ? `<div style="width:52px;height:52px;border-radius:8px;border:2px solid rgba(var(--ac-rgb),.3);background:rgba(var(--ac-rgb),.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;color:var(--ac)">+${realPhotos.length-4}</div>` : ''}
+            </div>` : `
+            <div style="margin-top:24px;padding:14px 16px;border:1px dashed rgba(255,255,255,.15);border-radius:12px;font-size:13px;color:rgba(255,255,255,.3)">
+              📸 As fotos aparecerão aqui
+            </div>`}
+          </div>
+          <!-- RIGHT: stacked photos -->
+          ${hasPhotos ? `<div style="position:absolute;right:28px;top:50%;transform:translateY(-50%);width:160px;height:${Math.min(realPhotos.slice(0,3).length,3)*58+44}px">${stackImgs}</div>` : ''}
         </div>
-        <h2>Tudo começou <span style="color:var(--ac);text-shadow:0 0 22px var(--glow)">aqui.</span></h2>
-        <p style="font-size:15px;margin-top:10px;color:rgba(255,255,255,.65)">${t.intro.toLowerCase().replace(/\.$/, '')}, e desde então tudo faz sentido.</p>
       </div>`;
+    }
 
-    case 'timeline':
+    case 'timeline': {
       const tlYears=buildTimelineYears(data.dataInicio,t.timeline);
-      const tlItems=tlYears.map(([ico,yr,desc])=>`<div class="tl-item"><div class="tl-icon">${ico}</div><div class="tl-year">${yr}</div><div class="tl-desc">${desc}</div></div>`).join('');
-      const tlPics=photos.slice(0,4).map(src=>`<img src="${src}" alt="">`).join('');
-      return `<div class="panel p-timeline">
+      const tlStepper = tlYears.map(([ico,yr,desc], i) => `
+        <div style="display:flex;gap:16px;align-items:flex-start;position:relative">
+          <!-- connector line -->
+          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
+            <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--ac);background:rgba(var(--ac-rgb),.15);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 16px rgba(var(--ac-rgb),.35);flex-shrink:0;z-index:1">${ico}</div>
+            ${i < tlYears.length-1 ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,rgba(var(--ac-rgb),.5),rgba(var(--ac-rgb),.1));margin:4px 0"></div>` : ''}
+          </div>
+          <!-- content -->
+          <div style="padding-bottom:${i < tlYears.length-1 ? '8px':'0'};padding-top:10px">
+            <div style="font-size:20px;font-weight:900;color:var(--ac);text-shadow:0 0 12px var(--glow);line-height:1">${yr}</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.75);margin-top:4px">${desc}</div>
+          </div>
+        </div>`).join('');
+      return `<div class="panel p-timeline" style="background:linear-gradient(160deg,#05050e,#0f0308)">
         <div class="panel-num">03 LINHA DO TEMPO</div>
-        <div class="tl-photos">${tlPics}</div>
-        <div class="tl-list">${tlItems}</div>
+        <h2 style="font-size:clamp(20px,3vw,34px);font-weight:900;margin:14px 0 22px;line-height:1.1">
+          A história de <span style="color:var(--ac);text-shadow:0 0 18px var(--glow)">${data.nome1||'vocês'}</span>
+        </h2>
+        <div style="display:flex;flex-direction:column">${tlStepper}</div>
       </div>`;
+    }
 
     case 'insights':
       const total=Number(ins.totalMessages||18432);
