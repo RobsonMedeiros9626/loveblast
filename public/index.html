@@ -1101,9 +1101,17 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('categoria', categoriaSelecionada);
       const dataInicioVal = document.getElementById('dataInicio')?.value || '';
       if(dataInicioVal) formData.append('dataInicio', dataInicioVal);
+      // Send insights from WhatsApp analysis
+      const insightsDados = await salvarDadosLocal();
+      if (insightsDados.insights) {
+        formData.append('insights', JSON.stringify(insightsDados.insights));
+      }
       Array.from(photosInput?.files || []).forEach(f => formData.append('photos', f));
       const musicFile = musicInput?.files?.[0];
-      if (musicFile) formData.append('music', musicFile);
+      if (musicFile) {
+        formData.append('music', musicFile);
+        formData.append('musicName', musicFile.name.replace(/\.[^/.]+$/, ''));
+      }
       const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
       if (whatsFile) formData.append('whatsappFile', whatsFile);
       const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
