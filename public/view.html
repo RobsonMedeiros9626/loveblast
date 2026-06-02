@@ -481,7 +481,13 @@ function hydrate(raw){
   set('quote1',phrases[0]||t.quotes[0]);set('quote2',phrases[1]||t.quotes[1]);set('quote3',phrases[2]||t.quotes[2]);
 
   const tl=document.getElementById('timelineItems');
-  if(tl){tl.innerHTML='';t.timeline.forEach(([ico,yr,desc])=>{tl.insertAdjacentHTML('beforeend',`<div class="tl-item"><div class="tl-icon">${ico}</div><div class="tl-year">${yr}</div><div class="tl-desc">${desc}</div></div>`);})}
+  if(tl){
+    tl.innerHTML='';
+    const tlYears=buildTimelineYears(data.dataInicio,t.timeline);
+    tlYears.forEach(([ico,yr,desc])=>{
+      tl.insertAdjacentHTML('beforeend',`<div class="tl-item"><div class="tl-icon">${ico}</div><div class="tl-year">${yr}</div><div class="tl-desc">${desc}</div></div>`);
+    });
+  }
 
   const photos=Array.isArray(data.photos)?data.photos.filter(Boolean):[];
   const pMain=document.getElementById('fotoPrincipal');
@@ -548,6 +554,36 @@ function seekMusic(e){
   if(!audioEl.duration)return;
   const bar=document.getElementById('musicBar'),rect=bar.getBoundingClientRect();
   audioEl.currentTime=((e.clientX-rect.left)/rect.width)*audioEl.duration;
+}
+
+/* ============================================================
+   TIMELINE DINÂMICA — usa datas reais do dataInicio
+============================================================ */
+function buildTimelineYears(dataInicio, themeTimeline){
+  // If no start date, return theme defaults unchanged
+  if(!dataInicio) return themeTimeline;
+
+  const start = new Date(dataInicio);
+  const startYear = start.getFullYear();
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const totalYears = currentYear - startYear;
+
+  // Build 4 milestone years from real startYear
+  const y0 = startYear;
+  const y1 = totalYears >= 1 ? startYear + Math.ceil(totalYears * 0.25) : startYear;
+  const y2 = totalYears >= 2 ? startYear + Math.ceil(totalYears * 0.6)  : startYear + 1;
+  const y3 = currentYear;
+
+  // Keep icons and descriptions from theme, replace only the year labels
+  const result = themeTimeline.map((item, i) => {
+    const yearMap = [y0, y1, y2, y3];
+    // Use actual year for each milestone, clamped to realistic range
+    const yr = Math.min(yearMap[i] ?? y3, currentYear);
+    return [item[0], String(yr), item[2]];
+  });
+
+  return result;
 }
 
 /* ============================================================
