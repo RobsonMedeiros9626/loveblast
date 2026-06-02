@@ -132,17 +132,27 @@
   .topbar{
     height:auto!important;
     min-height:60px!important;
-    display:grid!important;
-    grid-template-columns:1fr!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
     gap:10px!important;
     padding:12px 14px!important;
+  }
+  .topbar .logo{
+    font-size:clamp(24px,8vw,34px)!important;
+    flex:1 1 100%!important;
   }
   .topbar .actions{
     width:100%!important;
     display:grid!important;
     grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
   }
-  .action-btn{width:100%!important;min-height:44px!important}
+  .action-btn{
+    width:100%!important;
+    min-height:44px!important;
+    padding:10px 8px!important;
+    font-size:14px!important;
+  }
   .final-experience{padding:14px 0 44px!important}
   .final-grid{
     display:grid!important;
@@ -165,16 +175,40 @@
   }
   .final-panel h2{font-size:clamp(27px,9vw,40px)!important}
   .big-number{font-size:clamp(48px,16vw,64px)!important}
+  .timeline-final #timelineItems{
+    display:grid!important;
+    gap:18px!important;
+    margin-top:18px!important;
+  }
   .time-item{
-    grid-template-columns:36px 76px 1fr!important;
-    gap:9px!important;
+    display:grid!important;
+    grid-template-columns:44px 1fr!important;
+    grid-template-areas:"icon title" "icon text"!important;
+    gap:4px 12px!important;
+    align-items:center!important;
+    margin:0!important;
     font-size:16px!important;
   }
-  .time-item strong{font-size:16px!important}
-  .time-item p{font-size:14px!important}
+  .time-item .emoji{
+    grid-area:icon!important;
+    width:44px!important;
+    height:44px!important;
+    font-size:20px!important;
+  }
+  .time-item strong{
+    grid-area:title!important;
+    font-size:22px!important;
+    line-height:1.1!important;
+  }
+  .time-item p{
+    grid-area:text!important;
+    font-size:16px!important;
+    line-height:1.28!important;
+  }
   .polaroid{
     width:min(86vw,280px)!important;
     transform:none!important;
+    margin:22px auto 24px!important;
   }
   .polaroid img{height:230px!important}
   .galeria-fotos{
