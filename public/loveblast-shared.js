@@ -3,7 +3,7 @@
 
   const MAX_PHOTOS = 8;
   const MAX_IMAGE_SIDE = 1400;
-  const MAX_MUSIC_DATA_BYTES = 12 * 1024 * 1024;
+  const MAX_MUSIC_DATA_BYTES = 18 * 1024 * 1024;
   const STORAGE_KEY = 'loveblastData';
 
   const THEMES = {
@@ -149,6 +149,18 @@
     });
   }
 
+  function audioMimeFromName(name) {
+    const ext = String(name || '').split('.').pop().toLowerCase();
+    return {
+      mp3: 'audio/mpeg',
+      m4a: 'audio/mp4',
+      aac: 'audio/aac',
+      ogg: 'audio/ogg',
+      wav: 'audio/wav',
+      webm: 'audio/webm'
+    }[ext] || 'audio/mpeg';
+  }
+
   function resizeImage(file) {
     return new Promise((resolve, reject) => {
       if (!file.type.startsWith('image/')) return reject(new Error(`${file.name} nao parece ser uma imagem.`));
@@ -231,6 +243,9 @@
       musicName = musicFile.name.replace(/\.[^/.]+$/, '');
       if (musicFile.size <= MAX_MUSIC_DATA_BYTES) {
         musicData = await readDataUrl(musicFile);
+        if (musicData.startsWith('data:;base64,')) {
+          musicData = musicData.replace('data:;base64,', `data:${audioMimeFromName(musicFile.name)};base64,`);
+        }
       }
     }
 
@@ -410,14 +425,22 @@
     setText('nomeMusicaFinal', data.musicName || cfg.music);
     const audio = $('#audioFinal');
     const emptyMsg = $('#semMusicaMsg');
+    const disc = $('#disc');
     if (audio) {
       if (data.musicSrc && data.musicSrc !== '__indexeddb__') {
         audio.src = data.musicSrc;
         audio.style.display = 'block';
         if (emptyMsg) emptyMsg.style.display = 'none';
+        if (disc && !audio.dataset.loveblastBound) {
+          audio.addEventListener('play', () => disc.classList.add('playing'));
+          audio.addEventListener('pause', () => disc.classList.remove('playing'));
+          audio.addEventListener('ended', () => disc.classList.remove('playing'));
+          audio.dataset.loveblastBound = '1';
+        }
       } else {
         audio.removeAttribute('src');
         audio.style.display = 'none';
+        disc?.classList.remove('playing');
         if (emptyMsg) {
           emptyMsg.textContent = 'Nenhuma musica foi adicionada.';
           emptyMsg.style.display = 'block';
