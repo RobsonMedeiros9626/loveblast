@@ -895,7 +895,7 @@ function hydrate(raw){
 
   applyTheme(t);
 
-  // Build grid HTML
+  // Build grid HTML — all panels available (single plan)
   const grid=document.getElementById('arteFinal');
   grid.innerHTML=t.panels.map(p=>buildPanel(p,data,t,ins)).join('');
 
