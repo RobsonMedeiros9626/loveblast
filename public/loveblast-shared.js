@@ -1,482 +1,440 @@
+/* ============================================================
+   LoveBlast — Shared Logic v3
+   Handles: category themes, data save/load, hydration
+   ============================================================ */
 (() => {
   'use strict';
 
-  const MAX_PHOTOS = 8;
-  const MAX_IMAGE_SIDE = 1400;
-  const MAX_MUSIC_DATA_BYTES = 18 * 1024 * 1024;
-  const STORAGE_KEY = 'loveblastData';
-
+  /* ─── THEME DEFINITIONS ─── */
   const THEMES = {
     casal: {
-      label: 'CASAL',
-      intro: 'Algumas historias nao cabem em palavras.',
-      start: 'E desde entao, cada detalhe faz sentido.',
+      label: 'CASAL', icon: '♡',
+      accent: '#ff2d78', accentRgb: '255,45,120',
+      glow: 'rgba(255,45,120,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(30,5,15,.97))',
+      intro: 'Algumas histórias não cabem em palavras.',
+      start: 'E desde então, cada detalhe faz sentido.',
       mensagensLabel: 'mensagens',
       word: 'amor',
-      second: i => `saudade ${i.saudadeCount || 103} vezes`,
-      timeline: [['♡','Inicio','O primeiro marco dessa historia'],['💬','Conversas','Mensagens que aproximaram voces'],['✦','Memorias','Momentos que ficaram guardados'],['🔥','Hoje','E ainda parece so o comeco']],
-      quotes: ['O carinho aparece mais nos detalhes do que nas grandes declaracoes.', 'Mesmo quando o assunto era simples, voces encontravam jeito de permanecer juntos.', 'A saudade foi uma das emocoes mais presentes nessa historia.'],
-      final: 'Algumas historias merecem ser eternizadas.',
-      music: 'Nossa musica'
+      wordEmoji: '❤️',
+      saudadeLabel: i => `saudade ${i.saudadeCount||103} vezes`,
+      music: 'Nossa música',
+      finalPhrase: 'Algumas histórias merecem ser eternizadas.',
+      timeline: [
+        ['❤️','2023','Vocês se conheceram'],
+        ['💬','2023','Primeiras conversas'],
+        ['✈️','2024','Primeira viagem juntos'],
+        ['🔥','2025','E ainda parece o começo']
+      ],
+      quotes: [
+        'O carinho aparece mais nos detalhes do que nas grandes declarações.',
+        'Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos.',
+        'A saudade foi uma das emoções mais presentes nessa história.'
+      ],
+      modal: 'Celebre o amor de vocês com fotos, música e momentos inesquecíveis.',
+      extraEmoji: ['💗','😂','💬','🔥','🤝']
     },
     mae: {
-      label: 'MAE',
+      label: 'MÃE', icon: '🌷',
+      accent: '#ff6b9d', accentRgb: '255,107,157',
+      glow: 'rgba(255,107,157,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(25,5,18,.97))',
       intro: 'O amor mais constante da vida.',
-      start: 'Tudo comecou com cuidado, colo e presenca.',
+      start: 'Tudo começou com cuidado, colo e presença.',
       mensagensLabel: 'momentos especiais',
       word: 'cuidado',
-      second: () => 'cuidado em cada detalhe',
-      timeline: [['✦','Presenca','Ela esteve presente'],['♡','Cuidado','Cada gesto virou memoria'],['⌂','Lar','O abraco que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
-      quotes: ['Algumas pessoas nao apenas cuidam. Elas viram abrigo.', 'O amor dela aparece nos detalhes que quase ninguem ve.', 'Mae e a primeira forma de amor que a vida ensina.'],
-      final: 'Alguns amores merecem ser homenageados para sempre.',
-      music: 'A musica dela'
+      wordEmoji: '🌷',
+      saudadeLabel: () => 'cuidado em cada detalhe',
+      music: 'A música dela',
+      finalPhrase: 'Alguns amores merecem ser homenageados para sempre.',
+      timeline: [
+        ['🌷','Sempre','Ela esteve presente'],
+        ['🤍','Cuidado','Cada gesto virou memória'],
+        ['🏠','Lar','O abraço que acalma tudo'],
+        ['✨','Hoje','Uma homenagem para eternizar']
+      ],
+      quotes: [
+        'Algumas pessoas não apenas cuidam. Elas viram abrigo.',
+        'O amor dela aparece nos detalhes que quase ninguém vê.',
+        'Mãe é a primeira forma de amor que a vida ensina.'
+      ],
+      modal: 'Crie uma homenagem emocionante para quem sempre cuidou e esteve presente.',
+      extraEmoji: ['💗','🌷','💬','🔥','🤝']
     },
     pai: {
-      label: 'PAI',
-      intro: 'Alguns herois nao usam capa.',
-      start: 'Tudo comecou com exemplo, protecao e presenca.',
+      label: 'PAI', icon: '🛡️',
+      accent: '#ff8c42', accentRgb: '255,140,66',
+      glow: 'rgba(255,140,66,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(25,10,5,.97))',
+      intro: 'Alguns heróis não usam capa.',
+      start: 'Tudo começou com exemplo, proteção e presença.',
       mensagensLabel: 'momentos especiais',
       word: 'exemplo',
-      second: () => 'presenca que virou exemplo',
-      timeline: [['◇','Protecao','Sempre esteve por perto'],['✦','Exemplo','Ensinou mais por atitudes'],['💬','Conselhos','Palavras que ficaram'],['🔥','Hoje','Uma homenagem para guardar']],
-      quotes: ['Pai e presenca que guia, mesmo em silencio.', 'O exemplo dele virou parte de quem voce e.', 'Alguns gestos simples carregam amor gigante.'],
-      final: 'Herois de verdade merecem ser lembrados.',
-      music: 'A trilha dele'
+      wordEmoji: '🛡️',
+      saudadeLabel: () => 'presença que virou exemplo',
+      music: 'A trilha dele',
+      finalPhrase: 'Heróis de verdade merecem ser lembrados.',
+      timeline: [
+        ['🛡️','Proteção','Sempre esteve por perto'],
+        ['🧭','Exemplo','Ensinou mais por atitudes'],
+        ['💬','Conselhos','Palavras que ficaram'],
+        ['🔥','Hoje','Uma homenagem para guardar']
+      ],
+      quotes: [
+        'Pai é presença que guia, mesmo em silêncio.',
+        'O exemplo dele virou parte de quem você é.',
+        'Alguns gestos simples carregam amor gigante.'
+      ],
+      modal: 'Monte uma retrospectiva celebrando histórias, conselhos, força e presença.',
+      extraEmoji: ['💗','😌','💬','🔥','🛡️']
     },
     familia: {
-      label: 'FAMILIA',
-      intro: 'Familia e onde a historia comeca.',
-      start: 'Cada encontro virou parte de uma memoria maior.',
-      mensagensLabel: 'memorias compartilhadas',
-      word: 'familia',
-      second: () => 'memorias que unem todos',
-      timeline: [['⌂','Raizes','Onde tudo comecou'],['📸','Memorias','Momentos que uniram todos'],['✧','Presenca','Cada pessoa faz parte'],['✨','Hoje','Uma historia de geracoes']],
-      quotes: ['Familia e feita de risadas, apoio e lembrancas que ficam.', 'O lar nao e so um lugar, e quem caminha com voce.', 'Cada foto guarda uma parte da historia de voces.'],
-      final: 'Historias de familia atravessam geracoes.',
-      music: 'A trilha da familia'
+      label: 'FAMÍLIA', icon: '🏠',
+      accent: '#ffd700', accentRgb: '255,215,0',
+      glow: 'rgba(255,215,0,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(20,18,0,.97))',
+      intro: 'Família é onde a história começa.',
+      start: 'Cada encontro virou parte de uma memória maior.',
+      mensagensLabel: 'memórias compartilhadas',
+      word: 'família',
+      wordEmoji: '🏠',
+      saudadeLabel: () => 'memórias que unem todos',
+      music: 'A trilha da família',
+      finalPhrase: 'Histórias de família atravessam gerações.',
+      timeline: [
+        ['🏠','Raízes','Onde tudo começou'],
+        ['📸','Memórias','Momentos que uniram todos'],
+        ['🫶','Presença','Cada pessoa faz parte'],
+        ['✨','Hoje','Uma história de gerações']
+      ],
+      quotes: [
+        'Família é feita de risadas, apoio e lembranças que ficam.',
+        'O lar não é só um lugar, é quem caminha com você.',
+        'Cada foto guarda uma parte da história de vocês.'
+      ],
+      modal: 'Crie uma retrospectiva familiar com momentos, gerações e mensagens especiais.',
+      extraEmoji: ['💗','😂','💬','🔥','🏠']
     },
     amigos: {
-      label: 'AMIGOS',
-      intro: 'Algumas amizades viram familia.',
-      start: 'Tudo comecou com risadas e virou parceria.',
-      mensagensLabel: 'mensagens e memorias',
+      label: 'AMIGOS', icon: '🤝',
+      accent: '#00d4ff', accentRgb: '0,212,255',
+      glow: 'rgba(0,212,255,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(0,15,22,.97))',
+      intro: 'Algumas amizades viram família.',
+      start: 'Tudo começou com risadas e virou parceria.',
+      mensagensLabel: 'mensagens e memórias',
       word: 'risadas',
-      second: () => 'risadas que viraram historia',
-      timeline: [['✶','Risadas','Momentos impossiveis de esquecer'],['💬','Conversas','Assuntos que so voces entendem'],['♡','Parceria','Um pelo outro sempre'],['🔥','Hoje','Mais historias para viver']],
-      quotes: ['Voces transformaram dias comuns em historias boas.', 'A amizade aparece nas piadas, nos conselhos e na presenca.', 'Algumas pessoas chegam e ficam para sempre.'],
-      final: 'Amizades verdadeiras merecem ser eternizadas.',
-      music: 'A trilha dos amigos'
+      wordEmoji: '😂',
+      saudadeLabel: () => 'risadas que viraram história',
+      music: 'A trilha dos amigos',
+      finalPhrase: 'Amizades verdadeiras merecem ser eternizadas.',
+      timeline: [
+        ['😂','Risadas','Momentos impossíveis de esquecer'],
+        ['💬','Conversas','Assuntos que só vocês entendem'],
+        ['🤝','Parceria','Um pelo outro sempre'],
+        ['🔥','Hoje','Mais histórias para viver']
+      ],
+      quotes: [
+        'Vocês transformaram dias comuns em histórias boas.',
+        'A amizade aparece nas piadas, nos conselhos e na presença.',
+        'Algumas pessoas chegam e ficam para sempre.'
+      ],
+      modal: 'Transforme amizade, risadas e conversas em um recap estilo Spotify Wrapped.',
+      extraEmoji: ['💙','😂','💬','🔥','🤝']
     },
     formatura: {
-      label: 'FORMATURA',
-      intro: 'Todo esforco merece ser lembrado.',
-      start: 'Tudo comecou com um sonho e muita coragem.',
-      mensagensLabel: 'dias de dedicacao',
+      label: 'FORMATURA', icon: '🎓',
+      accent: '#9d4edd', accentRgb: '157,78,221',
+      glow: 'rgba(157,78,221,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(15,5,22,.97))',
+      intro: 'Todo esforço merece ser lembrado.',
+      start: 'Tudo começou com um sonho e muita coragem.',
+      mensagensLabel: 'dias de dedicação',
       word: 'conquista',
-      second: () => 'esforco que virou conquista',
-      timeline: [['📚','Comeco','O primeiro passo foi dado'],['☕','Rotina','Dias dificeis tambem fizeram parte'],['◇','Conquista','O sonho virou realidade'],['✨','Agora','Uma nova fase comeca']],
-      quotes: ['A conquista de hoje carrega todo esforco de ontem.', 'Cada etapa dificil tambem fez parte da vitoria.', 'O diploma e so o comeco de uma historia maior.'],
-      final: 'Conquistas grandes merecem ser eternizadas.',
-      music: 'A trilha da conquista'
+      wordEmoji: '🎓',
+      saudadeLabel: () => 'esforço que virou conquista',
+      music: 'A trilha da conquista',
+      finalPhrase: 'Conquistas grandes merecem ser eternizadas.',
+      timeline: [
+        ['📚','Começo','O primeiro passo foi dado'],
+        ['☕','Rotina','Dias difíceis também fizeram parte'],
+        ['🎓','Conquista','O sonho virou realidade'],
+        ['✨','Hoje','Uma nova fase começa']
+      ],
+      quotes: [
+        'A conquista de hoje carrega todo esforço de ontem.',
+        'Cada etapa difícil também fez parte da vitória.',
+        'O diploma é só o começo de uma história maior.'
+      ],
+      modal: 'Crie uma retrospectiva de conquista, esforço, superação e orgulho.',
+      extraEmoji: ['💜','😤','💬','🔥','🎓']
     },
     bebe: {
-      label: 'BEBE',
+      label: 'BEBÊ', icon: '🍼',
+      accent: '#ff9eb5', accentRgb: '255,158,181',
+      glow: 'rgba(255,158,181,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(22,5,12,.97))',
       intro: 'Cada descoberta virou amor.',
-      start: 'Tudo comecou com amor, cuidado e encanto.',
+      start: 'Tudo começou com amor, cuidado e encanto.',
       mensagensLabel: 'momentos registrados',
       word: 'sorrisos',
-      second: () => 'descobertas guardadas com carinho',
-      timeline: [['☻','Comeco','Tudo era novidade'],['♡','Sorrisos','Cada risada mudou o dia'],['✦','Fases','Cada descoberta uma emocao'],['✨','Agora','Um amor que so cresce']],
-      quotes: ['Cada sorriso pequeno virou uma memoria gigante.', 'O tempo passa rapido, mas esses momentos ficam.', 'Essa historia e feita de amor em sua forma mais pura.'],
-      final: 'Infancias merecem ser guardadas com carinho.',
-      music: 'Cancao do bebe'
+      wordEmoji: '👶',
+      saudadeLabel: () => 'descobertas guardadas com carinho',
+      music: 'Canção do bebê',
+      finalPhrase: 'Infâncias merecem ser guardadas com carinho.',
+      timeline: [
+        ['🍼','Começo','Tudo era novidade'],
+        ['👶','Sorrisos','Cada risada mudou o dia'],
+        ['🐾','Passinhos','Cada fase uma emoção'],
+        ['✨','Hoje','Um amor que só cresce']
+      ],
+      quotes: [
+        'Cada sorriso pequeno virou uma memória gigante.',
+        'O tempo passa rápido, mas esses momentos ficam.',
+        'Essa história é feita de amor em sua forma mais pura.'
+      ],
+      modal: 'Registre as primeiras fases, descobertas, sorrisos e momentos mais fofos.',
+      extraEmoji: ['💗','🍼','💬','✨','🤝']
     },
     pet: {
-      label: 'PET',
-      intro: 'Amor tambem tem quatro patas.',
-      start: 'Tudo comecou com bagunca, carinho e companhia.',
-      mensagensLabel: 'memorias com o pet',
+      label: 'PET', icon: '🐾',
+      accent: '#ff9f43', accentRgb: '255,159,67',
+      glow: 'rgba(255,159,67,.7)',
+      cardBg: 'linear-gradient(160deg,rgba(7,7,13,.97),rgba(22,12,0,.97))',
+      intro: 'Amor também tem quatro patas.',
+      start: 'Tudo começou com bagunça, carinho e companhia.',
+      mensagensLabel: 'memórias com o pet',
       word: 'companhia',
-      second: () => 'companhia em todos os momentos',
-      timeline: [['♨','Chegada','A casa nunca mais foi igual'],['✶','Brincadeiras','Cada travessura virou memoria'],['♡','Companhia','Sempre perto, sempre amor'],['✨','Hoje','Um melhor amigo para sempre']],
-      quotes: ['Alguns animais chegam e viram parte da familia.', 'O amor mais sincero as vezes vem com patas.', 'Cada brincadeira virou uma memoria feliz.'],
-      final: 'Alguns companheiros deixam marcas eternas.',
-      music: 'A trilha do pet'
+      wordEmoji: '🐾',
+      saudadeLabel: () => 'companhia em todos os momentos',
+      music: 'A trilha do pet',
+      finalPhrase: 'Alguns companheiros deixam marcas eternas.',
+      timeline: [
+        ['🐾','Chegada','A casa nunca mais foi igual'],
+        ['🎾','Brincadeiras','Cada travessura virou memória'],
+        ['❤️','Companhia','Sempre perto, sempre amor'],
+        ['✨','Hoje','Um melhor amigo para sempre']
+      ],
+      quotes: [
+        'Alguns animais chegam e viram parte da família.',
+        'O amor mais sincero às vezes vem com patas.',
+        'Cada brincadeira virou uma memória feliz.'
+      ],
+      modal: 'Crie uma homenagem fofa para seu melhor amigo de quatro patas.',
+      extraEmoji: ['🐾','😂','💬','🔥','❤️']
     }
   };
 
-  const $ = selector => document.querySelector(selector);
-  const $$ = selector => Array.from(document.querySelectorAll(selector));
+  /* ─── HELPERS ─── */
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+  const STORAGE_KEY = 'loveblastData';
 
-  let selectedCategory = $('.card.active')?.dataset.category || $('#categoriaInput')?.value || 'casal';
-
-  function toast(message) {
-    $('.loveblast-toast')?.remove();
-    const el = document.createElement('div');
-    el.className = 'loveblast-toast';
-    el.textContent = message;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 3500);
-  }
-
-  function theme(cat = selectedCategory) {
-    return THEMES[cat] || THEMES.casal;
-  }
-
-  function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value;
-  }
-
-  function defaultInsights(cat = selectedCategory) {
-    return {
-      totalMessages: 18432,
-      topWord: theme(cat).word,
-      saudadeCount: 103,
-      loveCount: 82,
-      favoriteTime: '23:47',
-      emotionalLevel: 'Alto',
-      generatedPhrases: theme(cat).quotes
-    };
-  }
-
-  function readDataUrl(file) {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  }
-
-  function audioMimeFromName(name) {
-    const ext = String(name || '').split('.').pop().toLowerCase();
-    return {
-      mp3: 'audio/mpeg',
-      m4a: 'audio/mp4',
-      aac: 'audio/aac',
-      ogg: 'audio/ogg',
-      wav: 'audio/wav',
-      webm: 'audio/webm'
-    }[ext] || 'audio/mpeg';
-  }
-
-  function resizeImage(file) {
-    return new Promise((resolve, reject) => {
-      if (!file.type.startsWith('image/')) return reject(new Error(`${file.name} nao parece ser uma imagem.`));
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(img.width, img.height));
-        const canvas = document.createElement('canvas');
-        canvas.width = Math.max(1, Math.round(img.width * scale));
-        canvas.height = Math.max(1, Math.round(img.height * scale));
-        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-        URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL('image/jpeg', 0.84));
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error(`${file.name} nao pode ser carregada.`));
-      };
-      img.src = url;
-    });
-  }
-
-  function analyzeWhatsApp(text) {
-    const lower = (text || '').toLowerCase();
-    const lines = lower.split(/\r?\n/).filter(line => line.trim());
-    const loveCount = (lower.match(/\b(eu te amo|te amo|amo voce|amo você)\b/g) || []).length;
-    const saudadeCount = (lower.match(/\b(saudade|saudades|sdds)\b/g) || []).length;
-    const words = lower.normalize('NFD').replace(/[\u0300-\u036f]/g, '').match(/\b[a-z0-9]{4,}\b/g) || [];
-    const ignore = new Set('para com uma umas uns que nao voce meu minha seu sua dela dele esse essa aqui hoje agora bom boa amor sim tem muito mais como quando'.split(' '));
-    const counts = {};
-    words.forEach(word => { if (!ignore.has(word)) counts[word] = (counts[word] || 0) + 1; });
-    return {
-      ...defaultInsights(),
-      totalMessages: lines.length || 18432,
-      topWord: Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] || theme().word,
-      loveCount: loveCount || 82,
-      saudadeCount: saudadeCount || 103
-    };
-  }
+  function getTheme(cat) { return THEMES[cat] || THEMES.casal; }
 
   function getLocalData() {
-    try {
-      const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-      return data && typeof data === 'object' ? data : null;
-    } catch {
-      return null;
-    }
+    try { const d = JSON.parse(localStorage.getItem(STORAGE_KEY)||'null'); return d && typeof d==='object' ? d : null; } catch { return null; }
   }
-
   function saveLocalData(data) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    } catch {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...data, photos: [], musicSrc: '' }));
-      } catch {}
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    catch { try { localStorage.setItem(STORAGE_KEY, JSON.stringify({...data, photos:[], musicSrc:''})); } catch {} }
+  }
+
+  /* ─── APPLY THEME CSS VARS TO DOCUMENT ─── */
+  function applyThemeVars(cat) {
+    const t = getTheme(cat);
+    const r = document.documentElement;
+    r.style.setProperty('--accent', t.accent);
+    r.style.setProperty('--accent-rgb', t.accentRgb);
+    r.style.setProperty('--glow', t.glow);
+    r.style.setProperty('--card-bg', t.cardBg);
+  }
+
+  /* ─── HYDRATE VIEW.HTML ─── */
+  function hydrateFinal(raw) {
+    const data = raw || {};
+    const cat = THEMES[data.categoria] ? data.categoria : 'casal';
+    const t = getTheme(cat);
+    const ins = { totalMessages:18432, topWord:t.word, saudadeCount:103, loveCount:82, emotionalLevel:'Alto', ...(data.insights||{}) };
+
+    applyThemeVars(cat);
+
+    // Names
+    setText('finalNome1', data.nome1||'Robson');
+    setText('finalNome2', data.nome2||'Pessoa especial');
+    setText('cartaNome',  data.nome2||'Pessoa especial');
+    setText('mensagemFinal', data.mensagem||t.finalPhrase);
+
+    // Texts
+    setText('fraseAbertura', t.intro);
+    setText('textoCategoria', t.start);
+    setText('mensagensLabel', t.mensagensLabel);
+    setText('fraseFinal', t.finalPhrase);
+
+    // Quotes (use generatedPhrases from WhatsApp if available)
+    const phrases = ins.generatedPhrases || t.quotes;
+    setText('quote1', `"${phrases[0]||t.quotes[0]}"`);
+    setText('quote2', `"${phrases[1]||t.quotes[1]}"`);
+    setText('quote3', `"${phrases[2]||t.quotes[2]}"`);
+
+    // Insights
+    const msgCount = Number(ins.totalMessages||18432);
+    setText('totalMensagens', msgCount.toLocaleString('pt-BR'));
+    const equiv = document.getElementById('insEquiv');
+    if (equiv) {
+      const b = Math.round(msgCount/1500);
+      equiv.textContent = b<=0?'muitas conversas':b===1?'1 livro inteiro':`${b} livros inteiros.`;
     }
-  }
-
-  async function collectFormData() {
-    selectedCategory = $('#categoriaInput')?.value || selectedCategory || 'casal';
-    if (!THEMES[selectedCategory]) selectedCategory = 'casal';
-
-    const photosInput = $('#photos');
-    const musicInput = $('#music');
-    const whatsappFile = $('#whatsappFile')?.files?.[0];
-    const photoFiles = Array.from(photosInput?.files || []).slice(0, MAX_PHOTOS);
-    const photosData = [];
-
-    for (const file of photoFiles) {
-      photosData.push(await resizeImage(file));
-    }
-
-    const musicFile = musicInput?.files?.[0];
-    let musicData = '';
-    let musicName = theme().music;
-    if (musicFile) {
-      const audioOk = musicFile.type.startsWith('audio/') || /\.(mp3|m4a|aac|ogg|wav|webm)$/i.test(musicFile.name);
-      if (!audioOk) throw new Error('Formato de musica nao suportado. Use MP3, M4A, AAC, OGG, WAV ou WEBM.');
-      musicName = musicFile.name.replace(/\.[^/.]+$/, '');
-      if (musicFile.size <= MAX_MUSIC_DATA_BYTES) {
-        musicData = await readDataUrl(musicFile);
-        if (musicData.startsWith('data:;base64,')) {
-          musicData = musicData.replace('data:;base64,', `data:${audioMimeFromName(musicFile.name)};base64,`);
-        }
-      }
-    }
-
-    const insights = whatsappFile ? analyzeWhatsApp(await whatsappFile.text()) : defaultInsights(selectedCategory);
-    const data = {
-      nome1: $('#nome1')?.value?.trim() || 'Robson',
-      nome2: $('#nome2')?.value?.trim() || 'Pessoa especial',
-      email: $('#email')?.value?.trim() || '',
-      mensagem: $('#mensagem')?.value?.trim() || theme().final,
-      categoria: selectedCategory,
-      photos: photosData,
-      musicSrc: musicData,
-      musicName,
-      insights
-    };
-    saveLocalData(data);
-    return { data, photoFiles, musicFile };
-  }
-
-  function setupIndex() {
-    $$('.card').forEach(card => {
-      card.addEventListener('click', () => {
-        selectedCategory = card.dataset.category || 'casal';
-        if ($('#categoriaInput')) $('#categoriaInput').value = selectedCategory;
-      }, true);
-    });
-
-    const payBtn = $('#payBtn');
-    if (!payBtn) return;
-    const cleanBtn = payBtn.cloneNode(true);
-    payBtn.replaceWith(cleanBtn);
-
-    cleanBtn.addEventListener('click', async () => {
-      const nome1 = $('#nome1')?.value.trim();
-      const nome2 = $('#nome2')?.value.trim();
-      const email = $('#email')?.value.trim();
-      if (!nome1 || !nome2 || !email) {
-        alert('Preencha nome, nome da pessoa e e-mail.');
-        return;
-      }
-
-      cleanBtn.disabled = true;
-      cleanBtn.textContent = 'CRIANDO SESSAO...';
-
-      try {
-        const { data, photoFiles, musicFile } = await collectFormData();
-        const formData = new FormData();
-        formData.set('nome1', data.nome1);
-        formData.set('nome2', data.nome2);
-        formData.set('email', data.email);
-        formData.set('mensagem', data.mensagem);
-        formData.set('categoria', data.categoria);
-        formData.set('musicName', data.musicName);
-        formData.set('insights', JSON.stringify(data.insights || defaultInsights(data.categoria)));
-        formData.set('photosData', JSON.stringify(data.photos || []));
-        if (data.musicSrc) formData.set('musicData', data.musicSrc);
-        photoFiles.forEach(file => formData.append('photos', file));
-        if (musicFile) formData.append('music', musicFile);
-        const whatsFile = $('#whatsappFile')?.files?.[0];
-        if (whatsFile) formData.append('whatsappFile', whatsFile);
-
-        const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
-        const json = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(json.erro || 'Erro ao iniciar pagamento.');
-
-        if (json.retrospectiveId) {
-          saveLocalData({ ...data, id: json.retrospectiveId });
-        }
-        if (json.checkoutUrl) {
-          window.location.href = json.checkoutUrl;
-          return;
-        }
-        throw new Error('Nao foi possivel iniciar o pagamento.');
-      } catch (error) {
-        alert(error.message || 'Erro ao iniciar pagamento.');
-        cleanBtn.disabled = false;
-        cleanBtn.textContent = '💳 Finalizar e pagar';
-      }
-    });
-  }
-
-  async function loadSharedData() {
-    const params = new URLSearchParams(location.search);
-    const id = params.get('id');
-    const sessionId = params.get('session_id');
-    const paid = params.get('pago') === '1' ? '?pago=1' : '';
-    const endpoint = id
-      ? `/api/retrospectiva/${encodeURIComponent(id)}${paid}`
-      : sessionId
-        ? `/api/retrospectiva-por-sessao/${encodeURIComponent(sessionId)}${paid}`
-        : '';
-    if (!endpoint) return null;
-    const response = await fetch(endpoint);
-    if (!response.ok) throw new Error('Nao foi possivel carregar a retrospectiva.');
-    const data = await response.json();
-    saveLocalData(data);
-    return data;
-  }
-
-  function normalizedData(data) {
-    const cat = THEMES[data?.categoria] ? data.categoria : 'casal';
-    return {
-      id: data?.id || '',
-      nome1: data?.nome1 || 'Robson',
-      nome2: data?.nome2 || 'Pessoa especial',
-      mensagem: data?.mensagem || theme(cat).final,
-      categoria: cat,
-      photos: Array.isArray(data?.photos) ? data.photos.filter(Boolean) : [],
-      musicSrc: data?.musicSrc || '',
-      musicName: data?.musicName || theme(cat).music,
-      insights: data?.insights || defaultInsights(cat)
-    };
-  }
-
-  function hydrateFinal(data) {
-    data = normalizedData(data);
-    selectedCategory = data.categoria;
-    const cfg = theme(data.categoria);
-    const insights = { ...defaultInsights(data.categoria), ...(data.insights || {}) };
-
-    setText('finalNome1', data.nome1);
-    setText('finalNome2', data.nome2);
-    setText('cartaNome', data.nome2);
-    setText('mensagemFinal', data.mensagem);
-    setText('fraseAbertura', cfg.intro);
-    setText('textoCategoria', cfg.start);
-    setText('mensagensLabel', cfg.mensagensLabel);
-    setText('quote1', `"${(insights.generatedPhrases || cfg.quotes)[0] || cfg.quotes[0]}"`);
-    setText('quote2', `"${(insights.generatedPhrases || cfg.quotes)[1] || cfg.quotes[1]}"`);
-    setText('quote3', `"${(insights.generatedPhrases || cfg.quotes)[2] || cfg.quotes[2]}"`);
-    setText('fraseFinal', cfg.final);
-    setText('totalMensagens', Number(insights.totalMessages || 18432).toLocaleString('pt-BR'));
-    setText('palavraMaisUsada', insights.topWord || cfg.word);
-    setText('saudadeCount', cfg.second(insights));
-    setText('nivelCarinho', insights.emotionalLevel || 'Alto');
-    setText('humor', data.categoria === 'amigos' ? 'Muito presente' : 'Presente');
-    setText('comunicacao', insights.totalMessages > 10000 ? 'Muito frequente' : 'Frequente');
-    setText('intensidade', insights.emotionalLevel || 'Alta');
+    setText('palavraMaisUsada', ins.topWord||t.word);
+    setText('saudadeCount', t.saudadeLabel(ins));
+    setText('nivelCarinho', ins.emotionalLevel||'Alto');
+    setText('humor', cat==='amigos'?'Muito presente':'Presente');
+    setText('comunicacao', ins.totalMessages>10000?'Muito frequente':'Frequente');
+    setText('intensidade', ins.emotionalLevel||'Alta');
     setText('conexao', 'Forte');
 
-    const timeline = $('#timelineItems');
-    if (timeline) {
-      timeline.innerHTML = '';
-      cfg.timeline.forEach(([emoji, label, text]) => {
-        timeline.insertAdjacentHTML('beforeend', `<div class="time-item"><span class="emoji">${emoji}</span><strong>${label}</strong><p>${text}</p></div>`);
-      });
-    }
-
-    const photoList = data.photos;
-    const mainPhoto = $('#fotoPrincipal');
-    const gallery = $('#galeriaFinal');
-    if (mainPhoto) {
-      if (photoList[0]) {
-        mainPhoto.src = photoList[0];
-        mainPhoto.closest('.polaroid')?.style.removeProperty('display');
-      } else {
-        mainPhoto.removeAttribute('src');
-        mainPhoto.closest('.polaroid')?.style.setProperty('display', 'none');
-      }
-    }
-    if (gallery) {
-      gallery.innerHTML = '';
-      if (photoList.length) {
-        photoList.slice(0, 3).forEach(src => {
-          const img = document.createElement('img');
-          img.src = src;
-          img.alt = 'Memoria';
-          gallery.appendChild(img);
-        });
-      } else {
-        gallery.innerHTML = '<div class="loveblast-empty-media">Nenhuma foto foi carregada para esta retrospectiva.</div>';
-      }
-    }
-
+    // Music title
     const musicTitle = $('.musica-final h2');
-    if (musicTitle) musicTitle.innerHTML = `${cfg.music} <span>♡</span>`;
-    setText('nomeMusicaFinal', data.musicName || cfg.music);
+    if (musicTitle) musicTitle.innerHTML = `${t.music} <span>♡</span>`;
+    setText('nomeMusicaFinal', data.musicName||t.music);
+
+    // Music player
     const audio = $('#audioFinal');
     const emptyMsg = $('#semMusicaMsg');
     const disc = $('#disc');
     if (audio) {
-      if (data.musicSrc && data.musicSrc !== '__indexeddb__') {
+      if (data.musicSrc) {
         audio.src = data.musicSrc;
         audio.style.display = 'block';
         if (emptyMsg) emptyMsg.style.display = 'none';
-        if (disc && !audio.dataset.loveblastBound) {
-          audio.addEventListener('play', () => disc.classList.add('playing'));
+        if (disc && !audio._lb) {
+          audio.addEventListener('play',  () => disc.classList.add('playing'));
           audio.addEventListener('pause', () => disc.classList.remove('playing'));
           audio.addEventListener('ended', () => disc.classList.remove('playing'));
-          audio.dataset.loveblastBound = '1';
+          audio._lb = 1;
         }
       } else {
         audio.removeAttribute('src');
         audio.style.display = 'none';
+        if (emptyMsg) { emptyMsg.textContent = 'Nenhuma música foi adicionada.'; emptyMsg.style.display = 'block'; }
         disc?.classList.remove('playing');
-        if (emptyMsg) {
-          emptyMsg.textContent = 'Nenhuma musica foi adicionada.';
-          emptyMsg.style.display = 'block';
-        }
       }
+    }
+
+    // Timeline
+    const tl = $('#timelineItems');
+    if (tl) {
+      tl.innerHTML = '';
+      t.timeline.forEach(([emoji, label, text]) => {
+        tl.insertAdjacentHTML('beforeend',
+          `<div class="time-item"><span class="emoji">${emoji}</span><strong>${label}</strong><p>${text}</p></div>`);
+      });
+    }
+
+    // Photos
+    const photos = Array.isArray(data.photos) ? data.photos.filter(Boolean) : [];
+    const mainPhoto = $('#fotoPrincipal');
+    if (mainPhoto) {
+      if (photos[0]) { mainPhoto.src = photos[0]; mainPhoto.closest('.polaroid')?.style.removeProperty('display'); }
+      else { mainPhoto.removeAttribute('src'); mainPhoto.closest('.polaroid')?.style.setProperty('display','none'); }
+    }
+    const gallery = $('#galeriaFinal');
+    if (gallery) {
+      gallery.innerHTML = '';
+      if (photos.length) {
+        photos.slice(0,3).forEach(src => {
+          const img = document.createElement('img');
+          img.src = src; img.alt = 'Memória'; gallery.appendChild(img);
+        });
+      } else {
+        gallery.innerHTML = '<div class="loveblast-empty-media">Nenhuma foto adicionada.</div>';
+      }
+    }
+
+    // Extra emoji update
+    const extraItems = $$('.extra-item');
+    if (extraItems.length && t.extraEmoji) {
+      const labels = [
+        `${t.extraEmoji[0]} Nível de carinho`,
+        `${t.extraEmoji[1]} Humor`,
+        `${t.extraEmoji[2]} Comunicação`,
+        `${t.extraEmoji[3]} Intensidade emocional`,
+        `${t.extraEmoji[4]} Conexão`
+      ];
+      extraItems.forEach((el, i) => {
+        const strong = el.querySelector('strong');
+        if (strong) { const sv = strong.textContent; el.childNodes[0].textContent = labels[i]; strong.textContent = sv; }
+        else el.firstChild.textContent = labels[i];
+      });
     }
   }
 
-  function setupView() {
-    window.compartilharArte = function compartilharArte() {
-      const data = normalizedData(getLocalData() || {});
-      const url = data.id ? `${location.origin}/view.html?id=${encodeURIComponent(data.id)}&pago=1` : location.href;
-      if (navigator.share) {
-        navigator.share({ title: 'Minha retrospectiva LoveBlast', text: 'Olha essa retrospectiva que eu criei no LoveBlast.', url }).catch(() => {});
-      } else if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(() => toast('Link copiado.'));
-      }
-    };
+  /* ─── SETUP INDEX.HTML ─── */
+  function setupIndex() {
+    // Category selection
+    $$('.card').forEach(card => {
+      card.addEventListener('click', () => {
+        const cat = card.dataset.category || 'casal';
+        $$('.card').forEach(c => c.classList.toggle('active', c.dataset.category===cat));
+        if ($('#categoriaInput')) $('#categoriaInput').value = cat;
+        const t = getTheme(cat);
+        if ($('#categoriaDescricao')) $('#categoriaDescricao').textContent = t.modal;
+        applyThemeVars(cat);
+      }, true); // capture so it fires before modal open
+    });
 
-    loadSharedData()
-      .then(data => hydrateFinal(data || getLocalData() || {}))
-      .catch(error => {
-        const local = getLocalData();
-        if (local) hydrateFinal(local);
-        toast(error.message || 'Nao foi possivel carregar o link compartilhado.');
-      });
+    // Init default theme
+    const initCat = $('#categoriaInput')?.value || 'casal';
+    applyThemeVars(initCat);
   }
 
+  /* ─── SETUP VIEW.HTML ─── */
+  function setupView() {
+    window.compartilharArte = function() {
+      const url = location.href;
+      if (navigator.share) navigator.share({ title:'Minha retrospectiva LoveBlast', text:'Olha essa retrospectiva ❤️', url }).catch(()=>{});
+      else if (navigator.clipboard) navigator.clipboard.writeText(url).then(()=>lbToast('Link copiado ❤️'));
+    };
+
+    // Try loading from server first, fallback to localStorage
+    const params = new URLSearchParams(location.search);
+    const id = params.get('id');
+    const sessionId = params.get('session_id');
+    let endpoint = '';
+    if (id) endpoint = `/api/retrospectiva/${encodeURIComponent(id)}?pago=1`;
+    else if (sessionId) endpoint = `/api/retrospectiva-por-sessao/${encodeURIComponent(sessionId)}?pago=1`;
+
+    if (endpoint) {
+      fetch(endpoint)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => { saveLocalData(data); hydrateFinal(data); })
+        .catch(() => hydrateFinal(getLocalData()||{}));
+    } else {
+      hydrateFinal(getLocalData()||{});
+    }
+  }
+
+  /* ─── TOAST ─── */
+  function lbToast(msg) {
+    const prev = $('.loveblast-toast');
+    if (prev) prev.remove();
+    const el = document.createElement('div');
+    el.className = 'loveblast-toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 3500);
+  }
+
+  /* ─── INIT ─── */
   function init() {
     if ($('#payBtn')) setupIndex();
     if ($('#arteFinal')) setupView();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  // Expose for debugging
+  window._lb = { getTheme, getLocalData, saveLocalData, THEMES };
 })();
