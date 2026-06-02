@@ -542,19 +542,26 @@ function buildPanel(type,data,t,ins){
         const ytM=data.musicLink.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([-\w]{11})/);
         const spM=data.musicLink.match(/spotify\.com\/track\/([A-Za-z0-9]+)/);
         if(ytM){
-          embedHTML=`<div style="border-radius:14px;overflow:hidden;border:1px solid rgba(var(--ac-rgb),.3);margin-top:16px">
-            <iframe width="100%" height="80" src="https://www.youtube.com/embed/${ytM[1]}?autoplay=0&rel=0" frameborder="0" allow="autoplay;encrypted-media" allowfullscreen style="display:block"></iframe>
+          const vid=ytM[1];
+          // Use youtube-nocookie + enablejsapi + custom thumbnail overlay player
+          embedHTML=`<div id="ytPlayerWrap" style="margin-top:18px;border-radius:16px;overflow:hidden;border:1px solid rgba(var(--ac-rgb),.3);background:#0a0a0a;position:relative;cursor:pointer" onclick="loadYTVideo('${vid}',this)">
+            <img src="https://img.youtube.com/vi/${vid}/mqdefault.jpg" alt="capa" style="width:100%;height:130px;object-fit:cover;display:block;filter:brightness(.7)">
+            <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+              <div style="width:56px;height:56px;border-radius:50%;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 28px rgba(var(--ac-rgb),.6)">▶</div>
+              <span style="font-size:12px;color:rgba(255,255,255,.8);font-weight:700">Toque para reproduzir</span>
+            </div>
           </div>
-          <p style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)">▶ Toque no player para ouvir no YouTube</p>`;
+          <div id="ytIframeWrap" style="display:none;margin-top:2px;border-radius:0 0 16px 16px;overflow:hidden"></div>`;
         } else if(spM){
           embedHTML=`<div style="border-radius:14px;overflow:hidden;border:1px solid rgba(var(--ac-rgb),.3);margin-top:16px">
-            <iframe src="https://open.spotify.com/embed/track/${spM[1]}" width="100%" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media" style="display:block"></iframe>
-          </div>
-          <p style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.4)">🎵 Toque no player para ouvir no Spotify</p>`;
-        } else {
-          embedHTML=`<div style="margin-top:16px;padding:14px;border:1px solid rgba(var(--ac-rgb),.3);border-radius:12px;background:rgba(var(--ac-rgb),.06)">
-            <a href="${data.musicLink}" target="_blank" rel="noopener" style="color:var(--ac);font-size:14px;font-weight:700;text-decoration:none">▶ Abrir música: ${data.musicLink.slice(0,50)}...</a>
+            <iframe src="https://open.spotify.com/embed/track/${spM[1]}?utm_source=generator&theme=0" width="100%" height="152" frameborder="0" allowtransparency="true" allow="autoplay;clipboard-write;encrypted-media;fullscreen;picture-in-picture" loading="lazy" style="display:block"></iframe>
           </div>`;
+        } else {
+          // Generic link: show as styled button
+          embedHTML=`<a href="${data.musicLink}" target="_blank" rel="noopener" style="display:flex;align-items:center;gap:14px;margin-top:18px;padding:16px;border:1px solid rgba(var(--ac-rgb),.35);border-radius:14px;background:rgba(var(--ac-rgb),.08);text-decoration:none;transition:.2s" onmouseover="this.style.background='rgba(var(--ac-rgb),.18)'" onmouseout="this.style.background='rgba(var(--ac-rgb),.08)'">
+            <div style="width:44px;height:44px;border-radius:10px;background:var(--ac);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🎵</div>
+            <div><div style="font-size:14px;font-weight:900;color:#fff">Ouvir a música</div><div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:2px">${data.musicLink.slice(0,48)}${data.musicLink.length>48?'...':''}</div></div>
+          </a>`;
         }
       }
 
@@ -903,6 +910,49 @@ function compartilharArte(){
 /* ============================================================
    INIT
 ============================================================ */
+/* ============================================================
+   YouTube — carrega iframe só quando o usuário clica
+   Evita o bloqueio de "Assistir no YouTube" que aparece
+   quando o vídeo tem embed restrito pelo dono
+============================================================ */
+function loadYTVideo(videoId, wrapEl) {
+  // Hide thumbnail overlay
+  wrapEl.style.display = 'none';
+
+  const iframeWrap = document.getElementById('ytIframeWrap');
+  if (!iframeWrap) return;
+
+  // Build iframe with all necessary permissions
+  iframeWrap.style.display = 'block';
+  iframeWrap.innerHTML = `
+    <iframe
+      id="ytPlayer"
+      width="100%"
+      height="180"
+      src="https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+      frameborder="0"
+      allow="autoplay; accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowfullscreen
+      style="display:block;border-radius:0 0 14px 14px"
+    ></iframe>`;
+
+  // If still blocked (some videos), show fallback open link
+  setTimeout(() => {
+    const iframe = document.getElementById('ytPlayer');
+    if (!iframe) return;
+    // Check if iframe loaded by trying to access contentWindow
+    // If blocked, YouTube shows a redirect page — we can't detect this from JS
+    // Best UX: show "open in YouTube" button below as fallback
+    const fallback = document.createElement('a');
+    fallback.href = `https://www.youtube.com/watch?v=${videoId}`;
+    fallback.target = '_blank';
+    fallback.rel = 'noopener';
+    fallback.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 14px;background:rgba(255,255,255,.06);border-top:1px solid rgba(255,255,255,.08);font-size:12px;color:rgba(255,255,255,.5);text-decoration:none;font-weight:700';
+    fallback.innerHTML = '🔗 Abrir no YouTube (caso o player não carregue)';
+    iframeWrap.appendChild(fallback);
+  }, 2000);
+}
+
 (async function init(){
   const params=new URLSearchParams(location.search);
   const id=params.get('id'),sid=params.get('session_id');
