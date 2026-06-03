@@ -796,6 +796,23 @@ nav a:hover{background:rgba(255,45,120,.12)}
     <label>Data em que se conheceram</label>
     <input id="dataInicio" type="date" style="color-scheme:dark">
 
+    <!-- MARCOS DA HISTÓRIA -->
+    <div style="margin-top:18px;padding:16px;border:1px solid rgba(255,45,120,.2);border-radius:14px;background:rgba(255,45,120,.04)">
+      <div style="font-size:12px;font-weight:900;letter-spacing:.1em;color:rgba(255,255,255,.5);margin-bottom:14px">✨ MARCOS DA HISTÓRIA <span style="font-weight:400;color:rgba(255,255,255,.3)">(opcional, mas deixa muito mais especial)</span></div>
+
+      <label style="margin:0 0 4px;font-size:11px;letter-spacing:.05em">❤️ Como vocês se conheceram?</label>
+      <input id="marco1desc" type="text" placeholder="Ex: numa festa, no trabalho, pelo Instagram...">
+
+      <label style="margin:10px 0 4px;font-size:11px;letter-spacing:.05em">💬 Qual foi o primeiro programa juntos?</label>
+      <input id="marco2desc" type="text" placeholder="Ex: fomos ao cinema, tomamos sorvete...">
+
+      <label style="margin:10px 0 4px;font-size:11px;letter-spacing:.05em">✈️ Qual foi a melhor aventura de vocês?</label>
+      <input id="marco3desc" type="text" placeholder="Ex: viagem para a praia, show, aniversário...">
+
+      <label style="margin:10px 0 4px;font-size:11px;letter-spacing:.05em">🔥 O que define vocês até hoje?</label>
+      <input id="marco4desc" type="text" placeholder="Ex: rir de tudo, se apoiar sempre...">
+    </div>
+
     <label>E-mail</label>
     <input id="email" type="email" placeholder="seu@email.com">
 
@@ -1366,9 +1383,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const dataInicio = document.getElementById('dataInicio')?.value || '';
+    const marcos = {
+      m1: document.getElementById('marco1desc')?.value.trim() || '',
+      m2: document.getElementById('marco2desc')?.value.trim() || '',
+      m3: document.getElementById('marco3desc')?.value.trim() || '',
+      m4: document.getElementById('marco4desc')?.value.trim() || '',
+    };
     const dados = {
       nome1, nome2, mensagem, dataInicio,
       categoria: categoriaSelecionada,
+      marcos,
       photos: fotosBase64,
       musicSrc, musicName, musicLink,
       insights,
@@ -1545,6 +1569,13 @@ document.addEventListener('DOMContentLoaded', () => {
       formData.append('categoria', categoriaSelecionada);
       const dataInicioVal = document.getElementById('dataInicio')?.value || '';
       if (dataInicioVal) formData.append('dataInicio', dataInicioVal);
+      const marcosVal = {
+        m1: document.getElementById('marco1desc')?.value.trim() || '',
+        m2: document.getElementById('marco2desc')?.value.trim() || '',
+        m3: document.getElementById('marco3desc')?.value.trim() || '',
+        m4: document.getElementById('marco4desc')?.value.trim() || '',
+      };
+      formData.append('marcos', JSON.stringify(marcosVal));
 
       // Compress photos client-side before upload (max 800px, quality 0.75)
       // This reduces 4MB photos to ~150KB — 25x smaller, much faster upload
