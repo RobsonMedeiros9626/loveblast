@@ -151,9 +151,11 @@ function writeRetrospective(data) {
 function markPaid(id) {
   const data = readRetrospective(id);
   if (!data) return null;
+  // Already paid — just return data without reprocessing
+  if (data.pago) return data;
   data.pago = true;
   data.pagoEm = new Date().toISOString();
-  writeRetrospective(data);
+  try { writeRetrospective(data); } catch(e) { /* silent */ }
   return data;
 }
 
@@ -267,7 +269,11 @@ async function saveRetrospective(req, body) {
 }
 
 app.get('/api/retrospectiva/:id', (req, res) => {
-  const data = req.query.pago === '1' ? markPaid(req.params.id) : readRetrospective(req.params.id);
+  // Always try to get data — if pago=1, mark as paid first
+  // If already paid, markPaid returns existing data safely
+  const data = req.query.pago === '1'
+    ? markPaid(req.params.id)
+    : readRetrospective(req.params.id);
   if (!data) return res.status(404).json({ erro: 'Retrospectiva nao encontrada.' });
   return res.json(data);
 });
@@ -279,6 +285,7 @@ app.get('/api/retrospectiva-por-sessao/:sessionId', async (req, res) => {
     const id = session && session.metadata ? session.metadata.retrospectiveId : '';
     if (!id) return res.status(404).json({ erro: 'Sessao sem retrospectiva vinculada.' });
 
+    // Safe: markPaid handles already-paid gracefully
     const data = req.query.pago === '1' ? markPaid(id) : readRetrospective(id);
     if (!data) return res.status(404).json({ erro: 'Retrospectiva nao encontrada.' });
     return res.json(data);
@@ -342,7 +349,9 @@ app.post(
             quantity: 1
           }
         ],
-        success_url: `${appUrl}/view.html?id=${retrospective.id}&session_id={CHECKOUT_SESSION_ID}&pago=1`,
+        // pago=1 removed — webhook handles payment confirmation reliably
+        // success_url just loads the page; if webhook fires first it's already marked paid
+        success_url: `${appUrl}/view.html?id=${retrospective.id}&session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: `${appUrl}/?cancelado=1&id=${retrospective.id}`,
         metadata: {
           retrospectiveId: retrospective.id,
