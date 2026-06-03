@@ -42,6 +42,54 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
+// Serve og-image.svg as og-image.png
+app.get('/og-image.png', (req, res) => {
+  const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#030306"/>
+        <stop offset="50%" style="stop-color:#0e0118"/>
+        <stop offset="100%" style="stop-color:#1a0414"/>
+      </linearGradient>
+      <radialGradient id="glow1" cx="30%" cy="50%" r="50%">
+        <stop offset="0%" style="stop-color:#ff2d78;stop-opacity:.4"/>
+        <stop offset="100%" style="stop-color:#ff2d78;stop-opacity:0"/>
+      </radialGradient>
+    </defs>
+    <rect width="1200" height="630" fill="url(#bg)"/>
+    <rect width="1200" height="630" fill="url(#glow1)"/>
+    <text x="600" y="180" text-anchor="middle" font-family="Arial" font-size="28" font-weight="900" fill="#ff2d78" letter-spacing="4">♡ LOVEBLAST</text>
+    <text x="600" y="290" text-anchor="middle" font-family="Arial" font-size="110" fill="#ff2d78">♡</text>
+    <text x="600" y="390" text-anchor="middle" font-family="Arial" font-size="58" font-weight="900" fill="white">Uma retrospectiva</text>
+    <text x="600" y="455" text-anchor="middle" font-family="Arial" font-size="58" font-weight="900" fill="#ff2d78">especial foi criada</text>
+    <text x="600" y="520" text-anchor="middle" font-family="Arial" font-size="22" fill="rgba(255,255,255,.6)">Clica para ver a história completa ❤️</text>
+  </svg>`;
+  res.setHeader('Content-Type', 'image/svg+xml');
+  res.setHeader('Cache-Control', 'public, max-age=86400');
+  res.send(svg);
+});
+
+// Dynamic meta tags for view.html — makes WhatsApp show real names
+app.get('/view.html', (req, res, next) => {
+  const id = req.query.id;
+  if (!id) return next();
+  try {
+    const data = readRetrospective(id);
+    if (!data) return next();
+    const nome1 = data.nome1 || 'Você';
+    const nome2 = data.nome2 || 'Pessoa especial';
+    const fs2 = require('fs');
+    let html = fs2.readFileSync(path.join(__dirname, '../public/view.html'), 'utf8');
+    html = html
+      .replace(/♡ Minha retrospectiva no LoveBlast/g, `♡ ${nome1} & ${nome2} — LoveBlast`)
+      .replace(/Criei uma retrospectiva especial\. Clica para ver a nossa história ❤️/g,
+        `A retrospectiva de ${nome1} & ${nome2} está pronta. Clica para ver! ❤️`)
+      .replace(/Clica para ver a nossa retrospectiva ❤️ — criado no LoveBlast/g,
+        `A retrospectiva de ${nome1} & ${nome2}. Criado no LoveBlast ❤️`);
+    res.send(html);
+  } catch(e) { next(); }
+});
+
 app.use(express.static(path.join(__dirname, '../public')));
 
 function createId() {
