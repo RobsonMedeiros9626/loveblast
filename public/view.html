@@ -503,15 +503,73 @@ function fmt(n){return Number(n||0).toLocaleString('pt-BR')}
 function fmtTime(s){s=Math.floor(s||0);return `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`}
 function applyTheme(t){const r=document.documentElement;r.style.setProperty('--ac',t.ac);r.style.setProperty('--ac-rgb',t.acRgb);r.style.setProperty('--glow',t.glow);}
 
-function buildTimelineYears(dataInicio,tl){
-  if(!dataInicio)return tl;
-  const start=parseLocalDate(dataInicio);
-  const startYear=start.getFullYear();
-  const now=new Date();
-  const currentYear=now.getFullYear();
-  const total=currentYear-startYear;
-  const y0=startYear,y1=startYear+Math.ceil(total*.25),y2=startYear+Math.ceil(total*.6),y3=currentYear;
-  return tl.map((item,i)=>[item[0],String(Math.min([y0,y1,y2,y3][i]??y3,currentYear)),item[2]]);
+function buildTimelineYears(dataInicio, tl) {
+  if (!dataInicio) return tl;
+
+  const start = parseLocalDate(dataInicio);
+  const now = new Date();
+  const totalDays = Math.floor((now - start) / 86400000);
+  const totalMonths = Math.floor(totalDays / 30);
+  const totalYears = Math.floor(totalDays / 365);
+
+  // Helper: format a date as "Mês YYYY"
+  const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  function addMonths(d, m) {
+    const r = new Date(d);
+    r.setMonth(r.getMonth() + m);
+    return r;
+  }
+  function fmt(d) {
+    return MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  // ── História CURTA (menos de 6 meses) ──
+  if (totalMonths < 6) {
+    const m1 = fmt(start);
+    const m2 = totalMonths >= 1 ? fmt(addMonths(start,1)) : fmt(start);
+    const m3 = totalMonths >= 3 ? fmt(addMonths(start,3)) : fmt(addMonths(start,2));
+    const m4 = fmt(now);
+    const descs = [
+      tl[0]?.[2] || 'O primeiro encontro',
+      tl[1]?.[2] || 'As primeiras conversas',
+      tl[2]?.[2] || 'Cada dia junto',
+      tl[3]?.[2] || 'E já parece que sempre foi assim'
+    ];
+    return [
+      [tl[0]?.[0]||'❤️', m1, descs[0]],
+      [tl[1]?.[0]||'💬', m2, descs[1]],
+      [tl[2]?.[0]||'✨', m3, descs[2]],
+      [tl[3]?.[0]||'🔥', m4, descs[3]],
+    ];
+  }
+
+  // ── História MÉDIA (6 meses a 2 anos) ──
+  if (totalYears < 2) {
+    const m1 = fmt(start);
+    const m2 = fmt(addMonths(start, Math.floor(totalMonths * 0.3)));
+    const m3 = fmt(addMonths(start, Math.floor(totalMonths * 0.65)));
+    const m4 = fmt(now);
+    const descs = [
+      tl[0]?.[2] || 'O começo de tudo',
+      tl[1]?.[2] || 'Primeiros momentos juntos',
+      tl[2]?.[2] || 'A história crescendo',
+      tl[3]?.[2] || 'E ainda é só o começo'
+    ];
+    return [
+      [tl[0]?.[0]||'❤️', m1, descs[0]],
+      [tl[1]?.[0]||'💬', m2, descs[1]],
+      [tl[2]?.[0]||'✨', m3, descs[2]],
+      [tl[3]?.[0]||'🔥', m4, descs[3]],
+    ];
+  }
+
+  // ── História LONGA (2+ anos) — usa anos como antes ──
+  const y0 = start.getFullYear();
+  const y1 = y0 + Math.max(1, Math.ceil(totalYears * 0.25));
+  const y2 = y0 + Math.max(1, Math.ceil(totalYears * 0.6));
+  const y3 = now.getFullYear();
+  const years = [y0, Math.min(y1,y3), Math.min(y2,y3), y3];
+  return tl.map((item, i) => [item[0], String(years[i] ?? y3), item[2]]);
 }
 
 /* ============================================================
@@ -522,6 +580,80 @@ const photos_fallback=['https://images.unsplash.com/photo-1516589178581-6cd7833a
 function getPhotos(data){
   const p=Array.isArray(data.photos)?data.photos.filter(Boolean):[];
   return p.length?p:photos_fallback;
+}
+
+/* ============================================================
+   SMART TIMELINE — usa marcos do usuário quando disponíveis
+   Caso contrário, gera datas inteligentes baseadas no tempo
+============================================================ */
+function buildSmartTimeline(dataInicio, themeTl, marcos) {
+  const m = marcos || {};
+  const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  function addMonths(d, n) {
+    const r = new Date(d); r.setMonth(r.getMonth() + n); return r;
+  }
+  function fmtMonth(d) {
+    return MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  const start = dataInicio ? parseLocalDate(dataInicio) : null;
+  const now = new Date();
+  const totalDays = start ? Math.floor((now - start) / 86400000) : 365;
+  const totalMonths = Math.floor(totalDays / 30);
+  const totalYears = Math.floor(totalDays / 365);
+
+  // Default descriptions from theme
+  const defaultDescs = [
+    themeTl[0]?.[2] || 'O começo de tudo',
+    themeTl[1]?.[2] || 'Os primeiros momentos',
+    themeTl[2]?.[2] || 'A história crescendo',
+    themeTl[3]?.[2] || 'E ainda é só o começo',
+  ];
+  const icons = [
+    themeTl[0]?.[0] || '❤️',
+    themeTl[1]?.[0] || '💬',
+    themeTl[2]?.[0] || '✨',
+    themeTl[3]?.[0] || '🔥',
+  ];
+
+  // Use user marcos if provided, otherwise use theme defaults
+  const descs = [
+    m.m1 || defaultDescs[0],
+    m.m2 || defaultDescs[1],
+    m.m3 || defaultDescs[2],
+    m.m4 || defaultDescs[3],
+  ];
+
+  // Build date labels intelligently
+  let labels;
+  if (!start) {
+    labels = ['Início', 'Em seguida', 'Depois', 'Hoje'];
+  } else if (totalYears >= 2) {
+    // Long history: use years
+    const y0 = start.getFullYear();
+    const y1 = y0 + Math.max(1, Math.round(totalYears * 0.3));
+    const y2 = y0 + Math.max(1, Math.round(totalYears * 0.65));
+    const y3 = now.getFullYear();
+    labels = [String(y0), String(Math.min(y1,y3)), String(Math.min(y2,y3)), String(y3)];
+  } else if (totalMonths >= 3) {
+    // Medium: use month names
+    labels = [
+      fmtMonth(start),
+      fmtMonth(addMonths(start, Math.max(1, Math.round(totalMonths * 0.35)))),
+      fmtMonth(addMonths(start, Math.max(2, Math.round(totalMonths * 0.7)))),
+      fmtMonth(now),
+    ];
+  } else {
+    // Short: relative labels
+    const weekLabels = ['Semana 1','Semana 2','Semana 3','Hoje'];
+    const monthLabels = ['1° mês','2° mês','3° mês','Hoje'];
+    labels = totalDays < 30 ? weekLabels : monthLabels;
+    if (start) labels[0] = fmtMonth(start);
+    labels[3] = fmtMonth(now);
+  }
+
+  return icons.map((ico, i) => [ico, labels[i], descs[i]]);
 }
 
 function buildPanel(type,data,t,ins){
@@ -581,28 +713,34 @@ function buildPanel(type,data,t,ins){
     }
 
     case 'timeline': {
-      const tlYears=buildTimelineYears(data.dataInicio,t.timeline);
-      const tlStepper = tlYears.map(([ico,yr,desc], i) => `
-        <div style="display:flex;gap:16px;align-items:flex-start;position:relative">
-          <!-- connector line -->
+      const marcos = data.marcos || {};
+      const hasMarcos = marcos.m1 || marcos.m2 || marcos.m3 || marcos.m4;
+
+      // Build smart timeline items
+      const tlItems = buildSmartTimeline(data.dataInicio, t.timeline, marcos);
+
+      const tlStepper = tlItems.map(([ico, label, desc], i) => `
+        <div style="display:flex;gap:16px;align-items:flex-start">
           <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
-            <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--ac);background:rgba(var(--ac-rgb),.15);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 16px rgba(var(--ac-rgb),.35);flex-shrink:0;z-index:1">${ico}</div>
-            ${i < tlYears.length-1 ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,rgba(var(--ac-rgb),.5),rgba(var(--ac-rgb),.1));margin:4px 0"></div>` : ''}
+            <div style="width:46px;height:46px;border-radius:50%;border:2px solid var(--ac);background:rgba(var(--ac-rgb),.12);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 0 18px rgba(var(--ac-rgb),.3);flex-shrink:0;z-index:1">${ico}</div>
+            ${i < tlItems.length-1 ? `<div style="width:2px;flex:1;min-height:32px;background:linear-gradient(to bottom,rgba(var(--ac-rgb),.5),rgba(var(--ac-rgb),.08));margin:6px 0"></div>` : ''}
           </div>
-          <!-- content -->
-          <div style="padding-bottom:${i < tlYears.length-1 ? '8px':'0'};padding-top:10px">
-            <div style="font-size:20px;font-weight:900;color:var(--ac);text-shadow:0 0 12px var(--glow);line-height:1">${yr}</div>
-            <div style="font-size:14px;color:rgba(255,255,255,.75);margin-top:4px">${desc}</div>
+          <div style="padding-top:10px;padding-bottom:${i < tlItems.length-1?'4px':'0'}">
+            <div style="font-size:clamp(13px,1.8vw,18px);font-weight:900;color:var(--ac);text-shadow:0 0 12px var(--glow);line-height:1.1">${label}</div>
+            <div style="font-size:14px;color:rgba(255,255,255,.7);margin-top:4px;line-height:1.4">${desc}</div>
           </div>
         </div>`).join('');
+
       return `<div class="panel p-timeline" style="background:linear-gradient(160deg,#05050e,#0f0308)">
         <div class="panel-num">03 LINHA DO TEMPO</div>
         <h2 style="font-size:clamp(20px,3vw,34px);font-weight:900;margin:14px 0 22px;line-height:1.1">
           A história de <span style="color:var(--ac);text-shadow:0 0 18px var(--glow)">${data.nome1||'vocês'}</span>
+          ${hasMarcos ? '' : `<div style="font-size:12px;font-weight:400;color:rgba(255,255,255,.3);margin-top:6px;letter-spacing:.05em">💡 Adicione marcos para personalizar ainda mais</div>`}
         </h2>
-        <div style="display:flex;flex-direction:column">${tlStepper}</div>
+        <div style="display:flex;flex-direction:column;gap:0">${tlStepper}</div>
       </div>`;
     }
+
 
     case 'insights':
       const total=Number(ins.totalMessages||18432);
