@@ -582,6 +582,80 @@ function getPhotos(data){
   return p.length?p:photos_fallback;
 }
 
+/* ============================================================
+   SMART TIMELINE — usa marcos do usuário quando disponíveis
+   Caso contrário, gera datas inteligentes baseadas no tempo
+============================================================ */
+function buildSmartTimeline(dataInicio, themeTl, marcos) {
+  const m = marcos || {};
+  const MONTHS = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+
+  function addMonths(d, n) {
+    const r = new Date(d); r.setMonth(r.getMonth() + n); return r;
+  }
+  function fmtMonth(d) {
+    return MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  const start = dataInicio ? parseLocalDate(dataInicio) : null;
+  const now = new Date();
+  const totalDays = start ? Math.floor((now - start) / 86400000) : 365;
+  const totalMonths = Math.floor(totalDays / 30);
+  const totalYears = Math.floor(totalDays / 365);
+
+  // Default descriptions from theme
+  const defaultDescs = [
+    themeTl[0]?.[2] || 'O começo de tudo',
+    themeTl[1]?.[2] || 'Os primeiros momentos',
+    themeTl[2]?.[2] || 'A história crescendo',
+    themeTl[3]?.[2] || 'E ainda é só o começo',
+  ];
+  const icons = [
+    themeTl[0]?.[0] || '❤️',
+    themeTl[1]?.[0] || '💬',
+    themeTl[2]?.[0] || '✨',
+    themeTl[3]?.[0] || '🔥',
+  ];
+
+  // Use user marcos if provided, otherwise use theme defaults
+  const descs = [
+    m.m1 || defaultDescs[0],
+    m.m2 || defaultDescs[1],
+    m.m3 || defaultDescs[2],
+    m.m4 || defaultDescs[3],
+  ];
+
+  // Build date labels intelligently
+  let labels;
+  if (!start) {
+    labels = ['Início', 'Em seguida', 'Depois', 'Hoje'];
+  } else if (totalYears >= 2) {
+    // Long history: use years
+    const y0 = start.getFullYear();
+    const y1 = y0 + Math.max(1, Math.round(totalYears * 0.3));
+    const y2 = y0 + Math.max(1, Math.round(totalYears * 0.65));
+    const y3 = now.getFullYear();
+    labels = [String(y0), String(Math.min(y1,y3)), String(Math.min(y2,y3)), String(y3)];
+  } else if (totalMonths >= 3) {
+    // Medium: use month names
+    labels = [
+      fmtMonth(start),
+      fmtMonth(addMonths(start, Math.max(1, Math.round(totalMonths * 0.35)))),
+      fmtMonth(addMonths(start, Math.max(2, Math.round(totalMonths * 0.7)))),
+      fmtMonth(now),
+    ];
+  } else {
+    // Short: relative labels
+    const weekLabels = ['Semana 1','Semana 2','Semana 3','Hoje'];
+    const monthLabels = ['1° mês','2° mês','3° mês','Hoje'];
+    labels = totalDays < 30 ? weekLabels : monthLabels;
+    if (start) labels[0] = fmtMonth(start);
+    labels[3] = fmtMonth(now);
+  }
+
+  return icons.map((ico, i) => [ico, labels[i], descs[i]]);
+}
+
 function buildPanel(type,data,t,ins){
   const photos=getPhotos(data);
   const n1=data.nome1||'Você',n2=data.nome2||'Pessoa especial';
@@ -639,28 +713,54 @@ function buildPanel(type,data,t,ins){
     }
 
     case 'timeline': {
-      const tlYears=buildTimelineYears(data.dataInicio,t.timeline);
-      const tlStepper = tlYears.map(([ico,yr,desc], i) => `
-        <div style="display:flex;gap:16px;align-items:flex-start;position:relative">
-          <!-- connector line -->
-          <div style="display:flex;flex-direction:column;align-items:center;flex-shrink:0">
-            <div style="width:44px;height:44px;border-radius:50%;border:2px solid var(--ac);background:rgba(var(--ac-rgb),.15);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 0 16px rgba(var(--ac-rgb),.35);flex-shrink:0;z-index:1">${ico}</div>
-            ${i < tlYears.length-1 ? `<div style="width:2px;flex:1;min-height:28px;background:linear-gradient(to bottom,rgba(var(--ac-rgb),.5),rgba(var(--ac-rgb),.1));margin:4px 0"></div>` : ''}
-          </div>
-          <!-- content -->
-          <div style="padding-bottom:${i < tlYears.length-1 ? '8px':'0'};padding-top:10px">
-            <div style="font-size:20px;font-weight:900;color:var(--ac);text-shadow:0 0 12px var(--glow);line-height:1">${yr}</div>
-            <div style="font-size:14px;color:rgba(255,255,255,.75);margin-top:4px">${desc}</div>
-          </div>
+      const totalMsgs  = Number(ins.totalMessages || 18432);
+      const loveCount  = ins.loveCount  || 82;
+      const saudadeC   = ins.saudadeCount || 103;
+      const favTime    = ins.favoriteTime || '23:47';
+      const topEmoji   = ins.topEmoji   || '😂';
+      const topWord    = ins.topWord    || 'amor';
+      const emoLevel   = ins.emotionalLevel || 'Alto';
+
+      // Days together
+      let diasJuntos = '', anosJuntos = '';
+      if (data.dataInicio) {
+        const d = parseLocalDate(data.dataInicio);
+        const diff = Math.floor((new Date() - d) / 86400000);
+        diasJuntos = diff.toLocaleString('pt-BR');
+        const anos = Math.floor(diff/365);
+        const meses = Math.floor((diff%365)/30);
+        if (anos > 0) anosJuntos = anos + (anos===1?' ano':' anos') + (meses>0?' e '+meses+(meses===1?' mês':' meses'):'');
+        else if (meses > 0) anosJuntos = meses + (meses===1?' mês':' meses');
+        else anosJuntos = diff + ' dias';
+      }
+
+      // Stats cards
+      const stats = [
+        { ico:'💬', val: totalMsgs.toLocaleString('pt-BR'), label:'mensagens trocadas' },
+        { ico:'❤️', val: topWord,       label:'palavra mais usada' },
+        { ico:'😂', val: topEmoji,       label:'emoji favorito' },
+        { ico:'💌', val: loveCount+'×',  label:'vezes "eu te amo"' },
+        { ico:'🥹', val: saudadeC+'×',   label:'vezes "saudade"' },
+        { ico:'🌙', val: favTime,         label:'horário preferido' },
+      ].map(s => `
+        <div style="background:rgba(255,255,255,.05);border:1px solid rgba(var(--ac-rgb),.2);border-radius:14px;padding:16px 12px;text-align:center;transition:.2s" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='rgba(var(--ac-rgb),.2)'">
+          <div style="font-size:24px;margin-bottom:6px">${s.ico}</div>
+          <div style="font-size:clamp(16px,2.5vw,22px);font-weight:900;color:var(--ac);text-shadow:0 0 14px var(--glow);line-height:1.1;overflow-wrap:anywhere">${s.val}</div>
+          <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:5px">${s.label}</div>
         </div>`).join('');
-      return `<div class="panel p-timeline" style="background:linear-gradient(160deg,#05050e,#0f0308)">
-        <div class="panel-num">03 LINHA DO TEMPO</div>
-        <h2 style="font-size:clamp(20px,3vw,34px);font-weight:900;margin:14px 0 22px;line-height:1.1">
-          A história de <span style="color:var(--ac);text-shadow:0 0 18px var(--glow)">${data.nome1||'vocês'}</span>
+
+      return `<div class="panel" style="background:linear-gradient(160deg,#05050e,#0f0308);display:flex;flex-direction:column;justify-content:center">
+        <div class="panel-num">03 VOCÊS EM NÚMEROS</div>
+        <h2 style="font-size:clamp(20px,3vw,34px);font-weight:900;margin:12px 0 4px;line-height:1.1">
+          A conversa de <span style="color:var(--ac);text-shadow:0 0 18px var(--glow)">${data.nome1||'vocês'}</span>
         </h2>
-        <div style="display:flex;flex-direction:column">${tlStepper}</div>
+        ${diasJuntos ? `<p style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:18px">${anosJuntos} juntos · ${diasJuntos} dias de história</p>` : '<div style="margin-bottom:18px"></div>'}
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          ${stats}
+        </div>
       </div>`;
     }
+
 
     case 'insights':
       const total=Number(ins.totalMessages||18432);
