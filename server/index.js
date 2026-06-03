@@ -16,12 +16,22 @@ const stripe = process.env.STRIPE_SECRET_KEY
   ? Stripe(process.env.STRIPE_SECRET_KEY)
   : null;
 
+// Use diskStorage — files go straight to disk, NEVER held in RAM
+// This is the fix for the 2-minute timeout
 const upload = multer({
-  storage: multer.memoryStorage(),
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+      cb(null, UPLOAD_DIR);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname || '').toLowerCase() || '.bin';
+      cb(null, `tmp-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
+    }
+  }),
   limits: {
-    fileSize: 60 * 1024 * 1024,
-    fieldSize: 40 * 1024 * 1024,
-    fields: 40
+    fileSize: 20 * 1024 * 1024,  // 20MB max per file
+    fields: 20
   }
 });
 
@@ -104,23 +114,15 @@ async function saveRetrospective(req, body) {
   const files = req.files || {};
   const photos = [];
 
-  for (const [index, file] of (files.photos || []).slice(0, 12).entries()) {
-    if (!file.mimetype.startsWith('image/')) continue;
-    const fileName = `${id}-photo-${index}${safeExt(file, '.jpg')}`;
-    fs.writeFileSync(path.join(UPLOAD_DIR, fileName), file.buffer);
+  // Files are already on disk (diskStorage) — just rename them
+  for (const [index, file] of (files.photos || []).slice(0, 10).entries()) {
+    const isImage = (file.mimetype || '').startsWith('image/') ||
+      /\.(jpg|jpeg|png|webp|gif)$/i.test(file.originalname || '');
+    if (!isImage) { try { fs.unlinkSync(file.path); } catch {} continue; }
+    const fileName = `${id}-photo-${index}${path.extname(file.originalname||'').toLowerCase()||'.jpg'}`;
+    const dest = path.join(UPLOAD_DIR, fileName);
+    fs.renameSync(file.path, dest);
     photos.push(publicUrl(req, fileName));
-  }
-
-  if (!photos.length && body.photosData) {
-    try {
-      const parsedPhotos = JSON.parse(body.photosData);
-      if (Array.isArray(parsedPhotos)) {
-        parsedPhotos.slice(0, 8).forEach((dataUrl, index) => {
-          const saved = saveDataUrl(req, id, dataUrl, 'photo', index);
-          if (saved) photos.push(saved);
-        });
-      }
-    } catch {}
   }
 
   let musicSrc = '';
@@ -128,40 +130,38 @@ async function saveRetrospective(req, body) {
   let musicName = body.musicName || 'Trilha sonora da historia';
   const music = (files.music || [])[0];
   if (music) {
-    const audioOk = music.mimetype.startsWith('audio/') || /\.(mp3|m4a|aac|ogg|wav|webm)$/i.test(music.originalname || '');
+    const audioOk = (music.mimetype||'').startsWith('audio/') ||
+      /\.(mp3|m4a|aac|ogg|wav|webm)$/i.test(music.originalname || '');
     if (!audioOk) {
+      try { fs.unlinkSync(music.path); } catch {}
       const error = new Error('Envie uma musica em MP3, M4A, AAC, OGG, WAV ou WEBM.');
       error.statusCode = 400;
       throw error;
     }
-    const fileName = `${id}-music${safeExt(music, '.mp3')}`;
-    fs.writeFileSync(path.join(UPLOAD_DIR, fileName), music.buffer);
+    const fileName = `${id}-music${path.extname(music.originalname||'').toLowerCase()||'.mp3'}`;
+    const dest = path.join(UPLOAD_DIR, fileName);
+    fs.renameSync(music.path, dest);
     musicSrc = publicUrl(req, fileName);
     musicName = (music.originalname || musicName).replace(/\.[^/.]+$/, '');
   }
 
-  if (!musicSrc && body.musicData) {
-    musicSrc = saveDataUrl(req, id, body.musicData, 'music');
-    musicName = body.musicName || musicName;
-  }
-
+  // Parse insights from pre-parsed JSON (sent by client) or from WhatsApp txt
   let insights = null;
   if (body.insights) {
     try { insights = JSON.parse(body.insights); } catch { insights = null; }
   }
 
-  // If insights not provided but whatsapp file was sent, try to parse it server-side (txt only)
   if (!insights) {
     const wppFile = (files.whatsappFile || [])[0];
     if (wppFile) {
       try {
         let txt = '';
-        if (wppFile.originalname && wppFile.originalname.endsWith('.txt')) {
-          txt = wppFile.buffer.toString('utf8');
-        } else if (wppFile.originalname && wppFile.originalname.endsWith('.zip')) {
-          // Unzip to find .txt - requires adm-zip or similar
-          // For now just skip; insights already parsed client-side
+        const fname = (wppFile.originalname || wppFile.path || '').toLowerCase();
+        if (fname.endsWith('.txt')) {
+          txt = fs.readFileSync(wppFile.path, 'utf8');
         }
+        // ZIP parsing skipped on server — client already parsed and sent insights
+        try { fs.unlinkSync(wppFile.path); } catch {}
         if (txt) {
           const lines = txt.split(/\r?\n/).filter(Boolean);
           const loveCount = (txt.match(/eu te amo|te amo|amo você|amo vc/gi) || []).length;
