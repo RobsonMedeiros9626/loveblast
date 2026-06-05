@@ -626,6 +626,32 @@ nav a:hover{background:rgba(255,45,120,.12)}
   #precos{padding:40px 16px 60px !important}
 }
 
+/* PROMO BANNER */
+.promo-banner{
+  background:linear-gradient(90deg,#8b0030,#cc0044,#ff2d78,#cc0044,#8b0030);
+  background-size:300% 100%;
+  animation:promoBg 4s ease infinite;
+  padding:10px 16px;
+  text-align:center;
+  position:sticky;
+  top:0;
+  z-index:9998;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+@keyframes promoBg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.promo-banner .promo-text{font-size:13px;font-weight:900;color:#fff;letter-spacing:.03em}
+.promo-banner .promo-old{text-decoration:line-through;opacity:.7;font-size:12px}
+.promo-banner .promo-new{font-size:16px;font-weight:900;color:#ffe066;text-shadow:0 0 10px rgba(255,224,102,.5)}
+.promo-banner .promo-timer{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:900;color:#ffe066}
+.promo-banner .promo-timer .t-box{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:5px;min-width:26px;text-align:center;font-size:13px}
+.promo-banner .promo-cta{padding:6px 14px;background:#fff;color:#cc0044;border:none;border-radius:99px;font-weight:900;font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap}
+.promo-banner .promo-cta:hover{background:#ffe066;transform:scale(1.05)}
+.promo-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;position:absolute;right:12px}
+
 /* HIDE final art on index */
 #arteFinal,.final-experience,.final-grid,.extra{display:none!important}
 
@@ -955,6 +981,16 @@ nav a:hover{background:rgba(255,45,120,.12)}
 
     <p id="localModeNotice" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.4);border-radius:10px;font-size:12px;color:#ffb380;text-align:center">⚡ Modo local: clique em "Ver prévia" para visualizar a retrospectiva direto. Para cobrar pagamento, rode o servidor (<code>npm start</code>).</p>
 
+    <!-- Promo badge above pay button -->
+    <div style="margin-top:16px;padding:14px 16px;border:1.5px solid rgba(255,45,120,.5);border-radius:16px;background:linear-gradient(135deg,rgba(255,45,120,.12),rgba(255,107,26,.08));text-align:center">
+      <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#ff7aa9;margin-bottom:6px">💕 PROMOÇÃO DIA DOS NAMORADOS</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:16px;color:rgba(255,255,255,.4);text-decoration:line-through;font-weight:700">R$ 19,90</span>
+        <span style="font-size:28px;font-weight:900;color:#ff2d78;text-shadow:0 0 16px rgba(255,45,120,.5)">R$ 9,90</span>
+        <span style="background:rgba(255,45,120,.2);border:1px solid rgba(255,45,120,.4);color:#ff7aa9;font-size:11px;font-weight:900;padding:3px 8px;border-radius:99px">-50%</span>
+      </div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4)">⏰ Termina em: <span id="promoTimerModal" style="color:#ffe066;font-weight:900"></span></div>
+    </div>
     <button id="payBtn" class="btn-full secondary" type="button">💳 Pagar R$ 9,90</button>
   </div>
 </div>
@@ -1838,6 +1874,40 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="/loveblast-shared.js"></script>
 <script>
+// ── PROMO COUNTDOWN — termina dia 12/06 às 23:59 ──
+(function() {
+  // Set end date: June 12, 2026 23:59:59
+  const endDate = new Date('2026-06-12T23:59:59');
+
+  function updateTimer() {
+    const now  = new Date();
+    const diff = endDate - now;
+    if (diff <= 0) {
+      const banner = document.getElementById('promoBanner');
+      if (banner) banner.style.display = 'none';
+      return;
+    }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const pad = n => String(n).padStart(2,'0');
+
+    const ph = document.getElementById('ph');
+    const pm = document.getElementById('pm');
+    const ps = document.getElementById('ps');
+    if (ph) ph.textContent = pad(h);
+    if (pm) pm.textContent = pad(m);
+    if (ps) ps.textContent = pad(s);
+
+    // Modal timer
+    const mt = document.getElementById('promoTimerModal');
+    if (mt) mt.textContent = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+  }
+
+  updateTimer();
+  setInterval(updateTimer, 1000);
+})();
+
 // ── LoveBlast Analytics ──
 function lb_track(event, meta) {
   fetch('/api/track', {
