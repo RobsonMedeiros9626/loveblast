@@ -1653,5 +1653,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 <script src="/loveblast-shared.js"></script>
+<script>
+// Track visit silently
+fetch('/api/track-visit', {
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({ page:'index', referrer: document.referrer||'' })
+}).catch(()=>{});
+</script>
 </body>
 </html>
