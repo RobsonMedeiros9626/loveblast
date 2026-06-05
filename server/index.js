@@ -42,6 +42,9 @@ app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json({ limit: '30mb' }));
 app.use(express.urlencoded({ extended: true, limit: '30mb' }));
+// Admin panel
+require('./admin')(app);
+
 // Serve og-image.svg as og-image.png
 app.get('/og-image.png', (req, res) => {
   const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
@@ -159,8 +162,8 @@ function markPaid(id) {
   return data;
 }
 
-async function saveRetrospective(req, body) {
-  const id = createId();
+async function saveRetrospective(req, body, existingId) {
+  const id = existingId || createId();
   const files = req.files || {};
   const photos = [];
 
@@ -329,8 +332,28 @@ app.post(
         return res.status(400).json({ erro: 'Digite um e-mail valido.' });
       }
 
-      const retrospective = await saveRetrospective(req, req.body || {});
+      // ── SPEED FIX: Create Stripe session first (fast), process files after ──
       const appUrl = (process.env.APP_URL || '').trim().replace(/\/+$/, '');
+
+      // Save minimal data synchronously first
+      const quickId = createId();
+      const quickData = {
+        id: quickId,
+        nome1: req.body.nome1 || '',
+        nome2: req.body.nome2 || '',
+        email: req.body.email || '',
+        mensagem: req.body.mensagem || '',
+        categoria: req.body.categoria || 'casal',
+        dataInicio: req.body.dataInicio || '',
+        musicLink: req.body.musicLink || '',
+        musicName: req.body.musicName || '',
+        insights: (() => { try { return JSON.parse(req.body.insights||'null'); } catch { return null; } })(),
+        photos: [],
+        musicSrc: '',
+        pago: false,
+        criadoEm: new Date().toISOString()
+      };
+      writeRetrospective(quickData);
 
       const session = await stripe.checkout.sessions.create({
         mode: 'payment',
@@ -362,10 +385,21 @@ app.post(
         }
       });
 
-      return res.json({
+      // Return immediately — process files in background
+      res.json({
         checkoutUrl: session.url,
         sessionId: session.id,
-        retrospectiveId: retrospective.id
+        retrospectiveId: quickId
+      });
+
+      // Process files async after response is sent
+      setImmediate(async () => {
+        try {
+          const full = await saveRetrospective(req, req.body || {}, quickId);
+          // full already written by saveRetrospective with the same id
+        } catch(e) {
+          console.error('Background file processing error:', e.message);
+        }
       });
     } catch (err) {
       console.error('Erro Stripe:', err.message);
@@ -375,6 +409,24 @@ app.post(
     }
   }
 );
+
+// Track page visits
+app.post('/api/track-visit', express.json(), (req, res) => {
+  try {
+    const { page, referrer } = req.body || {};
+    const statsFile = require('path').join(__dirname, '../data/_stats.json');
+    let stats = {};
+    try { stats = JSON.parse(require('fs').readFileSync(statsFile,'utf8')); } catch {}
+    const today = new Date().toISOString().split('T')[0];
+    if (!stats.visits) stats.visits = {};
+    if (!stats.visits[today]) stats.visits[today] = 0;
+    stats.visits[today]++;
+    if (!stats.pages) stats.pages = {};
+    if (page) { stats.pages[page] = (stats.pages[page]||0)+1; }
+    require('fs').writeFileSync(statsFile, JSON.stringify(stats,null,2));
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false }); }
+});
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
