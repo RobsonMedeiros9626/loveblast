@@ -674,7 +674,7 @@ function buildSmartTimeline(dataInicio, themeTl, marcos) {
   return icons.map((ico, i) => [ico, labels[i], descs[i]]);
 }
 
-function buildPanel(type,data,t,ins){
+function buildPanel(type,data,t,ins,isBasico,isCreator){
   const photos=getPhotos(data);
   const n1=data.nome1||'Você',n2=data.nome2||'Pessoa especial';
   const cat=data.categoria||'casal';
@@ -1156,20 +1156,44 @@ function buildPanel(type,data,t,ins){
 
     case 'share': {
       const panNum={casal:'12',mae:'11',pai:'11',familia:'10',amigos:'12',formatura:'10',bebe:'11',pet:'11'}[cat]||'12';
-      return `<div class="panel p-share">
-        <div class="panel-num">${panNum} GUARDE &amp; COMPARTILHE</div>
-        <h2 class="share-title">Sua retrospectiva<br>está pronta.</h2>
-        <div class="share-buttons">
-          <button class="share-btn" onclick="iniciarDownload()"><span class="sico">⬇</span>Baixar<br><small>retrospectiva</small></button>
-          <button class="share-btn" onclick="compartilharArte()"><span class="sico">🔗</span>Compartilhar<br><small>com quem ama</small></button>
-          <button class="share-btn" onclick="location.href='/'"><span class="sico">♡</span>Criar outra<br><small>retrospectiva</small></button>
-        </div>
-        <div class="qr-section">
-          <div class="qr-label">📱 QR Code — imprima e surpreenda</div>
-          <div class="qr-row">
-            <canvas id="qrCanvas" width="100" height="100"></canvas>
-            <div class="qr-info"><strong>Escaneie e abra no celular</strong><p>Cole em um cartão ou caixa de presente.</p><button class="qr-download" onclick="downloadQR()">⬇ Baixar QR</button></div>
+
+      // CREATOR view — full share/download options
+      if (isCreator) {
+        return `<div class="panel p-share">
+          <div class="panel-num">${panNum} GUARDE &amp; COMPARTILHE</div>
+          <h2 class="share-title">Sua retrospectiva<br>está pronta.</h2>
+          <div class="share-buttons">
+            <button class="share-btn" onclick="iniciarDownload()"><span class="sico">⬇</span>Baixar<br><small>retrospectiva</small></button>
+            <button class="share-btn" onclick="compartilharArte()"><span class="sico">🔗</span>Compartilhar<br><small>com quem ama</small></button>
+            <button class="share-btn" onclick="location.href='/'"><span class="sico">♡</span>Criar outra<br><small>retrospectiva</small></button>
           </div>
+          <div class="qr-section">
+            <div class="qr-label">📱 QR Code — imprima e surpreenda</div>
+            <div class="qr-row">
+              <canvas id="qrCanvas" width="100" height="100"></canvas>
+              <div class="qr-info"><strong>Escaneie e abra no celular</strong><p>Cole em um cartão ou caixa de presente.</p><button class="qr-download" onclick="downloadQR()">⬇ Baixar QR</button></div>
+            </div>
+          </div>
+        </div>`;
+      }
+
+      // RECIPIENT view — emotional final panel, no download/share buttons
+      const n1 = data.nome1 || 'Você';
+      const n2 = data.nome2 || 'Pessoa especial';
+      return `<div class="panel p-final" style="display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(160deg,#030308,#12020a)">
+        <div class="panel-num" style="position:absolute;top:28px;left:38px">${panNum} FIM</div>
+        <div style="font-size:64px;animation:heartbeat 1.4s ease-in-out infinite;line-height:1;margin-bottom:22px">${t.badgeIcon}</div>
+        <h2 style="font-size:clamp(18px,3vw,34px);font-weight:900;color:#fff;line-height:1.2;max-width:380px">
+          Essa história foi criada<br>especialmente para <span style="color:var(--ac);text-shadow:0 0 20px var(--glow)">${n2}</span>
+        </h2>
+        <p style="margin-top:16px;font-size:14px;color:rgba(255,255,255,.4);max-width:300px;line-height:1.6">
+          Alguém especial dedicou tempo para eternizar essa história. ♡
+        </p>
+        <div style="margin-top:28px;padding:16px 22px;border:1px solid rgba(var(--ac-rgb),.3);border-radius:14px;background:rgba(var(--ac-rgb),.08)">
+          <p style="font-size:13px;color:rgba(255,255,255,.6);margin-bottom:10px">Quer criar a sua retrospectiva?</p>
+          <a href="/" style="display:inline-block;padding:10px 24px;background:linear-gradient(90deg,var(--ac),#ff6b1a);border-radius:10px;color:#fff;font-weight:900;font-size:14px;text-decoration:none;box-shadow:0 0 20px rgba(var(--ac-rgb),.35)">
+            ♡ Criar minha retrospectiva
+          </a>
         </div>
       </div>`;
     }
@@ -1189,9 +1213,19 @@ function hydrate(raw){
 
   applyTheme(t);
 
+  // Detect if viewer is the creator (came from Stripe success or is on creator's device)
+  const params = new URLSearchParams(location.search);
+  const isCreator = !!params.get('session_id') ||
+    (!!params.get('id') && localStorage.getItem('lb_creator_' + params.get('id')) === '1');
+
+  // Mark as creator on this device
+  if (params.get('session_id') && params.get('id')) {
+    try { localStorage.setItem('lb_creator_' + params.get('id'), '1'); } catch {}
+  }
+
   // Build grid HTML — all panels available (single plan)
   const grid=document.getElementById('arteFinal');
-  grid.innerHTML=t.panels.map(p=>buildPanel(p,data,t,ins)).join('');
+  grid.innerHTML=t.panels.map(p=>buildPanel(p,data,t,ins,false,isCreator)).join('');
 
   // Set abertura bg
   const ab=document.getElementById('painelAbertura');
