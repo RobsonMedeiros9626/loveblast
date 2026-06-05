@@ -959,11 +959,14 @@ function buildPanel(type,data,t,ins){
     case 'musica': {
       const mSub=`${t.badgeIcon} ${t.badgeLabel} — trilha sonora`;
       const musicName=data.musicName||'Trilha sonora';
-      const dash=musicName.indexOf(' - ');
-      const mTitle=dash>-1?musicName.slice(dash+3):musicName;
-      const mArtist=dash>-1?musicName.slice(0,dash):'LoveBlast';
-      const hasMus=!!data.musicSrc;
-      const hasLink=!!data.musicLink;
+      // Prefer explicit fields from iTunes search
+      const mTitle  = data.musicTitle  || (musicName.includes(' — ') ? musicName.split(' — ')[0] : (musicName.includes(' - ') ? musicName.split(' - ').slice(1).join(' - ') : musicName));
+      const mArtist = data.musicArtist || (musicName.includes(' — ') ? musicName.split(' — ')[1] : (musicName.includes(' - ') ? musicName.split(' - ')[0] : 'LoveBlast'));
+      const mArtwork= data.musicArtwork || '';
+      const mPreview= data.musicPreview || '';
+      const hasMus  = !!data.musicSrc;
+      const hasLink = !!data.musicLink;
+      const hasItunes = !!mPreview; // iTunes preview audio
 
       // Build embed HTML for YouTube/Spotify links
       let embedHTML='';
@@ -998,8 +1001,10 @@ function buildPanel(type,data,t,ins){
         <div class="panel-num">07 NOSSA MÚSICA</div>
         <h2 style="font-size:clamp(24px,3.5vw,46px);margin-top:14px">Nossa <span style="color:var(--ac);text-shadow:0 0 20px var(--glow)">música</span> ♡</h2>
         ${hasLink ? `<div><div class="music-sub" style="margin-top:14px">${mSub}</div><div class="music-title" style="font-size:clamp(16px,2vw,24px);font-weight:900;color:#fff;margin:6px 0 2px">${mTitle}</div><div class="music-artist" style="font-size:13px;color:rgba(255,255,255,.55)">${mArtist}</div>${embedHTML}</div>` :
-        `<div class="music-player" id="musicPlayer" style="display:${hasMus?'flex':'none'}">
-          <div class="album-art" id="albumArt">🎵</div>
+        `<div class="music-player" id="musicPlayer" style="display:${(hasMus||hasItunes)?'flex':'none'}">
+          <div class="album-art" id="albumArt" style="${mArtwork?'padding:0;overflow:hidden':''}">
+          ${mArtwork?`<img src="${mArtwork}" alt="capa" style="width:100%;height:100%;object-fit:cover;display:block">`: '🎵'}
+        </div>
           <div class="music-info">
             <div class="music-sub">${mSub}</div>
             <div class="music-title">${mTitle}</div>
@@ -1195,13 +1200,21 @@ function hydrate(raw){
     extraEl.innerHTML=t.extra.map(([ico,label,val])=>`<div class="extra-item">${ico} ${label}<strong>${val}</strong></div>`).join('');
   }
 
-  // Music — file src (server URL or base64)
+  // Music: uploaded file OR iTunes preview OR link embed
   const audio=document.getElementById('audioFinal');
-  if(data.musicSrc&&audio){
-    audio.src=data.musicSrc;
+  const musicPlayer=document.getElementById('musicPlayer');
+  const semMusicaMsg=document.getElementById('semMusicaMsg');
+  const musicaSrc = data.musicSrc || data.musicPreview || '';
+  if(musicaSrc&&audio){
+    audio.src=musicaSrc;
+    if(musicPlayer) musicPlayer.style.display='flex';
+    if(semMusicaMsg) semMusicaMsg.style.display='none';
     setupMusicPlayer(audio);
+  } else if(!data.musicLink){
+    if(musicPlayer) musicPlayer.style.display='none';
+    if(semMusicaMsg) semMusicaMsg.style.display='block';
   }
-  // musicLink is handled directly in buildPanel('musica') embed HTML
+  // YouTube/Spotify link handled by embed HTML in buildPanel
 
   // Counter + stars
   const dateStr=data.dataInicio;
