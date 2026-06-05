@@ -290,7 +290,6 @@ nav a:hover{background:rgba(255,45,120,.12)}
   z-index:10001;
   display:none;
 }
-.modal-overlay.active .modal-pay-footer{display:block}
 .modal-overlay.active{display:flex}
 .modal-box{
   width:100%;
@@ -1058,10 +1057,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cat) aplicarCategoria(cat);
     modal?.classList.add('active');
     document.body.style.overflow = 'hidden';
+    const footer = document.querySelector('.modal-pay-footer');
+    if (footer) footer.style.display = 'block';
   }
   function fecharFormulario() {
     modal?.classList.remove('active');
     document.body.style.overflow = '';
+    const footer = document.querySelector('.modal-pay-footer');
+    if (footer) footer.style.display = 'none';
   }
 
   document.querySelectorAll('.card').forEach(card => {
