@@ -1654,12 +1654,28 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 <script src="/loveblast-shared.js"></script>
 <script>
-// Track visit silently
-fetch('/api/track-visit', {
-  method:'POST',
-  headers:{'Content-Type':'application/json'},
-  body: JSON.stringify({ page:'index', referrer: document.referrer||'' })
-}).catch(()=>{});
+// ── LoveBlast Analytics ──
+function lb_track(event, meta) {
+  fetch('/api/track', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ event, referrer: document.referrer||'', ...meta })
+  }).catch(()=>{});
+}
+
+// Page home
+lb_track('page_home');
+
+// Modal open
+document.querySelectorAll('.js-open-modal, .card').forEach(el => {
+  el.addEventListener('click', () => lb_track('modal_open'), { once: true });
+});
+
+// Preview click
+document.getElementById('previewBtn')?.addEventListener('click', () => lb_track('preview_click'), { once: true });
+
+// Pay click
+document.getElementById('payBtn')?.addEventListener('click', () => lb_track('pay_click'), { once: true });
 </script>
 </body>
 </html>
