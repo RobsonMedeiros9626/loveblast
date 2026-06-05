@@ -272,24 +272,15 @@ nav a:hover{background:rgba(255,45,120,.12)}
   position:fixed;
   inset:0;
   display:none;
-  align-items:flex-start;
+  align-items:center;
   justify-content:center;
   background:rgba(0,0,0,.88);
   backdrop-filter:blur(20px);
   z-index:9999;
   padding:18px;
-  padding-bottom:80px;
 }
 /* Pay button fixed footer inside modal */
-.modal-pay-footer{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  padding:12px 16px;
-  background:rgba(8,8,14,.97);
-  border-top:1px solid rgba(255,45,120,.25);
-  z-index:10001;
-  display:none;
-}
+
 .modal-overlay.active{display:flex}
 .modal-box{
   width:100%;
@@ -300,7 +291,6 @@ nav a:hover{background:rgba(255,45,120,.12)}
   border:1px solid rgba(255,45,120,.5);
   border-radius:28px;
   padding:32px;
-  padding-bottom:90px;
   box-shadow:0 0 80px rgba(255,45,120,.3),inset 0 0 40px rgba(255,255,255,.02);
   position:relative;
 }
@@ -893,12 +883,10 @@ nav a:hover{background:rgba(255,45,120,.12)}
       </div>
     </div>
 
-    <!-- payBtn moved to modal footer below -->
     <p id="localModeNotice" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.4);border-radius:10px;font-size:12px;color:#ffb380;text-align:center">⚡ Modo local: clique em "Ver prévia" para visualizar a retrospectiva direto. Para cobrar pagamento, rode o servidor (<code>npm start</code>).</p>
+
+    <button id="payBtn" class="btn-full secondary" type="button">💳 Pagar R$ 9,90</button>
   </div>
-</div>
-<div class="modal-pay-footer">
-  <button id="payBtn" class="btn-full secondary" type="button" style="margin:0">💳 Pagar R$ 9,90</button>
 </div>
 
 <script>
@@ -1058,14 +1046,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (cat) aplicarCategoria(cat);
     modal?.classList.add('active');
     document.body.style.overflow = 'hidden';
-    const footer = document.querySelector('.modal-pay-footer');
-    if (footer) footer.style.display = 'block';
   }
   function fecharFormulario() {
     modal?.classList.remove('active');
     document.body.style.overflow = '';
-    const footer = document.querySelector('.modal-pay-footer');
-    if (footer) footer.style.display = 'none';
   }
 
   document.querySelectorAll('.card').forEach(card => {
@@ -1552,8 +1536,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (pr) pr.classList.add('active');
 
-      // Scroll preview into view
-      setTimeout(() => box.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 100);
+      // Scroll payBtn into view so user sees it on mobile
+      setTimeout(() => {
+        const payBtn = document.getElementById('payBtn');
+        if (payBtn) payBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
 
     } finally {
       btn.textContent = '✨ Ver prévia';
