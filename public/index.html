@@ -753,24 +753,34 @@ nav a:hover{background:rgba(255,45,120,.12)}
 
   <!-- HEADER -->
   <div style="text-align:center;margin-bottom:44px">
-    <p style="font-size:12px;font-weight:900;letter-spacing:.2em;color:#ff2d78;margin-bottom:12px">PREÇO</p>
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,45,120,.15);border:1px solid rgba(255,45,120,.4);padding:6px 16px;border-radius:99px;margin-bottom:14px">
+      <span style="font-size:14px">💕</span>
+      <span style="font-size:12px;font-weight:900;letter-spacing:.12em;color:#ff7aa9">PROMOÇÃO DIA DOS NAMORADOS</span>
+    </div>
     <h2 style="font-size:clamp(28px,4vw,48px);font-weight:900;line-height:1.1;color:#fff">
       Uma história que dura para sempre<br>
       <span style="background:linear-gradient(90deg,#ff2d78,#ff6b1a);-webkit-background-clip:text;-webkit-text-fill-color:transparent">por apenas R$&nbsp;9,90</span>
     </h2>
     <p style="color:rgba(255,255,255,.5);margin-top:14px;font-size:16px">Sem assinatura. Pague uma vez, guarde para sempre.</p>
+    <div style="display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:8px 18px;background:rgba(0,0,0,.3);border:1px solid rgba(255,224,102,.3);border-radius:99px">
+      <span style="font-size:13px;color:rgba(255,255,255,.6);font-weight:700">⏰ Oferta termina em:</span>
+      <span style="font-size:14px;font-weight:900;color:#ffe066" id="promoTimerPrecos">--h --m --s</span>
+    </div>
   </div>
 
   <!-- CARD ÚNICO -->
   <div style="border:2px solid #ff2d78;border-radius:28px;padding:40px 36px;background:linear-gradient(160deg,rgba(255,45,120,.1),rgba(255,107,26,.06));position:relative;box-shadow:0 0 60px rgba(255,45,120,.2),0 0 120px rgba(255,45,120,.06)">
 
     <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#ff2d78,#ff6b1a);padding:6px 24px;border-radius:99px;font-size:12px;font-weight:900;color:#fff;white-space:nowrap;box-shadow:0 4px 20px rgba(255,45,120,.4)">
-      ♡ TUDO INCLUÍDO
+      💕 DIA DOS NAMORADOS — TUDO INCLUÍDO
     </div>
 
     <!-- PRICE -->
     <div style="text-align:center;margin-bottom:32px">
-      <span style="font-size:14px;color:rgba(255,255,255,.35);text-decoration:line-through">R$ 29,90</span>
+      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:16px;color:rgba(255,255,255,.4);text-decoration:line-through;font-weight:700">R$ 19,90</span>
+        <span style="background:rgba(255,45,120,.2);border:1px solid rgba(255,45,120,.5);color:#ff7aa9;font-size:12px;font-weight:900;padding:3px 10px;border-radius:99px">-50% OFF</span>
+      </div>
       <div style="font-size:22px;font-weight:900;color:#fff;line-height:1;margin-top:6px">
         R$ <span style="font-size:72px;background:linear-gradient(90deg,#ff2d78,#ff8a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">9<span style="font-size:44px">,90</span></span>
       </div>
@@ -1902,6 +1912,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Modal timer
     const mt = document.getElementById('promoTimerModal');
     if (mt) mt.textContent = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+    const tp = document.getElementById('promoTimerPrecos');
+    if (tp) tp.textContent = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
   }
 
   updateTimer();
