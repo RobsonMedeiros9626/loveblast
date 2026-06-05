@@ -1213,15 +1213,21 @@ function hydrate(raw){
 
   applyTheme(t);
 
-  // Detect if viewer is the creator (came from Stripe success or is on creator's device)
+  // Detect creator: came from Stripe (has session_id) OR previously marked on this device
   const params = new URLSearchParams(location.search);
-  const isCreator = !!params.get('session_id') ||
-    (!!params.get('id') && localStorage.getItem('lb_creator_' + params.get('id')) === '1');
+  const retroId = params.get('id');
+  const sessionId = params.get('session_id');
 
-  // Mark as creator on this device
-  if (params.get('session_id') && params.get('id')) {
-    try { localStorage.setItem('lb_creator_' + params.get('id'), '1'); } catch {}
+  // Mark as creator and clean URL (remove session_id so shared link doesn't expose it)
+  if (sessionId && retroId) {
+    try { localStorage.setItem('lb_creator_' + retroId, '1'); } catch {}
+    // Clean URL — remove session_id so sharing is safe
+    const cleanUrl = location.origin + location.pathname + '?id=' + retroId;
+    window.history.replaceState({}, '', cleanUrl);
   }
+
+  const isCreator = !!sessionId ||
+    (!!retroId && localStorage.getItem('lb_creator_' + retroId) === '1');
 
   // Build grid HTML — all panels available (single plan)
   const grid=document.getElementById('arteFinal');
@@ -1462,8 +1468,14 @@ async function _doCanvas(ov){
   catch{window.print();}finally{ov.classList.remove('on');}
 }
 function compartilharArte(){
-  if(navigator.share)navigator.share({title:'Minha retrospectiva LoveBlast',text:'Olha essa retrospectiva ❤️',url:location.href}).catch(()=>{});
-  else if(navigator.clipboard)navigator.clipboard.writeText(location.href).then(()=>alert('Link copiado! ❤️'));
+  // Always share clean URL — without session_id
+  const p = new URLSearchParams(location.search);
+  const id = p.get('id');
+  const cleanUrl = id
+    ? (location.origin + location.pathname + '?id=' + id)
+    : location.href;
+  if(navigator.share)navigator.share({title:'Minha retrospectiva LoveBlast',text:'Olha essa retrospectiva ❤️',url:cleanUrl}).catch(()=>{});
+  else if(navigator.clipboard)navigator.clipboard.writeText(cleanUrl).then(()=>alert('Link copiado! ❤️'));
 }
 
 /* ============================================================
