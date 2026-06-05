@@ -43,7 +43,8 @@ async function processFiles(req,body,id){
     try{fs.renameSync(file.path,dest);photos.push(pubUrl(req,`${id}-photo-${i}${ext}`));}catch{}
   }
   let musicSrc='',musicLink=(body.musicLink||'').trim(),musicName=body.musicName||'Trilha sonora';
-  if(musicLink){try{const u=new URL(musicLink);if(u.hostname.includes('youtube.com')||u.hostname.includes('youtu.be')){const v=u.searchParams.get('v');if(v)musicLink=`https://www.youtube.com/watch?v=${v}`;}else if(u.hostname.includes('spotify.com')){musicLink=`${u.origin}${u.pathname}`;}}catch{musicLink='';}}
+  if(musicLink){try{const u=new URL(musicLink);if(u.hostname.includes('youtube.com')||u.hostname.includes('youtu.be')){const v=u.searchParams.get('v');if(v)musicLink=`https://www.youtube.com/watch?v=${v}`;}else if(u.hostname.includes('spotify.com')){musicLink=`${u.origin}${u.pathname}`;}else if(u.hostname.includes('music.apple.com')||u.hostname.includes('itunes.apple.com')){musicLink='';// iTunes link — use musicPreview instead, no embed needed
+}}catch{musicLink='';}}
   const mf=(files.music||[])[0];
   if(mf){const ok=(mf.mimetype||'').startsWith('audio/')||/\.(mp3|m4a|aac|ogg|wav|webm)$/i.test(mf.originalname||'');if(ok){const ext=path.extname(mf.originalname||'').toLowerCase()||'.mp3';const dest=path.join(UPLOAD_DIR,`${id}-music${ext}`);try{fs.renameSync(mf.path,dest);musicSrc=pubUrl(req,`${id}-music${ext}`);}catch{}musicName=(mf.originalname||musicName).replace(/\.[^/.]+$/,'');}else{try{fs.unlinkSync(mf.path);}catch{}}}
   let insights=null;if(body.insights){try{insights=JSON.parse(body.insights);}catch{}}
