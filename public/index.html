@@ -504,6 +504,21 @@ nav a:hover{background:rgba(255,45,120,.12)}
 .mini-carta h4{font-family:cursive;font-size:20px;color:#9e1a3a;margin-bottom:8px}
 .mini-carta p{font-size:13px;line-height:1.7;color:#3a1505}
 .notice-ok{color:#ff7aa9;font-size:12px;margin-top:8px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.music-result-item{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);margin-bottom:8px;transition:.2s;cursor:pointer}
+.music-result-item:hover{border-color:rgba(255,45,120,.4);background:rgba(255,45,120,.08)}
+.music-result-artwork{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.06)}
+.music-result-info{flex:1;min-width:0}
+.music-result-title{font-size:14px;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.music-result-artist{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px}
+.music-result-duration{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.music-result-actions{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.music-btn-preview{padding:5px 10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:transparent;color:rgba(255,255,255,.7);font-size:11px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.music-btn-preview:hover{border-color:#ff2d78;color:#ff2d78}
+.music-btn-select{padding:5px 10px;border:none;border-radius:8px;background:linear-gradient(90deg,#ff2d78,#ff6b1a);color:#fff;font-size:11px;font-weight:900;cursor:pointer;transition:.2s;white-space:nowrap;box-shadow:0 0 12px rgba(255,45,120,.3)}
+.music-btn-select:hover{transform:scale(1.05)}
+#musicSearchResults::-webkit-scrollbar{width:4px}
+#musicSearchResults::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:99px}
 .category-description{
   margin-top:8px;padding:12px;
   border:1px solid rgba(255,45,120,.2);
@@ -811,20 +826,67 @@ nav a:hover{background:rgba(255,45,120,.12)}
     <div id="imgPreviewGrid" class="img-preview-grid"></div>
 
     <label>Música 🎵</label>
-    <!-- Tabs -->
-    <div style="display:flex;gap:0;margin-bottom:12px;border:1px solid rgba(255,45,120,.3);border-radius:12px;overflow:hidden">
+
+    <!-- 3 TABS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid rgba(255,45,120,.3);border-radius:14px;overflow:hidden;margin-bottom:14px">
+      <button type="button" id="musicTabSearch" onclick="switchMusicTab('search')"
+        style="padding:10px 6px;background:rgba(255,45,120,.2);border:none;border-right:1px solid rgba(255,45,120,.25);color:#fff;font-weight:900;font-size:12px;cursor:pointer">
+        🔍 Buscar
+      </button>
       <button type="button" id="musicTabYt" onclick="switchMusicTab('yt')"
-        style="flex:1;padding:10px;background:rgba(255,45,120,.18);border:none;color:#fff;font-weight:900;font-size:13px;cursor:pointer;border-right:1px solid rgba(255,45,120,.3)">
-        ▶ YouTube / Link
+        style="padding:10px 6px;background:transparent;border:none;border-right:1px solid rgba(255,45,120,.25);color:rgba(255,255,255,.5);font-weight:900;font-size:12px;cursor:pointer">
+        ▶ Link
       </button>
       <button type="button" id="musicTabFile" onclick="switchMusicTab('file')"
-        style="flex:1;padding:10px;background:transparent;border:none;color:rgba(255,255,255,.5);font-weight:900;font-size:13px;cursor:pointer">
-        📁 Arquivo MP3
+        style="padding:10px 6px;background:transparent;border:none;color:rgba(255,255,255,.5);font-weight:900;font-size:12px;cursor:pointer">
+        📁 MP3
       </button>
     </div>
 
+    <!-- TAB BUSCAR -->
+    <div id="musicPanelSearch">
+      <div style="position:relative">
+        <input id="musicSearch" type="text" placeholder="🔍  Perfect Ed Sheeran, Evidências, Photograph..."
+          autocomplete="off"
+          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#fff;padding:13px 15px 13px 40px;border-radius:14px;outline:none;font-size:15px;transition:.2s">
+        <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none">🎵</span>
+      </div>
+
+      <!-- Skeleton / loading -->
+      <div id="musicSearchLoading" style="display:none;margin-top:12px">
+        ${[1,2,3].map(()=>`<div style="display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:8px;animation:pulse 1.2s ease infinite">
+          <div style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.08);flex-shrink:0"></div>
+          <div style="flex:1"><div style="height:13px;background:rgba(255,255,255,.08);border-radius:6px;width:60%;margin-bottom:7px"></div><div style="height:11px;background:rgba(255,255,255,.06);border-radius:6px;width:40%"></div></div>
+        </div>`).join('')}
+      </div>
+
+      <!-- Results -->
+      <div id="musicSearchResults" style="margin-top:12px;max-height:320px;overflow-y:auto"></div>
+
+      <!-- Selected music card -->
+      <div id="musicSelectedCard" style="display:none;margin-top:12px;padding:14px;border:1.5px solid rgba(255,45,120,.5);border-radius:14px;background:rgba(255,45,120,.08);position:relative">
+        <div style="position:absolute;top:10px;right:10px;cursor:pointer;font-size:18px;color:rgba(255,255,255,.4)" onclick="clearSelectedMusic()">✕</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <img id="selectedArtwork" src="" alt="" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0">
+          <div style="min-width:0">
+            <div id="selectedTitle" style="font-size:15px;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+            <div id="selectedArtist" style="font-size:13px;color:rgba(255,255,255,.55);margin-top:3px"></div>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#ff2d78;box-shadow:0 0 8px #ff2d78"></div>
+              <span style="font-size:12px;color:#ff7aa9;font-weight:700">Música selecionada ✓</span>
+            </div>
+          </div>
+        </div>
+        <audio id="previewAudioSearch" style="width:100%;margin-top:10px;display:none"></audio>
+      </div>
+
+      <p style="font-size:12px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.5">
+        Busca via iTunes — mais de 100 milhões de músicas disponíveis
+      </p>
+    </div>
+
     <!-- TAB YouTube/Link -->
-    <div id="musicPanelYt">
+    <div id="musicPanelYt" style="display:none">
       <input id="musicLink" type="url" placeholder="Cole o link do YouTube, Spotify, SoundCloud..."
         style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;padding:13px 15px;border-radius:14px;outline:none;font-size:15px;transition:.2s">
       <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.5">
@@ -1079,30 +1141,120 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================================================
   // MUSIC TABS — YouTube link vs arquivo local
   // ============================================================
-  let musicMode = 'yt'; // 'yt' | 'file'
+  let musicMode = 'search'; // 'search' | 'yt' | 'file'
+  let selectedMusic = null; // { title, artist, artwork, previewUrl, itunesUrl, duration }
+  let _searchTimer  = null;
+  let _previewAudio = null;
 
   window.switchMusicTab = function(tab) {
     musicMode = tab;
-    const ytPanel  = document.getElementById('musicPanelYt');
-    const filePanel= document.getElementById('musicPanelFile');
-    const ytBtn    = document.getElementById('musicTabYt');
-    const fileBtn  = document.getElementById('musicTabFile');
-    if (tab === 'yt') {
-      ytPanel.style.display   = 'block';
-      filePanel.style.display = 'none';
-      ytBtn.style.background  = 'rgba(255,45,120,.18)';
-      ytBtn.style.color       = '#fff';
-      fileBtn.style.background= 'transparent';
-      fileBtn.style.color     = 'rgba(255,255,255,.5)';
-    } else {
-      ytPanel.style.display   = 'none';
-      filePanel.style.display = 'block';
-      fileBtn.style.background= 'rgba(255,45,120,.18)';
-      fileBtn.style.color     = '#fff';
-      ytBtn.style.background  = 'transparent';
-      ytBtn.style.color       = 'rgba(255,255,255,.5)';
-    }
+    const panels = { search: 'musicPanelSearch', yt: 'musicPanelYt', file: 'musicPanelFile' };
+    const btns   = { search: 'musicTabSearch',   yt: 'musicTabYt',   file: 'musicTabFile' };
+    Object.keys(panels).forEach(t => {
+      const p = document.getElementById(panels[t]);
+      const b = document.getElementById(btns[t]);
+      if (p) p.style.display = t === tab ? 'block' : 'none';
+      if (b) {
+        b.style.background = t === tab ? 'rgba(255,45,120,.2)' : 'transparent';
+        b.style.color      = t === tab ? '#fff' : 'rgba(255,255,255,.5)';
+      }
+    });
   };
+
+  // ── MUSIC SEARCH ──
+  function fmtDuration(secs) {
+    if (!secs) return '';
+    return `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+  }
+
+  function renderResults(results) {
+    const box = document.getElementById('musicSearchResults');
+    if (!box) return;
+    if (!results.length) {
+      box.innerHTML = '<p style="color:rgba(255,255,255,.3);font-size:13px;text-align:center;padding:20px">Nenhuma música encontrada</p>';
+      return;
+    }
+    box.innerHTML = results.map(r => `
+      <div class="music-result-item" data-id="${r.id}">
+        <img class="music-result-artwork" src="${r.artwork||''}" alt="" onerror="this.style.background='rgba(255,45,120,.12)'">
+        <div class="music-result-info">
+          <div class="music-result-title">${r.title||''}</div>
+          <div class="music-result-artist">${r.artist||''}</div>
+          ${r.duration ? `<div class="music-result-duration">${fmtDuration(r.duration)}</div>` : ''}
+        </div>
+        <div class="music-result-actions">
+          ${r.preview ? `<button class="music-btn-preview" onclick="previewMusic('${r.preview.replace(/'/g,"\'")}',this)">▶ Ouvir</button>` : ''}
+          <button class="music-btn-select" onclick='selectMusic(${JSON.stringify(r).replace(/'/g,"&apos;")})'>Selecionar</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.previewMusic = function(url, btn) {
+    // Stop previous
+    if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+    document.querySelectorAll('.music-btn-preview').forEach(b => b.textContent = '▶ Ouvir');
+    const audio = new Audio(url);
+    audio.volume = 0.7;
+    audio.play().then(() => { _previewAudio = audio; btn.textContent = '⏸ Parar'; }).catch(() => {});
+    audio.addEventListener('ended', () => { btn.textContent = '▶ Ouvir'; _previewAudio = null; });
+  };
+
+  window.selectMusic = function(r) {
+    selectedMusic = r;
+    // Show selected card
+    const card = document.getElementById('musicSelectedCard');
+    document.getElementById('selectedArtwork').src = r.artwork || '';
+    document.getElementById('selectedTitle').textContent  = r.title  || '';
+    document.getElementById('selectedArtist').textContent = r.artist || '';
+    if (r.preview) {
+      const a = document.getElementById('previewAudioSearch');
+      if (a) { a.src = r.preview; a.style.display = 'block'; }
+    }
+    if (card) card.style.display = 'block';
+    // Hide results, clear search
+    const res = document.getElementById('musicSearchResults');
+    if (res) res.innerHTML = '';
+    const inp = document.getElementById('musicSearch');
+    if (inp) inp.value = r.title + ' — ' + r.artist;
+    // Scroll to card
+    card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.clearSelectedMusic = function() {
+    selectedMusic = null;
+    const card = document.getElementById('musicSelectedCard');
+    if (card) card.style.display = 'none';
+    const inp  = document.getElementById('musicSearch');
+    if (inp)  { inp.value = ''; inp.focus(); }
+    if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+  };
+
+  // Debounced search
+  document.getElementById('musicSearch')?.addEventListener('input', function() {
+    const q = this.value.trim();
+    const loading = document.getElementById('musicSearchLoading');
+    const results = document.getElementById('musicSearchResults');
+    clearTimeout(_searchTimer);
+    if (selectedMusic) return; // already selected
+    if (q.length < 2) {
+      if (loading) loading.style.display = 'none';
+      if (results) results.innerHTML = '';
+      return;
+    }
+    if (loading) loading.style.display = 'block';
+    if (results) results.innerHTML = '';
+    _searchTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/music/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        if (loading) loading.style.display = 'none';
+        renderResults(data.results || []);
+      } catch {
+        if (loading) loading.style.display = 'none';
+        if (results) results.innerHTML = '<p style="color:rgba(255,255,255,.3);font-size:13px;text-align:center;padding:20px">Erro ao buscar. Tente novamente.</p>';
+      }
+    }, 500);
+  });
 
   // YouTube/link preview
   function extractYouTubeId(url) {
@@ -1154,13 +1306,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Helpers para salvar dados de música
   function getMusicData() {
+    if (musicMode === 'search' && selectedMusic) {
+      return {
+        musicLink:    selectedMusic.itunesUrl || '',
+        musicName:    `${selectedMusic.title} — ${selectedMusic.artist}`,
+        musicFile:    null,
+        musicArtwork: selectedMusic.artwork  || '',
+        musicPreview: selectedMusic.preview  || '',
+        musicTitle:   selectedMusic.title    || '',
+        musicArtist:  selectedMusic.artist   || '',
+      };
+    }
     if (musicMode === 'yt') {
       const url = document.getElementById('musicLink')?.value.trim() || '';
-      return { musicLink: url, musicName: url ? ('Música via link') : '', musicFile: null };
-    } else {
-      const file = document.getElementById('music')?.files?.[0] || null;
-      return { musicLink: '', musicName: file ? file.name.replace(/\.[^/.]+$/,'') : '', musicFile: file };
+      return { musicLink: url, musicName: url ? 'Música via link' : '', musicFile: null };
     }
+    const file = document.getElementById('music')?.files?.[0] || null;
+    return { musicLink: '', musicName: file ? file.name.replace(/\.[^/.]+$/,'') : '', musicFile: file };
   }
 
   // ============================================================
@@ -1376,6 +1538,10 @@ document.addEventListener('DOMContentLoaded', () => {
       categoria: categoriaSelecionada,
       photos: fotosBase64,
       musicSrc, musicName, musicLink,
+      musicArtwork: md.musicArtwork || '',
+      musicPreview: md.musicPreview || '',
+      musicTitle: md.musicTitle || '',
+      musicArtist: md.musicArtist || '',
       insights,
       criadoEm: Date.now()
     };
@@ -1598,8 +1764,12 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('musicName', md2.musicName);
       } else if (md2.musicLink) {
         formData.append('musicLink', md2.musicLink);
-        formData.append('musicName', 'Música via link');
+        formData.append('musicName', md2.musicName || 'Música via link');
       }
+      if (md2.musicArtwork) formData.append('musicArtwork', md2.musicArtwork);
+      if (md2.musicPreview) formData.append('musicPreview', md2.musicPreview);
+      if (md2.musicTitle)   formData.append('musicTitle',   md2.musicTitle);
+      if (md2.musicArtist)  formData.append('musicArtist',  md2.musicArtist);
 
       // WhatsApp — send raw file + cached insights (no re-parsing)
       const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
