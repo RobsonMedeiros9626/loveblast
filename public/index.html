@@ -1,197 +1,2452 @@
-require('dotenv').config();
-const express=require('express'),cors=require('cors'),path=require('path'),fs=require('fs'),multer=require('multer'),Stripe=require('stripe');
-const app=express(),PORT=process.env.PORT||8080,DATA_DIR=path.join(__dirname,'../data'),UPLOAD_DIR=path.join(__dirname,'../public/uploads');
-const stripe=process.env.STRIPE_SECRET_KEY?Stripe(process.env.STRIPE_SECRET_KEY):null;
-const upload=multer({storage:multer.diskStorage({destination:(req,file,cb)=>{fs.mkdirSync(UPLOAD_DIR,{recursive:true});cb(null,UPLOAD_DIR);},filename:(req,file,cb)=>{const ext=path.extname(file.originalname||'').toLowerCase()||'.bin';cb(null,`tmp-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);}}),limits:{fileSize:20*1024*1024,fields:20}});
-fs.mkdirSync(DATA_DIR,{recursive:true});fs.mkdirSync(UPLOAD_DIR,{recursive:true});
-app.set('trust proxy',1);app.use(cors());app.use(express.json({limit:'5mb'}));app.use(express.urlencoded({extended:true,limit:'5mb'}));
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LoveBlast</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:Arial,sans-serif;
+  background:#050508;
+  color:#fff;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(circle at 20% 20%,rgba(255,45,120,.25),transparent 30%),
+    radial-gradient(circle at 80% 30%,rgba(255,107,26,.18),transparent 30%),
+    radial-gradient(circle at 50% 90%,rgba(255,45,120,.18),transparent 35%);
+  z-index:-1;
+}
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:20px 40px;
+  position:sticky;
+  top:0;
+  z-index:20;
+  background:rgba(5,5,8,.82);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,45,120,.15);
+}
+.logo{
+  font-size:26px;
+  font-weight:900;
+  background:linear-gradient(90deg,#ff2d78,#ff8a00);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  flex-shrink:0;
+}
+nav{display:flex;gap:4px}
+nav a{
+  color:#fff;
+  text-decoration:none;
+  padding:8px 12px;
+  font-size:13px;
+  font-weight:700;
+  border-radius:8px;
+  transition:.2s;
+}
+nav a:hover{background:rgba(255,45,120,.12)}
+.btn{
+  border:1px solid #ff2d78;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  color:#fff;
+  padding:14px 22px;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+  box-shadow:0 0 30px rgba(255,45,120,.35);
+  font-size:14px;
+  white-space:nowrap;
+  transition:.2s ease;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 0 40px rgba(255,45,120,.5)}
+.btn:disabled{opacity:.65;cursor:not-allowed}
+.hero{
+  display:grid;
+  grid-template-columns:1fr 1.7fr;
+  gap:40px;
+  padding:60px 40px;
+  align-items:center;
+}
+.hero h1{font-size:clamp(32px,4vw,52px);line-height:1.05}
+.hero h1 span{color:#ff3b7d}
+.hero p{margin:28px 0;color:#d7d7d7;font-size:18px;line-height:1.5}
+.categories{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+}
+.card{
+  min-height:210px;
+  border:1px solid rgba(255,45,120,.6);
+  border-radius:16px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  background-size:cover;
+  background-position:center;
+  position:relative;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.3s ease;
+}
+.card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 0 40px rgba(255,45,120,.45);
+  border-color:#ff6b1a;
+}
+.card.active{
+  border-color:#ff2d78;
+  box-shadow:0 0 40px rgba(255,45,120,.5);
+  transform:translateY(-4px);
+}
+.card::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(to top,rgba(0,0,0,.88),rgba(0,0,0,.12));
+  transition:.3s;
+}
+.card:hover::before{background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.05))}
+.card *{position:relative}
+.card .icon{font-size:28px;margin-bottom:8px}
+.card h3{font-size:20px;font-weight:900}
+.card p{font-size:13px;margin-top:4px;color:#ddd}
+.card.active::after{
+  content:"✓";
+  position:absolute;
+  top:12px;right:12px;
+  width:26px;height:26px;
+  border-radius:50%;
+  display:grid;place-items:center;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  color:#fff;font-weight:900;font-size:14px;
+  z-index:2;
+  box-shadow:0 0 20px rgba(255,45,120,.6);
+}
+.section-title{
+  text-align:center;
+  margin:50px 0 25px;
+  letter-spacing:3px;
+  font-size:14px;
+  font-weight:900;
+  color:#bbb;
+}
+.section-title span{color:#ff3b7d;font-size:18px}
+.phones{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:16px;
+  padding:0 28px;
+}
+.phone{
+  height:420px;
+  border:2px solid rgba(255,255,255,.15);
+  border-radius:26px;
+  background:#07070d;
+  padding:18px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 40px rgba(255,45,120,.12);
+  transition:.3s;
+}
+.phone:hover{border-color:rgba(255,45,120,.4);box-shadow:0 0 55px rgba(255,45,120,.2)}
+.phone::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:radial-gradient(circle at 50% 80%,rgba(255,45,120,.22),transparent 45%);
+}
+.phone-content{
+  position:relative;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+}
+.phone h2{font-size:22px;line-height:1.2}
+.neon{color:#ff3b8d;text-shadow:0 0 20px #ff2d78}
+.big{font-size:60px!important;color:#ff2d78;text-shadow:0 0 25px #ff2d78;font-weight:900}
+.progress{
+  position:absolute;
+  bottom:16px;left:16px;right:16px;
+  height:4px;
+  background:rgba(255,255,255,.12);
+  border-radius:99px;
+}
+.progress span{
+  display:block;height:100%;width:35%;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  border-radius:99px;
+}
+.preview{
+  margin:60px 28px;
+  border:1px solid rgba(255,45,120,.4);
+  border-radius:22px;
+  padding:28px;
+  display:grid;
+  grid-template-columns:1.5fr .7fr;
+  gap:24px;
+  background:rgba(255,255,255,.03);
+  align-items:center;
+}
+.preview-list{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-top:16px;
+}
+.preview-item{
+  padding:16px 12px;
+  border:1px solid rgba(255,45,120,.4);
+  border-radius:12px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+  background:rgba(0,0,0,.35);
+  min-height:60px;
+}
+.preview-item.locked{
+  filter:blur(2px);
+  opacity:.5;
+  user-select:none;
+}
+.insights{
+  display:grid;
+  grid-template-columns:1fr 1.4fr;
+  gap:24px;
+  padding:0 28px 60px;
+}
+.panel{
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:20px;
+  padding:28px;
+  background:rgba(255,255,255,.03);
+}
+.panel h2{font-size:18px;font-weight:900;margin-bottom:4px}
+.insight-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-top:18px;
+}
+.mini{
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:14px;
+  padding:16px 12px;
+  text-align:center;
+}
+.mini strong{
+  display:block;
+  color:#ff3b8d;
+  font-size:22px;
+  margin-bottom:6px;
+}
+.mini span{font-size:11px;color:#bbb}
+.phrase{
+  border:1px solid rgba(255,45,120,.4);
+  border-radius:14px;
+  padding:16px;
+  margin:12px 0;
+  background:rgba(255,45,120,.07);
+  font-size:14px;
+  line-height:1.5;
+  color:#ddd;
+}
+/* === MODAL === */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  background:rgba(0,0,0,.88);
+  backdrop-filter:blur(20px);
+  z-index:9999;
+  padding:18px;
+}
+/* Pay button fixed footer inside modal */
 
-// Analytics
-const STATS=path.join(DATA_DIR,'_analytics.json');
-function rStats(){try{return JSON.parse(fs.readFileSync(STATS,'utf8'));}catch{return{events:[],counts:{},daily:{}};}}
-function wStats(s){try{fs.writeFileSync(STATS,JSON.stringify(s,null,2));}catch{}}
-function track(event,meta={}){const s=rStats(),today=new Date().toISOString().split('T')[0];if(!s.events)s.events=[];s.events.push({event,ts:Date.now(),date:today,...meta});if(s.events.length>10000)s.events=s.events.slice(-10000);if(!s.counts)s.counts={};s.counts[event]=(s.counts[event]||0)+1;if(!s.daily)s.daily={};if(!s.daily[today])s.daily[today]={};s.daily[today][event]=(s.daily[today][event]||0)+1;wStats(s);}
-app.post('/api/track',(req,res)=>{try{const{event,...meta}=req.body||{};if(!event)return res.json({ok:false});const ua=req.headers['user-agent']||'';const device=/Mobile|Android|iPhone|iPad/i.test(ua)?'mobile':'desktop';const browser=/Chrome/i.test(ua)?'Chrome':/Firefox/i.test(ua)?'Firefox':/Safari/i.test(ua)?'Safari':'Other';track(event,{...meta,device,browser,ip:req.ip});res.json({ok:true});}catch{res.json({ok:false});}});
+.modal-overlay.active{display:flex}
+.modal-box{
+  width:100%;
+  max-width:580px;
+  max-height:92vh;
+  overflow-y:auto;
+  background:linear-gradient(180deg,rgba(15,15,24,.98),rgba(8,8,14,.99));
+  border:1px solid rgba(255,45,120,.5);
+  border-radius:28px;
+  padding:32px;
+  box-shadow:0 0 80px rgba(255,45,120,.3),inset 0 0 40px rgba(255,255,255,.02);
+  position:relative;
+}
+.modal-box::-webkit-scrollbar{width:5px}
+.modal-box::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:20px}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  width:40px;height:40px;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.07);
+  color:white;font-size:24px;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:.2s;
+}
+.modal-close:hover{background:rgba(255,45,120,.2)}
+.modal-box h2{
+  font-size:30px;line-height:1;margin-bottom:6px;
+  background:linear-gradient(90deg,#fff,#ff7aa9);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.modal-subtitle{color:rgba(255,255,255,.5);margin-bottom:24px;font-size:14px}
+.modal-box label{display:block;margin:16px 0 6px;font-weight:800;font-size:12px;letter-spacing:.05em;color:#ccc}
+.modal-box input,
+.modal-box textarea{
+  width:100%;
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  color:white;
+  padding:13px 15px;
+  border-radius:14px;
+  outline:none;
+  transition:.2s ease;
+  font-size:15px;
+}
+.modal-box input:focus,
+.modal-box textarea:focus{
+  border-color:#ff2d78;
+  box-shadow:0 0 0 3px rgba(255,45,120,.14);
+}
+.modal-box textarea{height:100px;resize:none}
+/* File upload area */
+.file-drop{
+  border:2px dashed rgba(255,45,120,.4);
+  border-radius:16px;
+  padding:20px;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+  position:relative;
+  background:rgba(255,45,120,.04);
+}
+.file-drop:hover,.file-drop.drag-over{
+  border-color:#ff2d78;
+  background:rgba(255,45,120,.1);
+}
+.file-drop input[type="file"]{
+  position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;
+}
+.file-drop .drop-icon{font-size:28px;margin-bottom:6px}
+.file-drop p{color:#aaa;font-size:13px}
+.file-drop p strong{color:#ff7aa9}
+/* Image preview grid */
+.img-preview-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-top:12px;
+}
+.img-preview-grid img{
+  width:100%;
+  height:80px;
+  object-fit:cover;
+  border-radius:10px;
+  border:2px solid rgba(255,45,120,.3);
+}
+/* Music preview */
+.music-preview-box{
+  margin-top:10px;
+  padding:14px;
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:14px;
+  background:rgba(255,45,120,.07);
+  display:none;
+}
+.music-preview-box.visible{display:block}
+.music-preview-box audio{width:100%;margin-top:8px}
+.music-name{font-size:13px;color:#ff7aa9;font-weight:700}
+.music-error{color:#ff6b6b;font-size:13px;margin-top:6px;display:none}
+.btn-full{
+  width:100%;
+  margin-top:18px;
+  border:none;
+  padding:16px;
+  border-radius:15px;
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  color:white;
+  font-weight:900;
+  cursor:pointer;
+  box-shadow:0 16px 40px rgba(255,45,120,.28);
+  font-size:16px;
+  transition:.2s;
+}
+.btn-full:hover{transform:translateY(-1px);box-shadow:0 20px 50px rgba(255,45,120,.4)}
+.btn-full.secondary{
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,45,120,.6);
+  box-shadow:none;
+}
+.btn-full.secondary:hover{background:rgba(255,45,120,.1)}
+.preview-result{margin-top:16px;display:none}
+.preview-result.active{display:block}
 
-// Admin
-require('./admin')(app);
-
-// OG Image
-app.get('/og-image.png',(req,res)=>{const svg=`<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#030306"/><stop offset="50%" style="stop-color:#0e0118"/><stop offset="100%" style="stop-color:#1a0414"/></linearGradient><radialGradient id="g1" cx="30%" cy="50%" r="50%"><stop offset="0%" style="stop-color:#ff2d78;stop-opacity:.4"/><stop offset="100%" style="stop-color:#ff2d78;stop-opacity:0"/></radialGradient></defs><rect width="1200" height="630" fill="url(#bg)"/><rect width="1200" height="630" fill="url(#g1)"/><text x="600" y="200" text-anchor="middle" font-family="Arial" font-size="28" font-weight="900" fill="#ff2d78">♡ LOVEBLAST</text><text x="600" y="310" text-anchor="middle" font-family="Arial" font-size="110" fill="#ff2d78">♡</text><text x="600" y="410" text-anchor="middle" font-family="Arial" font-size="52" font-weight="900" fill="white">Uma retrospectiva</text><text x="600" y="470" text-anchor="middle" font-family="Arial" font-size="52" font-weight="900" fill="#ff2d78">especial foi criada</text><text x="600" y="530" text-anchor="middle" font-family="Arial" font-size="22" fill="rgba(255,255,255,.6)">Clica para ver ❤️</text></svg>`;res.setHeader('Content-Type','image/svg+xml');res.setHeader('Cache-Control','public,max-age=86400');res.send(svg);});
-
-// Dynamic meta for view.html
-app.get('/view.html',(req,res,next)=>{const id=req.query.id;if(!id)return next();try{const data=readRetro(id);if(!data)return next();const n1=(data.nome1||'Você').replace(/[<>"]/g,''),n2=(data.nome2||'Pessoa').replace(/[<>"]/g,'');let html=fs.readFileSync(path.join(__dirname,'../public/view.html'),'utf8');html=html.replace(/♡ Minha retrospectiva no LoveBlast/g,`♡ ${n1} & ${n2} — LoveBlast`).replace(/Criei uma retrospectiva especial\. Clica para ver a nossa história ❤️/g,`A retrospectiva de ${n1} & ${n2} está pronta!`).replace(/Clica para ver a nossa retrospectiva ❤️ — criado no LoveBlast/g,`A retrospectiva de ${n1} & ${n2}. LoveBlast ❤️`);res.send(html);}catch{next();}});
-
-app.use(express.static(path.join(__dirname,'../public')));
-
-// Helpers
-function createId(){return`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;}
-function baseUrl(req){return(process.env.APP_URL||`${req.protocol}://${req.get('host')}`).replace(/\/$/,'');}
-function pubUrl(req,f){return`${baseUrl(req)}/uploads/${f}`;}
-function readRetro(id){if(!/^[a-z0-9-]+$/i.test(id||''))return null;const fp=path.join(DATA_DIR,`${id}.json`);if(!fs.existsSync(fp))return null;try{return JSON.parse(fs.readFileSync(fp,'utf8'));}catch{return null;}}
-function writeRetro(data){fs.writeFileSync(path.join(DATA_DIR,`${data.id}.json`),JSON.stringify(data,null,2));}
-function markPaid(id){const data=readRetro(id);if(!data)return null;if(data.pago)return data;data.pago=true;data.pagoEm=new Date().toISOString();try{writeRetro(data);}catch{}track('purchase_approved',{retroId:id,nome1:data.nome1,nome2:data.nome2});return data;}
-
-// Background file processor
-async function processFiles(req,body,id){
-  const files=req.files||{},photos=[];
-  for(const[i,file]of(files.photos||[]).slice(0,10).entries()){
-    const ok=(file.mimetype||'').startsWith('image/')||/\.(jpg|jpeg|png|webp|gif)$/i.test(file.originalname||'');
-    if(!ok){try{fs.unlinkSync(file.path);}catch{}continue;}
-    const ext=path.extname(file.originalname||'').toLowerCase()||'.jpg';
-    const dest=path.join(UPLOAD_DIR,`${id}-photo-${i}${ext}`);
-    try{fs.renameSync(file.path,dest);photos.push(pubUrl(req,`${id}-photo-${i}${ext}`));}catch{}
+/* ── MINI RETROSPECTIVA PRÉVIA ── */
+.mini-retro{
+  border:1px solid rgba(255,45,120,.35);
+  border-radius:20px;
+  overflow:hidden;
+  background:#07060f;
+  max-height:520px;
+  overflow-y:auto;
+  scroll-behavior:smooth;
+}
+.mini-retro::-webkit-scrollbar{width:4px}
+.mini-retro::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:99px}
+.mini-panel{
+  padding:22px 20px;
+  border-bottom:1px solid rgba(255,45,120,.15);
+  position:relative;
+  overflow:hidden;
+}
+.mini-panel::before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 80% 10%,rgba(255,45,120,.1),transparent 55%);
+  pointer-events:none;
+}
+.mini-panel>*{position:relative;z-index:1}
+.mini-num{font-size:10px;font-weight:900;letter-spacing:.15em;color:rgba(255,255,255,.35);margin-bottom:6px}
+.mini-title{font-size:22px;font-weight:900;color:#fff;line-height:1.1}
+.mini-title span{color:#ff2d78;text-shadow:0 0 16px rgba(255,45,120,.7)}
+.mini-sub{font-size:13px;color:rgba(255,255,255,.5);margin-top:6px}
+.mini-names{
+  font-family:'Dancing Script',cursive;
+  font-size:clamp(32px,8vw,48px);
+  color:#fff;line-height:1;margin:10px 0 6px;
+}
+.mini-names .amp{color:#ff2d78}
+.mini-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border:1px solid rgba(255,45,120,.4);
+  border-radius:99px;background:rgba(255,45,120,.1);
+  font-size:12px;font-weight:900;color:#ff2d78;margin-top:10px;
+}
+/* photo strip */
+.mini-photos{display:flex;gap:8px;margin-top:14px;overflow-x:auto;padding-bottom:4px}
+.mini-photos::-webkit-scrollbar{height:3px}
+.mini-photos::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:99px}
+.mini-photos img{
+  width:90px;height:90px;object-fit:cover;
+  border-radius:12px;border:2px solid rgba(255,45,120,.35);flex-shrink:0;
+}
+.mini-photos .mp-locked{
+  width:90px;height:90px;border-radius:12px;
+  border:2px dashed rgba(255,255,255,.15);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;background:rgba(255,255,255,.04);
+  flex-direction:column;gap:2px;
+}
+.mini-photos .mp-locked span{font-size:10px;color:rgba(255,255,255,.3);font-weight:700}
+/* insight numbers */
+.mini-insight-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.mini-icard{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,45,120,.22);
+  border-radius:12px;padding:12px;
+}
+.mini-icard .iv{font-size:24px;font-weight:900;color:#ff2d78;display:block;line-height:1}
+.mini-icard .il{font-size:11px;color:rgba(255,255,255,.45);margin-top:4px}
+/* timeline rows */
+.mini-tl{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+.mini-tl-item{display:flex;align-items:center;gap:10px}
+.mini-tl-ico{
+  width:32px;height:32px;border-radius:50%;
+  border:1.5px solid #ff2d78;background:rgba(255,45,120,.12);
+  display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;
+}
+.mini-tl-yr{font-size:14px;font-weight:900;color:#ff2d78;min-width:50px}
+.mini-tl-desc{font-size:13px;color:rgba(255,255,255,.65)}
+/* locked overlay */
+.mini-locked{
+  padding:22px 20px;border-bottom:1px solid rgba(255,45,120,.1);
+  display:flex;align-items:center;gap:14px;
+  background:rgba(0,0,0,.35);
+}
+.mini-locked .lock-ico{font-size:22px;opacity:.4}
+.mini-locked .lock-text{font-size:13px;color:rgba(255,255,255,.3);font-weight:700}
+/* scroll hint */
+.mini-scroll-hint{
+  text-align:center;padding:10px;
+  font-size:11px;color:rgba(255,45,120,.5);
+  letter-spacing:.05em;font-weight:700;
+}
+/* carta mini */
+.mini-carta{
+  background:linear-gradient(135deg,#f8eac4,#f0d890);
+  color:#2a1008;padding:18px;border-radius:10px;
+  transform:rotate(-1deg);margin-top:12px;
+  font-family:Georgia,serif;
+  box-shadow:0 8px 28px rgba(0,0,0,.5);
+}
+.mini-carta h4{font-family:cursive;font-size:20px;color:#9e1a3a;margin-bottom:8px}
+.mini-carta p{font-size:13px;line-height:1.7;color:#3a1505}
+.notice-ok{color:#ff7aa9;font-size:12px;margin-top:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.music-result-item{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.03);margin-bottom:8px;transition:.2s;cursor:pointer}
+.music-result-item:hover{border-color:rgba(255,45,120,.4);background:rgba(255,45,120,.08)}
+.music-result-artwork{width:52px;height:52px;border-radius:10px;object-fit:cover;flex-shrink:0;background:rgba(255,255,255,.06)}
+.music-result-info{flex:1;min-width:0}
+.music-result-title{font-size:14px;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.music-result-artist{font-size:12px;color:rgba(255,255,255,.5);margin-top:2px}
+.music-result-duration{font-size:11px;color:rgba(255,255,255,.3);margin-top:2px}
+.music-result-actions{display:flex;flex-direction:column;gap:5px;flex-shrink:0}
+.music-btn-preview{padding:5px 10px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:transparent;color:rgba(255,255,255,.7);font-size:11px;font-weight:700;cursor:pointer;transition:.2s;white-space:nowrap}
+.music-btn-preview:hover{border-color:#ff2d78;color:#ff2d78}
+.music-btn-select{padding:5px 10px;border:none;border-radius:8px;background:linear-gradient(90deg,#ff2d78,#ff6b1a);color:#fff;font-size:11px;font-weight:900;cursor:pointer;transition:.2s;white-space:nowrap;box-shadow:0 0 12px rgba(255,45,120,.3)}
+.music-btn-select:hover{transform:scale(1.05)}
+#musicSearchResults::-webkit-scrollbar{width:4px}
+#musicSearchResults::-webkit-scrollbar-thumb{background:#ff2d78;border-radius:99px}
+.category-description{
+  margin-top:8px;padding:12px;
+  border:1px solid rgba(255,45,120,.2);
+  background:rgba(255,45,120,.06);
+  color:rgba(255,255,255,.75);
+  border-radius:12px;font-size:13px;line-height:1.4;
+}
+/* ===== RESPONSIVIDADE MOBILE ===== */
+@media(max-width:1024px){
+  .phones{grid-template-columns:repeat(3,1fr);gap:12px}
+  .phone{height:340px}
+  .phone h2{font-size:18px}
+  .big{font-size:48px!important}
+}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:8px;z-index:10001}
+.hamburger span{display:block;width:24px;height:2px;background:#fff;border-radius:2px;transition:.3s}
+.hamburger.active span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.active span:nth-child(2){opacity:0}
+.hamburger.active span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.mobile-menu{display:none;position:fixed;top:0;right:0;bottom:0;width:75%;max-width:300px;background:linear-gradient(180deg,#12020a,#08080e);border-left:1px solid rgba(255,45,120,.3);z-index:10000;flex-direction:column;gap:8px;padding:90px 28px 28px;transform:translateX(100%);transition:transform .3s ease}
+.mobile-menu.active{display:flex;transform:translateX(0)}
+.mobile-menu a{color:#fff;text-decoration:none;font-weight:900;font-size:15px;letter-spacing:.05em;padding:14px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.mobile-menu a:hover{color:#ff2d78}
+.mobile-menu-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999}
+.mobile-menu-backdrop.active{display:block}
+@media(max-width:768px){
+  header{padding:16px 20px}
+  nav{display:none}
+  .hamburger{display:flex}
+  .hide-mobile{display:none}
+  .hero{
+    grid-template-columns:1fr;
+    padding:36px 20px;
+    gap:28px;
   }
-  let musicSrc='',musicLink=(body.musicLink||'').trim(),musicName=body.musicName||'Trilha sonora';
-  if(musicLink){try{const u=new URL(musicLink);if(u.hostname.includes('youtube.com')||u.hostname.includes('youtu.be')){const v=u.searchParams.get('v');if(v)musicLink=`https://www.youtube.com/watch?v=${v}`;}else if(u.hostname.includes('spotify.com')){musicLink=`${u.origin}${u.pathname}`;}else if(u.hostname.includes('music.apple.com')||u.hostname.includes('itunes.apple.com')){musicLink='';// iTunes link — use musicPreview instead, no embed needed
-}}catch{musicLink='';}}
-  const mf=(files.music||[])[0];
-  if(mf){const ok=(mf.mimetype||'').startsWith('audio/')||/\.(mp3|m4a|aac|ogg|wav|webm)$/i.test(mf.originalname||'');if(ok){const ext=path.extname(mf.originalname||'').toLowerCase()||'.mp3';const dest=path.join(UPLOAD_DIR,`${id}-music${ext}`);try{fs.renameSync(mf.path,dest);musicSrc=pubUrl(req,`${id}-music${ext}`);}catch{}musicName=(mf.originalname||musicName).replace(/\.[^/.]+$/,'');}else{try{fs.unlinkSync(mf.path);}catch{}}}
-  let insights=null;if(body.insights){try{insights=JSON.parse(body.insights);}catch{}}
-  if(!insights){const wpp=(files.whatsappFile||[])[0];if(wpp){try{if((wpp.originalname||'').toLowerCase().endsWith('.txt')){const txt=fs.readFileSync(wpp.path,'utf8');const lines=txt.split(/\r?\n/).filter(Boolean);const love=(txt.match(/eu te amo|te amo|amo você|amo vc/gi)||[]).length;const sad=(txt.match(/saudade|sdds/gi)||[]).length;insights={totalMessages:lines.length||18432,loveCount:love||82,saudadeCount:sad||103,topWord:'amor',emotionalLevel:love+sad>40?'Muito alto':'Alto',favoriteTime:'23:47',topEmoji:'😂'};}try{fs.unlinkSync(wpp.path);}catch{};}catch{}}}
-  const ex=readRetro(id);if(ex){ex.photos=photos;ex.musicSrc=musicSrc;ex.musicLink=musicLink;ex.musicName=musicName;ex.insights=insights||ex.insights;writeRetro(ex);}
+  .hero h1{font-size:32px}
+  .hero p{font-size:16px;margin:16px 0}
+  .categories{
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+  .card{min-height:160px}
+  .card h3{font-size:17px}
+  .phones{
+    grid-template-columns:repeat(2,1fr);
+    padding:0 16px;
+    gap:12px;
+  }
+  .phone{height:300px}
+  .phone h2{font-size:16px}
+  .big{font-size:42px!important}
+  .preview{
+    grid-template-columns:1fr;
+    margin:36px 16px;
+    padding:20px;
+  }
+  .preview-list{grid-template-columns:repeat(2,1fr)}
+  .insights{
+    grid-template-columns:1fr;
+    padding:0 16px 40px;
+    gap:16px;
+  }
+  .insight-grid{grid-template-columns:repeat(2,1fr)}
+  .section-title{margin:36px 0 18px;padding:0 16px}
+  .modal-box{padding:24px 18px;border-radius:22px}
+  .modal-box h2{font-size:26px}
+  .img-preview-grid{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:480px){
+  header{padding:14px 16px}
+  .btn{padding:11px 16px;font-size:13px}
+  .hero{padding:28px 16px;gap:22px}
+  .hero h1{font-size:28px}
+  .categories{
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+  }
+  .card{min-height:140px;padding:14px}
+  .card .icon{font-size:22px;margin-bottom:6px}
+  .card h3{font-size:15px}
+  .card p{font-size:12px}
+  .phones{
+    grid-template-columns:1fr 1fr;
+    padding:0 12px;
+    gap:10px;
+    overflow-x:auto;
+    grid-template-columns:repeat(3,minmax(160px,1fr));
+  }
+  .phone{height:260px;padding:14px}
+  .phone h2{font-size:14px}
+  .big{font-size:36px!important}
+  .preview{margin:28px 12px;padding:16px}
+  .preview-list{grid-template-columns:repeat(2,1fr);gap:8px}
+  .preview-item{font-size:11px;padding:12px 8px;min-height:52px}
+  .insights{padding:0 12px 36px}
+  .insight-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .mini strong{font-size:18px}
+  .panel{padding:18px}
+  .modal-box{padding:20px 16px;border-radius:18px}
+  .modal-box h2{font-size:22px}
+  .img-preview-grid{grid-template-columns:repeat(3,1fr);gap:6px}
+  .img-preview-grid img{height:66px}
+}
+/* PREÇOS responsive */
+@media(max-width:768px){
+  #precos > div:nth-child(2){
+    grid-template-columns:1fr !important;
+    max-width:420px;margin:0 auto;
+  }
+  #precos > div:nth-child(2) > div:nth-child(2){
+    order:-1;
+  }
+  #precos > div:last-child{
+    grid-template-columns:1fr !important;
+  }
+}
+@media(max-width:480px){
+  #precos{padding:40px 16px 60px !important}
 }
 
-// API routes
-app.get('/api/retrospectiva/:id',(req,res)=>{const data=req.query.pago==='1'?markPaid(req.params.id):readRetro(req.params.id);if(!data)return res.status(404).json({erro:'Nao encontrada.'});res.json(data);});
-app.get('/api/retrospectiva-por-sessao/:sid',async(req,res)=>{try{if(!stripe)return res.status(500).json({erro:'Stripe nao configurado.'});const s=await stripe.checkout.sessions.retrieve(req.params.sid);const id=s?.metadata?.retrospectiveId;if(!id)return res.status(404).json({erro:'Sessao sem retrospectiva.'});const data=req.query.pago==='1'?markPaid(id):readRetro(id);if(!data)return res.status(404).json({erro:'Nao encontrada.'});res.json(data);}catch(e){res.status(500).json({erro:'Erro ao carregar.'});}});
+/* PROMO BANNER */
+.promo-banner{
+  background:linear-gradient(90deg,#8b0030,#cc0044,#ff2d78,#cc0044,#8b0030);
+  background-size:300% 100%;
+  animation:promoBg 4s ease infinite;
+  padding:10px 16px;
+  text-align:center;
+  position:sticky;
+  top:0;
+  z-index:9998;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+@keyframes promoBg{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.promo-banner .promo-text{font-size:13px;font-weight:900;color:#fff;letter-spacing:.03em}
+.promo-banner .promo-old{text-decoration:line-through;opacity:.7;font-size:12px}
+.promo-banner .promo-new{font-size:16px;font-weight:900;color:#ffe066;text-shadow:0 0 10px rgba(255,224,102,.5)}
+.promo-banner .promo-timer{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:900;color:#ffe066}
+.promo-banner .promo-timer .t-box{background:rgba(0,0,0,.3);padding:2px 6px;border-radius:5px;min-width:26px;text-align:center;font-size:13px}
+.promo-banner .promo-cta{padding:6px 14px;background:#fff;color:#cc0044;border:none;border-radius:99px;font-weight:900;font-size:12px;cursor:pointer;transition:.2s;white-space:nowrap}
+.promo-banner .promo-cta:hover{background:#ffe066;transform:scale(1.05)}
+.promo-close{background:none;border:none;color:rgba(255,255,255,.6);font-size:16px;cursor:pointer;padding:0 4px;line-height:1;position:absolute;right:12px}
 
-// Create session — FAST: save minimal → Stripe → return → process files bg
-app.post('/criar-sessao',upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]),async(req,res)=>{
-  try{
-    if(!stripe)return res.status(500).json({erro:'STRIPE_SECRET_KEY nao configurada.'});
-    if(!process.env.APP_URL)return res.status(500).json({erro:'APP_URL nao configurada.'});
-    const{nome1,nome2,email,mensagem='',categoria='casal'}=req.body||{};
-    if(!nome1||!nome2||!email)return res.status(400).json({erro:'Preencha nome, pessoa e email.'});
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({erro:'Email invalido.'});
-    const appUrl=(process.env.APP_URL||'').trim().replace(/\/+$/,'');
-    const id=createId();
-    writeRetro({id,nome1,nome2,email,mensagem:(mensagem||'').slice(0,500),categoria,dataInicio:req.body.dataInicio||'',musicLink:(req.body.musicLink||'').trim(),musicName:req.body.musicName||'Trilha sonora',musicArtwork:req.body.musicArtwork||'',musicPreview:req.body.musicPreview||'',musicTitle:req.body.musicTitle||'',musicArtist:req.body.musicArtist||'',insights:(()=>{try{return JSON.parse(req.body.insights||'null');}catch{return null;}})(),photos:[],musicSrc:'',pago:false,criadoEm:new Date().toISOString()});
-    track('checkout_initiated',{id,nome1,nome2,categoria,email});
-    const session=await stripe.checkout.sessions.create({mode:'payment',customer_email:email,payment_method_types:['card'],line_items:[{price_data:{currency:'brl',unit_amount:Number(process.env.PRICE_CENTS)||990,product_data:{name:'LoveBlast - Retrospectiva',description:`Retrospectiva ${categoria} para ${nome1} & ${nome2}`}},quantity:1}],success_url:`${appUrl}/view.html?id=${id}&session_id={CHECKOUT_SESSION_ID}`,cancel_url:`${appUrl}/?cancelado=1`,metadata:{retrospectiveId:id,nome1,nome2,categoria,mensagem:mensagem.slice(0,450)}});
-    res.json({checkoutUrl:session.url,sessionId:session.id,retrospectiveId:id});
-    setImmediate(()=>processFiles(req,req.body||{},id).catch(e=>console.error('BG error:',e.message)));
-  }catch(err){console.error('Stripe:',err.message);res.status(err.statusCode||500).json({erro:err.statusCode?err.message:'Erro ao criar sessao.'});}
-});
+/* HIDE final art on index */
+#arteFinal,.final-experience,.final-grid,.extra{display:none!important}
 
-// Webhook
-// ── PIX via PagBank (API de Pedidos) ──
-const PAGBANK_API = (process.env.PAGBANK_ENV === 'sandbox')
-  ? 'https://sandbox.api.pagseguro.com'
-  : 'https://api.pagseguro.com';
+/* CSS VARIABLE support on index */
+:root{
+  --accent:#ff2d78;
+  --accent-rgb:255,45,120;
+  --glow:rgba(255,45,120,.7);
+}
+.card.active{
+  border-color:var(--accent)!important;
+  box-shadow:0 0 40px rgba(var(--accent-rgb),.5)!important;
+}
+.card.active::after{
+  background:linear-gradient(90deg,var(--accent),var(--accent))!important;
+}
 
-app.post('/criar-pix',upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]),async(req,res)=>{
-  try{
-    if(!process.env.PAGBANK_TOKEN)return res.status(500).json({erro:'PAGBANK_TOKEN nao configurado no Railway.'});
-    const{nome1,nome2,email,mensagem='',categoria='casal'}=req.body||{};
-    if(!nome1||!nome2||!email)return res.status(400).json({erro:'Preencha nome, pessoa e email.'});
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({erro:'Email invalido.'});
+/* ═══════════════════════════════════════════
+   ENTREGA 1 — HERO PREMIUM + MOCKUP + CATEGORIAS
+═══════════════════════════════════════════ */
 
-    const id=createId();
-    writeRetro({id,nome1,nome2,email,mensagem:(mensagem||'').slice(0,500),categoria,dataInicio:req.body.dataInicio||'',musicLink:(req.body.musicLink||'').trim(),musicName:req.body.musicName||'Trilha sonora',musicArtwork:req.body.musicArtwork||'',musicPreview:req.body.musicPreview||'',musicTitle:req.body.musicTitle||'',musicArtist:req.body.musicArtist||'',insights:(()=>{try{return JSON.parse(req.body.insights||'null');}catch{return null;}})(),photos:[],musicSrc:'',pago:false,metodo:'pix',criadoEm:new Date().toISOString()});
-    track('checkout_initiated',{id,nome1,nome2,categoria,email,metodo:'pix'});
+/* HERO redesign */
+.hero-v2{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:50px;
+  align-items:center;
+  max-width:1200px;
+  margin:0 auto;
+  padding:70px 40px 50px;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,45,120,.12);
+  border:1px solid rgba(255,45,120,.35);
+  padding:7px 16px;border-radius:99px;
+  font-size:12px;font-weight:800;letter-spacing:.05em;color:#ff7aa9;
+  margin-bottom:22px;
+}
+.hero-v2 h1{
+  font-size:clamp(34px,4.5vw,56px);
+  line-height:1.08;font-weight:900;letter-spacing:-.02em;
+}
+.hero-v2 h1 .grad{
+  background:linear-gradient(90deg,#ff2d78,#ff8a00);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.hero-v2 .sub{
+  margin:24px 0 32px;color:#c7c7d0;font-size:18px;line-height:1.6;max-width:520px;
+}
+.hero-cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.btn-primary-lg{
+  background:linear-gradient(90deg,#ff2d78,#ff6b1a);
+  color:#fff;border:none;padding:17px 32px;border-radius:14px;
+  font-weight:900;font-size:16px;cursor:pointer;
+  box-shadow:0 8px 32px rgba(255,45,120,.4);transition:.2s;letter-spacing:.01em;
+}
+.btn-primary-lg:hover{transform:translateY(-2px);box-shadow:0 14px 44px rgba(255,45,120,.6)}
+.btn-secondary-lg{
+  background:rgba(255,255,255,.05);color:#fff;
+  border:1px solid rgba(255,255,255,.2);padding:17px 28px;border-radius:14px;
+  font-weight:800;font-size:15px;cursor:pointer;transition:.2s;
+}
+.btn-secondary-lg:hover{border-color:#ff2d78;background:rgba(255,45,120,.1)}
+.hero-rating{display:flex;align-items:center;gap:10px;margin-top:26px;font-size:13px;color:#aaa}
+.hero-rating .stars{color:#ffb800;font-size:15px;letter-spacing:1px}
 
-    const valorCents=Number(process.env.PRICE_CENTS)||990;
-    const appUrl=(process.env.APP_URL||'').replace(/\/+$/,'');
-    const expDate=new Date(Date.now()+3600000).toISOString(); // 1 hora
+/* PHONE MOCKUP */
+.mockup-wrap{display:flex;justify-content:center;align-items:center;position:relative}
+.mockup-wrap::before{
+  content:"";position:absolute;width:340px;height:340px;
+  background:radial-gradient(circle,rgba(255,45,120,.35),transparent 65%);
+  filter:blur(30px);z-index:0;
+}
+.phone-mockup{
+  position:relative;z-index:1;
+  width:280px;height:570px;
+  background:#0a0a12;
+  border:10px solid #1a1a24;
+  border-radius:44px;
+  box-shadow:0 30px 80px rgba(0,0,0,.6),0 0 60px rgba(255,45,120,.25);
+  overflow:hidden;
+}
+.phone-mockup::after{
+  content:"";position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:90px;height:22px;background:#1a1a24;border-radius:99px;z-index:5;
+}
+.mockup-screen{position:absolute;inset:0;border-radius:34px;overflow:hidden}
+.mockup-slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:34px 24px;
+  opacity:0;transition:opacity .8s ease;
+  background:linear-gradient(160deg,#0a0210,#1a0414);
+}
+.mockup-slide.active{opacity:1}
+.mockup-slide .ms-label{font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:rgba(255,255,255,.4);font-weight:800;margin-bottom:14px}
+.mockup-slide .ms-big{font-size:54px;font-weight:900;color:#ff2d78;text-shadow:0 0 24px rgba(255,45,120,.6);line-height:1}
+.mockup-slide .ms-unit{font-size:15px;font-weight:800;color:#fff;margin-top:6px;letter-spacing:.1em}
+.mockup-slide .ms-title{font-size:22px;font-weight:900;color:#fff;line-height:1.25}
+.mockup-slide .ms-title .neon2{color:#ff3b8d;text-shadow:0 0 16px #ff2d78}
+.mockup-slide .ms-heart{font-size:50px;margin-bottom:18px;animation:hb 1.4s ease-in-out infinite}
+.mockup-slide .ms-emoji{font-size:60px;margin:10px 0}
+@keyframes hb{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.mockup-dots{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:6}
+.mockup-dots span{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.25);transition:.3s}
+.mockup-dots span.active{background:#ff2d78;width:18px;border-radius:99px}
 
-    const orderBody={
-      reference_id:id,
-      customer:{name:`${nome1} ${nome2}`.slice(0,60),email,tax_id:'00000000191'},
-      items:[{name:'LoveBlast - Retrospectiva',quantity:1,unit_amount:valorCents}],
-      qr_codes:[{amount:{value:valorCents},expiration_date:expDate}],
-      notification_urls:[`${appUrl}/webhook-pagbank`]
+/* QUICK SOCIAL PROOF strip */
+.social-strip{
+  display:flex;justify-content:center;align-items:center;gap:40px;flex-wrap:wrap;
+  max-width:1000px;margin:0 auto;padding:24px 40px 10px;
+}
+.social-item{display:flex;align-items:center;gap:10px;color:#bbb;font-size:14px;font-weight:600}
+.social-item .si-ico{font-size:20px}
+.social-divider{width:1px;height:24px;background:rgba(255,255,255,.12)}
+
+/* CATEGORIES repaginadas */
+.cat-section{max-width:1200px;margin:0 auto;padding:50px 40px}
+.cat-head{text-align:center;margin-bottom:34px}
+.cat-head .ch-tag{font-size:12px;font-weight:900;letter-spacing:.18em;color:#ff7aa9;text-transform:uppercase}
+.cat-head h2{font-size:clamp(26px,3.2vw,38px);font-weight:900;margin-top:10px;line-height:1.15}
+.cat-head p{color:#999;margin-top:10px;font-size:16px}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.cat-card{
+  position:relative;min-height:230px;border-radius:20px;overflow:hidden;cursor:pointer;
+  border:1px solid rgba(255,255,255,.1);
+  background-size:cover;background-position:center;
+  display:flex;flex-direction:column;justify-content:flex-end;padding:20px;
+  transition:.35s cubic-bezier(.2,.8,.3,1);
+}
+.cat-card::before{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.15) 60%,rgba(0,0,0,.3));transition:.35s}
+.cat-card:hover{transform:translateY(-8px);border-color:var(--cat-color,#ff2d78);box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 40px var(--cat-glow,rgba(255,45,120,.35))}
+.cat-card:hover::before{background:linear-gradient(to top,rgba(0,0,0,.85),rgba(0,0,0,.05) 70%)}
+.cat-card>*{position:relative;z-index:1}
+.cat-card .cc-ico{font-size:32px;margin-bottom:8px;filter:drop-shadow(0 0 10px var(--cat-glow,rgba(255,45,120,.5)))}
+.cat-card h3{font-size:21px;font-weight:900}
+.cat-card p{font-size:13px;margin-top:4px;color:#d5d5d5;line-height:1.4}
+.cat-card .cc-tag{
+  display:inline-block;margin-top:10px;font-size:10px;font-weight:800;letter-spacing:.05em;
+  background:rgba(255,255,255,.12);padding:4px 10px;border-radius:99px;color:#fff;backdrop-filter:blur(4px);
+}
+
+@media(max-width:900px){
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-v2{grid-template-columns:1fr;gap:36px;padding:40px 24px}
+  .mockup-wrap{order:-1}
+}
+@media(max-width:768px){
+  .social-strip{gap:18px;padding:18px 20px}
+  .social-divider{display:none}
+  .cat-section{padding:36px 20px}
+  .hero-cta-row{flex-direction:column;align-items:stretch}
+  .btn-primary-lg,.btn-secondary-lg{width:100%}
+}
+@media(max-width:480px){
+  .cat-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .cat-card{min-height:180px;padding:14px}
+  .phone-mockup{width:240px;height:490px}
+}
+
+
+/* ═══ WIZARD MULTI-STEP (estilo LovePanda) ═══ */
+.wizard-progress{display:flex;gap:6px;margin:4px 0 22px}
+.wizard-progress .wp-bar{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden}
+.wizard-progress .wp-bar .wp-fill{height:100%;width:0;background:linear-gradient(90deg,#ff2d78,#ff6b1a);border-radius:99px;transition:width .4s ease}
+.wizard-progress .wp-bar.done .wp-fill{width:100%}
+.wizard-step{display:none;animation:wzIn .35s ease}
+.wizard-step.active{display:block}
+@keyframes wzIn{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.wz-step-label{font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#ff7aa9;margin-bottom:6px}
+.wz-step-title{font-size:22px;font-weight:900;color:#fff;margin-bottom:4px;line-height:1.2}
+.wz-step-desc{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:20px;line-height:1.5}
+.wizard-nav{display:flex;gap:10px;margin-top:24px}
+.wz-back{flex:0 0 auto;padding:15px 22px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#fff;border-radius:14px;font-weight:800;font-size:15px;cursor:pointer;transition:.2s}
+.wz-back:hover{border-color:#ff2d78;background:rgba(255,45,120,.1)}
+.wz-next{flex:1;padding:15px;border:none;background:linear-gradient(90deg,#ff2d78,#ff6b1a);color:#fff;border-radius:14px;font-weight:900;font-size:16px;cursor:pointer;box-shadow:0 6px 24px rgba(255,45,120,.4);transition:.2s}
+.wz-next:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(255,45,120,.55)}
+.wz-skip{text-align:center;margin-top:12px}
+.wz-skip button{background:none;border:none;color:rgba(255,255,255,.4);font-size:13px;cursor:pointer;text-decoration:underline}
+.wz-error{color:#ff7070;font-size:13px;margin-top:8px;display:none}
+
+</style>
+<link rel="stylesheet" href="/loveblast-sahred.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">♡ LoveBlast</div>
+  <nav>
+    <a href="#inicio">INÍCIO</a>
+    <a href="#como-funciona">COMO FUNCIONA</a>
+    <a href="#exemplos">EXEMPLOS</a>
+    <a href="#precos">PREÇOS</a>
+  </nav>
+  <button class="btn js-open-modal hide-mobile">CRIAR RETROSPECTIVA</button>
+  <button id="hamburger" class="hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</header>
+
+<!-- MOBILE MENU -->
+<div id="mobileMenu" class="mobile-menu">
+  <a href="#inicio">INÍCIO</a>
+  <a href="#como-funciona">COMO FUNCIONA</a>
+  <a href="#exemplos">EXEMPLOS</a>
+  <a href="#precos">PREÇOS</a>
+  <button class="btn js-open-modal" style="margin-top:12px">CRIAR RETROSPECTIVA</button>
+</div>
+<div id="mobileMenuBackdrop" class="mobile-menu-backdrop"></div>
+
+<!-- ════════ ENTREGA 1: HERO PREMIUM ════════ -->
+<section id="inicio" class="hero-v2">
+  <div class="hero-text">
+    <div class="hero-badge">✨ Presentes digitais inesquecíveis</div>
+    <h1>Transforme memórias em uma <span class="grad">experiência inesquecível.</span></h1>
+    <p class="sub">Crie uma retrospectiva personalizada com fotos, música, mensagens e insights da sua história — pronta em poucos minutos para surpreender quem você ama.</p>
+    <div class="hero-cta-row">
+      <button class="btn-primary-lg js-open-modal">CRIAR RETROSPECTIVA ♡</button>
+      <button class="btn-secondary-lg" id="verDemoBtn">▶ Ver demonstração</button>
+    </div>
+    <div class="hero-rating">
+      <span class="stars">★★★★★</span>
+      <span>Amado por casais, mães, pais e famílias</span>
+    </div>
+  </div>
+
+  <!-- PHONE MOCKUP ANIMADO -->
+  <div class="mockup-wrap">
+    <div class="phone-mockup">
+      <div class="mockup-screen" id="mockupScreen">
+        <div class="mockup-slide active">
+          <div class="ms-heart">♡</div>
+          <div class="ms-title">A história de vocês<br><span class="neon2">como nunca antes.</span></div>
+        </div>
+        <div class="mockup-slide">
+          <div class="ms-label">Vocês já criaram memórias há</div>
+          <div class="ms-big">732</div>
+          <div class="ms-unit">DIAS</div>
+        </div>
+        <div class="mockup-slide">
+          <div class="ms-label">Vocês trocaram</div>
+          <div class="ms-big">18.432</div>
+          <div class="ms-unit">MENSAGENS</div>
+        </div>
+        <div class="mockup-slide">
+          <div class="ms-label">A palavra mais usada foi</div>
+          <div class="ms-big" style="font-size:42px">amor</div>
+        </div>
+        <div class="mockup-slide">
+          <div class="ms-emoji">🎵</div>
+          <div class="ms-title">Nossa <span class="neon2">música</span></div>
+          <div class="ms-label" style="margin-top:12px">a trilha sonora de vocês</div>
+        </div>
+        <div class="mockup-slide">
+          <div class="ms-heart">💕</div>
+          <div class="ms-title">Feito com amor<br><span class="neon2">para vocês.</span></div>
+        </div>
+      </div>
+      <div class="mockup-dots" id="mockupDots"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ PROVA SOCIAL RÁPIDA ════════ -->
+<div class="social-strip">
+  <div class="social-item"><span class="si-ico">🔒</span> Pagamento 100% seguro</div>
+  <div class="social-divider"></div>
+  <div class="social-item"><span class="si-ico">⚡</span> Pix e cartão</div>
+  <div class="social-divider"></div>
+  <div class="social-item"><span class="si-ico">∞</span> Link para sempre</div>
+  <div class="social-divider"></div>
+  <div class="social-item"><span class="si-ico">★</span> Pronto em minutos</div>
+</div>
+
+<!-- ════════ CATEGORIAS REPAGINADAS ════════ -->
+<section class="cat-section">
+  <div class="cat-head">
+    <div class="ch-tag">Para quem você ama</div>
+    <h2>Uma retrospectiva para cada história</h2>
+    <p>Escolha uma categoria e comece a criar agora mesmo.</p>
+  </div>
+  <div class="cat-grid">
+    <div class="cat-card" data-category="casal" style="--cat-color:#ff2d78;--cat-glow:rgba(255,45,120,.4);background-image:url('https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=700')">
+      <div class="cc-ico">♡</div><h3>Casal</h3><p>Celebre o amor de vocês</p><span class="cc-tag">Aniversário de namoro</span>
+    </div>
+    <div class="cat-card" data-category="mae" style="--cat-color:#ff6b9d;--cat-glow:rgba(255,107,157,.4);background-image:url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=700')">
+      <div class="cc-ico">🌷</div><h3>Mãe</h3><p>Homenageie quem sempre esteve lá</p><span class="cc-tag">Dia das Mães</span>
+    </div>
+    <div class="cat-card" data-category="pai" style="--cat-color:#4a9eff;--cat-glow:rgba(74,158,255,.4);background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=700')">
+      <div class="cc-ico">🛡️</div><h3>Pai</h3><p>Celebre o seu herói</p><span class="cc-tag">Dia dos Pais</span>
+    </div>
+    <div class="cat-card" data-category="familia" style="--cat-color:#ffa94d;--cat-glow:rgba(255,169,77,.4);background-image:url('https://images.unsplash.com/photo-1511895426328-dc8714191300?w=700')">
+      <div class="cc-ico">🏠</div><h3>Família</h3><p>Histórias que unem gerações</p><span class="cc-tag">Momentos juntos</span>
+    </div>
+    <div class="cat-card" data-category="amigos" style="--cat-color:#ffd43b;--cat-glow:rgba(255,212,59,.4);background-image:url('https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=700')">
+      <div class="cc-ico">🤝</div><h3>Amigos</h3><p>Parceiros de todas as horas</p><span class="cc-tag">Amizade verdadeira</span>
+    </div>
+    <div class="cat-card" data-category="formatura" style="--cat-color:#9775fa;--cat-glow:rgba(151,117,250,.4);background-image:url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=700')">
+      <div class="cc-ico">🎓</div><h3>Formatura</h3><p>Seu esforço, sua conquista</p><span class="cc-tag">Nova fase</span>
+    </div>
+    <div class="cat-card" data-category="bebe" style="--cat-color:#74c0fc;--cat-glow:rgba(116,192,252,.4);background-image:url('https://images.unsplash.com/photo-1546015720-b8b30df5aa27?w=700')">
+      <div class="cc-ico">🍼</div><h3>Bebê</h3><p>Cada fase, cada descoberta</p><span class="cc-tag">Primeiro ano</span>
+    </div>
+    <div class="cat-card" data-category="pet" style="--cat-color:#69db7c;--cat-glow:rgba(105,219,124,.4);background-image:url('https://images.unsplash.com/photo-1552053831-71594a27632d?w=700')">
+      <div class="cc-ico">🐾</div><h3>Pet</h3><p>Amor que tem quatro patas</p><span class="cc-tag">Melhor amigo</span>
+    </div>
+  </div>
+</section>
+
+<h2 id="exemplos" class="section-title">EXEMPLO DE RETROSPECTIVA — TEMA <span id="temaExemplo" class="neon">CASAL</span> ♡</h2>
+
+<section class="phones">
+  <div class="phone"><div class="phone-content"><h2 id="phone1Text">A história de vocês<br><span class="neon">como nunca antes.</span></h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><p id="phone2Label">Vocês já criaram memórias há</p><h2 class="big" id="phone2Num">732</h2><h2 id="phone2Unit">DIAS</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><p id="phone3Label">Vocês trocaram</p><h2 class="big">18.432</h2><h2 id="phone3Unit">MENSAGENS</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><p>A palavra mais usada foi:</p><h2 class="neon" id="phone4Word" style="font-size:46px">amor</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><h2>2024</h2><p>foi o ano</p><h2 class="neon" id="phone5Phrase">mais intenso 🔥</h2><div class="progress"><span></span></div></div></div>
+  <div class="phone"><div class="phone-content"><h2>Nossa <span class="neon">música</span></h2><p id="phone6Sub">trilha sonora da história</p><button class="btn js-open-modal" type="button" style="font-size:20px;padding:12px 20px">▶</button><div class="progress"><span></span></div></div></div>
+</section>
+
+<section id="como-funciona" class="preview">
+  <div>
+    <h2>PRÉVIA ANTES DO PAGAMENTO</h2>
+    <p style="color:#aaa;margin:8px 0 16px;font-size:14px">Mostramos apenas uma parte da retrospectiva para aumentar a curiosidade.</p>
+    <div class="preview-list">
+      <div class="preview-item">Introdução ✓</div>
+      <div class="preview-item">Tempo juntos ✓</div>
+      <div class="preview-item">Primeira foto ✓</div>
+      <div class="preview-item">Mensagens ✓</div>
+      <div class="preview-item locked">🔒 Palavra mais usada</div>
+      <div class="preview-item locked">🔒 Horário favorito</div>
+      <div class="preview-item locked">🔒 Galeria completa</div>
+      <div class="preview-item locked">🔒 Mensagem final</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center">
+    <button class="btn js-open-modal">DESBLOQUEAR AGORA</button>
+  </div>
+</section>
+
+<section id="precos" style="padding:60px 28px 80px;max-width:680px;margin:0 auto">
+
+  <!-- HEADER -->
+  <div style="text-align:center;margin-bottom:44px">
+    </div>
+
+  <!-- CARD ÚNICO -->
+  <div style="border:2px solid #ff2d78;border-radius:28px;padding:40px 36px;background:linear-gradient(160deg,rgba(255,45,120,.1),rgba(255,107,26,.06));position:relative;box-shadow:0 0 60px rgba(255,45,120,.2),0 0 120px rgba(255,45,120,.06)">
+
+    <div style="position:absolute;top:-16px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#ff2d78,#ff6b1a);padding:6px 24px;border-radius:99px;font-size:12px;font-weight:900;color:#fff;white-space:nowrap;box-shadow:0 4px 20px rgba(255,45,120,.4)">
+      💕 DIA DOS NAMORADOS — TUDO INCLUÍDO
+    </div>
+
+    <!-- PRICE -->
+    <div style="text-align:center;margin-bottom:32px">
+      <div style="display:inline-flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:16px;color:rgba(255,255,255,.4);text-decoration:line-through;font-weight:700">R$ 19,90</span>
+        <span style="background:rgba(255,45,120,.2);border:1px solid rgba(255,45,120,.5);color:#ff7aa9;font-size:12px;font-weight:900;padding:3px 10px;border-radius:99px">-50% OFF</span>
+      </div>
+      <div style="font-size:22px;font-weight:900;color:#fff;line-height:1;margin-top:6px">
+        R$ <span style="font-size:72px;background:linear-gradient(90deg,#ff2d78,#ff8a00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1">9<span style="font-size:44px">,90</span></span>
+      </div>
+      <p style="font-size:13px;color:rgba(255,255,255,.35);margin-top:8px">pagamento único • acesso eterno</p>
+    </div>
+
+    <!-- FEATURES 2-col grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px 24px;margin-bottom:32px;font-size:14px;color:rgba(255,255,255,.8)">
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Retrospectiva completa</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Até 10 fotos + carrossel</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Música via YouTube/Spotify</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>QR Code imprimível</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Mapa estelar da data</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Contador ao vivo</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Análise da conversa WhatsApp</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Link eterno + download PNG</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>8 categorias (casal, família…)</div>
+      <div style="display:flex;align-items:center;gap:8px"><span style="color:#ff2d78;font-size:18px;flex-shrink:0">✓</span>Compartilhe com quem ama</div>
+    </div>
+
+    <!-- CTA -->
+    <button onclick="document.querySelector('.js-open-modal').click()" style="width:100%;padding:18px;border:none;border-radius:16px;background:linear-gradient(90deg,#ff2d78,#ff6b1a);color:#fff;font-weight:900;font-size:18px;cursor:pointer;box-shadow:0 8px 32px rgba(255,45,120,.45);transition:.2s;letter-spacing:.02em" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 14px 44px rgba(255,45,120,.6)'" onmouseout="this.style.transform='none';this.style.boxShadow='0 8px 32px rgba(255,45,120,.45)'">
+      ♡ Criar minha retrospectiva agora
+    </button>
+    <p style="text-align:center;font-size:12px;color:rgba(255,255,255,.3);margin-top:12px">🔒 Pagamento seguro via cartão ou Pix</p>
+  </div>
+
+  <!-- SELOS -->
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px;text-align:center">
+    <div style="padding:18px 12px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.02)">
+      <div style="font-size:26px;margin-bottom:8px">🔒</div>
+      <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:4px">Pagamento seguro</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4)">Cartão ou Pix</div>
+    </div>
+    <div style="padding:18px 12px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.02)">
+      <div style="font-size:26px;margin-bottom:8px">♾️</div>
+      <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:4px">Link eterno</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4)">Fica no ar para sempre</div>
+    </div>
+    <div style="padding:18px 12px;border:1px solid rgba(255,255,255,.07);border-radius:16px;background:rgba(255,255,255,.02)">
+      <div style="font-size:26px;margin-bottom:8px">⚡</div>
+      <div style="font-size:13px;font-weight:900;color:#fff;margin-bottom:4px">Pronto em minutos</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.4)">Crie e compartilhe na hora</div>
+    </div>
+  </div>
+
+</section>
+
+<!-- MODAL -->
+<div id="createModal" class="modal-overlay">
+  <div class="modal-box">
+    <button id="closeModal" class="modal-close" type="button">×</button>
+    <h2>Criar retrospectiva</h2>
+    <input id="categoriaInput" type="hidden" value="casal">
+
+    <!-- PROGRESS -->
+    <div class="wizard-progress" id="wizardProgress"></div>
+
+    <!-- STEP 1: NOMES -->
+    <div class="wizard-step active" data-step="0">
+      <div class="wz-step-label" id="wzCatLabel">♡ Casal</div>
+      <div class="wz-step-title">Quem são vocês?</div>
+      <div class="wz-step-desc" id="categoriaDescricao">Celebre seu amor com uma retrospectiva cinematográfica.</div>
+      <label>Seu nome</label>
+      <input id="nome1" type="text" placeholder="Ex: Robson">
+      <label style="margin-top:14px">Nome da pessoa especial</label>
+      <input id="nome2" type="text" placeholder="Ex: Paloma">
+      <div class="wz-error" data-err="0">Preencha os dois nomes para continuar.</div>
+    </div>
+
+    <!-- STEP 2: DATA -->
+    <div class="wizard-step" data-step="1">
+      <div class="wz-step-label">📅 A data especial</div>
+      <div class="wz-step-title">Quando tudo começou?</div>
+      <div class="wz-step-desc">A data em que vocês se conheceram ou começaram a história.</div>
+      <label>Data</label>
+      <input id="dataInicio" type="date" style="color-scheme:dark">
+    </div>
+
+    <!-- STEP 3: EMAIL -->
+    <div class="wizard-step" data-step="2">
+      <div class="wz-step-label">✉️ Para receber</div>
+      <div class="wz-step-title">Qual o seu e-mail?</div>
+      <div class="wz-step-desc">Enviaremos o link da retrospectiva para este e-mail.</div>
+      <label>E-mail</label>
+      <input id="email" type="email" placeholder="seu@email.com">
+      <div class="wz-error" data-err="2">Digite um e-mail válido.</div>
+    </div>
+
+    <!-- STEP 4: FOTOS -->
+    <div class="wizard-step" data-step="3">
+      <div class="wz-step-label">📸 Memórias</div>
+      <div class="wz-step-title">Adicione suas fotos</div>
+      <div class="wz-step-desc">Escolha até 6 fotos especiais para a retrospectiva.</div>
+      <div class="file-drop" id="photoDropArea">
+        <input id="photos" type="file" accept="image/*" multiple>
+        <div class="drop-icon">📸</div>
+        <p><strong>Clique para adicionar fotos</strong><br>ou arraste aqui — JPG, PNG, WEBP</p>
+      </div>
+      <div id="imgPreviewGrid" class="img-preview-grid"></div>
+    </div>
+
+    <!-- STEP 5: MÚSICA -->
+    <div class="wizard-step" data-step="4">
+      <div class="wz-step-label">🎵 Trilha sonora</div>
+      <div class="wz-step-title">Escolha a música de vocês</div>
+      <div class="wz-step-desc">Busque, cole um link ou envie um MP3.</div>
+
+    <!-- 3 TABS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid rgba(255,45,120,.3);border-radius:14px;overflow:hidden;margin-bottom:14px">
+      <button type="button" id="musicTabSearch" onclick="switchMusicTab('search')"
+        style="padding:10px 6px;background:rgba(255,45,120,.2);border:none;border-right:1px solid rgba(255,45,120,.25);color:#fff;font-weight:900;font-size:12px;cursor:pointer">
+        🔍 Buscar
+      </button>
+      <button type="button" id="musicTabYt" onclick="switchMusicTab('yt')"
+        style="padding:10px 6px;background:transparent;border:none;border-right:1px solid rgba(255,45,120,.25);color:rgba(255,255,255,.5);font-weight:900;font-size:12px;cursor:pointer">
+        ▶ Link
+      </button>
+      <button type="button" id="musicTabFile" onclick="switchMusicTab('file')"
+        style="padding:10px 6px;background:transparent;border:none;color:rgba(255,255,255,.5);font-weight:900;font-size:12px;cursor:pointer">
+        📁 MP3
+      </button>
+    </div>
+
+    <!-- TAB BUSCAR -->
+    <div id="musicPanelSearch">
+      <div style="position:relative">
+        <input id="musicSearch" type="text" placeholder="🔍  Perfect Ed Sheeran, Evidências, Photograph..."
+          autocomplete="off"
+          style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:#fff;padding:13px 15px 13px 40px;border-radius:14px;outline:none;font-size:15px;transition:.2s">
+        <span style="position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:18px;pointer-events:none">🎵</span>
+      </div>
+
+      <!-- Skeleton / loading -->
+      <div id="musicSearchLoading" style="display:none;margin-top:12px">
+        <div style="display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:8px;animation:pulse 1.2s ease infinite">
+          <div style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.08);flex-shrink:0"></div>
+          <div style="flex:1"><div style="height:13px;background:rgba(255,255,255,.08);border-radius:6px;width:60%;margin-bottom:7px"></div><div style="height:11px;background:rgba(255,255,255,.06);border-radius:6px;width:40%"></div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:8px;animation:pulse 1.4s ease infinite">
+          <div style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.08);flex-shrink:0"></div>
+          <div style="flex:1"><div style="height:13px;background:rgba(255,255,255,.08);border-radius:6px;width:45%;margin-bottom:7px"></div><div style="height:11px;background:rgba(255,255,255,.06);border-radius:6px;width:30%"></div></div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);margin-bottom:8px;animation:pulse 1.6s ease infinite">
+          <div style="width:52px;height:52px;border-radius:10px;background:rgba(255,255,255,.08);flex-shrink:0"></div>
+          <div style="flex:1"><div style="height:13px;background:rgba(255,255,255,.08);border-radius:6px;width:55%;margin-bottom:7px"></div><div style="height:11px;background:rgba(255,255,255,.06);border-radius:6px;width:35%"></div></div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div id="musicSearchResults" style="margin-top:12px;max-height:320px;overflow-y:auto"></div>
+
+      <!-- Selected music card -->
+      <div id="musicSelectedCard" style="display:none;margin-top:12px;padding:14px;border:1.5px solid rgba(255,45,120,.5);border-radius:14px;background:rgba(255,45,120,.08);position:relative">
+        <div style="position:absolute;top:10px;right:10px;cursor:pointer;font-size:18px;color:rgba(255,255,255,.4)" onclick="clearSelectedMusic()">✕</div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <img id="selectedArtwork" src="" alt="" style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0">
+          <div style="min-width:0">
+            <div id="selectedTitle" style="font-size:15px;font-weight:900;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></div>
+            <div id="selectedArtist" style="font-size:13px;color:rgba(255,255,255,.55);margin-top:3px"></div>
+            <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+              <div style="width:8px;height:8px;border-radius:50%;background:#ff2d78;box-shadow:0 0 8px #ff2d78"></div>
+              <span style="font-size:12px;color:#ff7aa9;font-weight:700">Música selecionada ✓</span>
+            </div>
+          </div>
+        </div>
+        <audio id="previewAudioSearch" style="width:100%;margin-top:10px;display:none"></audio>
+      </div>
+
+      <p style="font-size:12px;color:rgba(255,255,255,.3);margin-top:10px;line-height:1.5">
+        Busca via iTunes — mais de 100 milhões de músicas disponíveis
+      </p>
+    </div>
+
+    <!-- TAB YouTube/Link -->
+    <div id="musicPanelYt" style="display:none">
+      <input id="musicLink" type="url" placeholder="Cole o link do YouTube, Spotify, SoundCloud..."
+        style="width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:#fff;padding:13px 15px;border-radius:14px;outline:none;font-size:15px;transition:.2s">
+      <p style="font-size:12px;color:rgba(255,255,255,.4);margin-top:8px;line-height:1.5">
+        ✅ YouTube: <code>youtube.com/watch?v=...</code><br>
+        ✅ Spotify: <code>open.spotify.com/track/...</code><br>
+        ✅ SoundCloud, Deezer, qualquer link público
+      </p>
+      <div id="ytPreviewWrap" style="margin-top:12px;display:none">
+        <div id="ytEmbed" style="border-radius:12px;overflow:hidden;border:1px solid rgba(255,45,120,.3)"></div>
+        <p id="ytLinkName" style="margin-top:8px;font-size:13px;color:#ff7aa9;font-weight:700"></p>
+      </div>
+    </div>
+
+    <!-- TAB Arquivo -->
+    <div id="musicPanelFile" style="display:none">
+      <div class="file-drop" id="musicDropArea">
+        <input id="music" type="file" accept="audio/*,.mp3,.m4a,.aac,.ogg,.wav,.webm">
+        <div class="drop-icon">🎵</div>
+        <p><strong>Clique para adicionar um arquivo de música</strong><br>MP3, M4A, AAC, OGG, WAV</p>
+      </div>
+      <div class="music-error" id="musicError">❌ Formato não suportado. Use MP3 ou M4A.</div>
+      <div class="music-preview-box" id="musicPreviewBox">
+        <div class="music-name" id="musicPreviewName">🎵 Nome da música</div>
+        <audio id="previewAudio" controls style="width:100%;margin-top:8px"></audio>
+      </div>
+    </div>
+
+    </div><!-- /step música -->
+
+    <!-- STEP 6: WHATSAPP + MENSAGEM -->
+    <div class="wizard-step" data-step="5">
+      <div class="wz-step-label">💬 Toque pessoal</div>
+      <div class="wz-step-title">WhatsApp e mensagem</div>
+      <div class="wz-step-desc">A conversa gera insights reais. A mensagem é o seu recado especial. Ambos opcionais.</div>
+      <label>Conversa do WhatsApp <span style="font-weight:400;color:rgba(255,255,255,.5)">(opcional)</span></label>
+    <div class="file-drop" id="wppDropArea">
+      <input id="whatsappFile" type="file" accept=".txt,.zip,text/plain,application/zip">
+      <div class="drop-icon">💬</div>
+      <p><strong>Envie o .txt ou o .zip do WhatsApp</strong><br>Ambos os formatos são aceitos automaticamente</p>
+    </div>
+    <div id="wppStatus" style="display:none;margin-top:8px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700"></div>
+    <details style="margin-top:10px">
+      <summary style="font-size:12px;color:rgba(255,255,255,.45);cursor:pointer">Como exportar? (passo a passo)</summary>
+      <div style="margin-top:10px;padding:12px;background:rgba(255,255,255,.04);border-radius:10px;font-size:12px;color:rgba(255,255,255,.6);line-height:1.8">
+        <strong style="color:#ff7aa9">Android:</strong><br>
+        Abra a conversa → ⋮ Menu → Mais → Exportar conversa → Sem mídia<br>
+        Salve ou envie o arquivo <strong>.txt</strong> para você mesmo<br><br>
+        <strong style="color:#ff7aa9">iPhone:</strong><br>
+        Abra a conversa → Nome do contato → Exportar conversa<br>
+        O arquivo chega como <strong>.zip</strong> — pode enviar direto, o site extrai automaticamente<br><br>
+        <strong style="color:#ff7aa9">💡 Dica:</strong> Escolha sempre "Sem mídia" para o arquivo ficar pequeno.
+      </div>
+    </details>
+
+    <label style="margin-top:16px">Mensagem especial <span style="font-weight:400;color:rgba(255,255,255,.5)">(opcional)</span></label>
+    <textarea id="mensagem" placeholder="Escreva uma mensagem do coração..."></textarea>
+    </div><!-- /step whatsapp+msg -->
+
+    <!-- STEP 7: REVISÃO + PAGAMENTO -->
+    <div class="wizard-step" data-step="6">
+      <div class="wz-step-label">✨ Tudo pronto!</div>
+      <div class="wz-step-title">Veja a prévia e finalize</div>
+      <div class="wz-step-desc">Confira como ficou e escolha a forma de pagamento.</div>
+      <button id="previewBtn" class="btn-full" type="button">✨ Ver prévia</button>
+
+    <div id="previewResult" class="preview-result">
+      <div class="mini-retro" id="miniRetro">
+        <!-- preenchido via JS -->
+      </div>
+    </div>
+
+    <p id="localModeNotice" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.4);border-radius:10px;font-size:12px;color:#ffb380;text-align:center">⚡ Modo local: clique em "Ver prévia" para visualizar a retrospectiva direto. Para cobrar pagamento, rode o servidor (<code>npm start</code>).</p>
+
+    <!-- Promo badge above pay button -->
+    <div style="margin-top:16px;padding:14px 16px;border:1.5px solid rgba(255,45,120,.5);border-radius:16px;background:linear-gradient(135deg,rgba(255,45,120,.12),rgba(255,107,26,.08));text-align:center">
+      <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#ff7aa9;margin-bottom:6px">💕 PROMOÇÃO DIA DOS NAMORADOS</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:16px;color:rgba(255,255,255,.4);text-decoration:line-through;font-weight:700">R$ 19,90</span>
+        <span style="font-size:28px;font-weight:900;color:#ff2d78;text-shadow:0 0 16px rgba(255,45,120,.5)">R$ 9,90</span>
+        <span style="background:rgba(255,45,120,.2);border:1px solid rgba(255,45,120,.4);color:#ff7aa9;font-size:11px;font-weight:900;padding:3px 8px;border-radius:99px">-50%</span>
+      </div>
+      </div>
+    <button id="payBtn" class="btn-full secondary" type="button">💳 Pagar com Cartão — R$ 9,90</button>
+    <button id="pixBtn" class="btn-full" type="button" style="margin-top:10px;background:linear-gradient(90deg,#00b899,#00d4aa);box-shadow:0 0 20px rgba(0,212,170,.3)">⚡ Pagar com Pix — R$ 9,90</button>
+    </div><!-- /step revisão -->
+
+    <!-- WIZARD NAV -->
+    <div class="wizard-nav">
+      <button type="button" class="wz-back" id="wzBack" style="display:none">← Voltar</button>
+      <button type="button" class="wz-next" id="wzNext">Continuar →</button>
+    </div>
+    <div class="wz-skip" id="wzSkip" style="display:none">
+      <button type="button" id="wzSkipBtn">Pular esta etapa</button>
+    </div>
+
+    <!-- PIX MODAL -->
+    <div id="pixModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);backdrop-filter:blur(20px);z-index:10002;align-items:center;justify-content:center;padding:18px">
+      <div style="background:linear-gradient(180deg,rgba(15,15,24,.99),rgba(8,8,14,.99));border:1px solid rgba(0,212,170,.4);border-radius:24px;padding:28px;max-width:380px;width:100%;text-align:center;position:relative">
+        <button onclick="fecharPix()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:rgba(255,255,255,.5);font-size:22px;cursor:pointer">✕</button>
+        <div id="pixLoading">
+          <div style="font-size:14px;color:#00d4aa;font-weight:900;margin-bottom:14px">⚡ Gerando seu Pix...</div>
+          <div style="width:40px;height:40px;border:3px solid rgba(0,212,170,.2);border-top-color:#00d4aa;border-radius:50%;margin:20px auto;animation:spin 1s linear infinite"></div>
+        </div>
+        <div id="pixContent" style="display:none">
+          <div style="font-size:16px;font-weight:900;color:#fff;margin-bottom:6px">Pague com Pix</div>
+          <div style="font-size:28px;font-weight:900;color:#00d4aa;margin-bottom:16px">R$ 9,90</div>
+          <img id="pixQrImg" src="" alt="QR Code Pix" style="width:200px;height:200px;border-radius:12px;background:#fff;padding:8px;margin:0 auto;display:block">
+          <p style="font-size:12px;color:rgba(255,255,255,.5);margin:14px 0 8px">Escaneie com o app do seu banco</p>
+          <div style="font-size:11px;color:rgba(255,255,255,.4);margin-bottom:6px">ou copie o código:</div>
+          <div style="display:flex;gap:6px;margin-bottom:16px">
+            <input id="pixCode" readonly style="flex:1;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:#fff;padding:10px;border-radius:8px;font-size:11px;outline:none">
+            <button onclick="copiarPix()" style="padding:10px 14px;background:#00d4aa;border:none;border-radius:8px;color:#fff;font-weight:900;cursor:pointer;font-size:12px;white-space:nowrap">Copiar</button>
+          </div>
+          <div id="pixStatus" style="font-size:13px;color:#00d4aa;font-weight:700">⏳ Aguardando pagamento...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const STORAGE_KEY = 'loveblast_dados_retro';
+
+  const CATEGORY_CONFIG = {
+    casal:{
+      label:'CASAL',icon:'♡',accentColor:'#ff2d78',
+      modal:'Celebre o amor de vocês com fotos, música e momentos inesquecíveis.',
+      phone1:'A história de vocês<br><span class="neon">como nunca antes.</span>',
+      phone2label:'Vocês já criaram memórias há',phone2num:'732',phone2unit:'DIAS',
+      phone3label:'Vocês trocaram',phone3unit:'MENSAGENS',
+      phone4word:'amor',phone5:'mais intenso 🔥',phone6:'trilha sonora da história',
+      timeline:[['❤️','2023','Vocês se conheceram'],['💬','2023','Primeiras conversas'],['✈️','2024','Primeira viagem juntos'],['🔥','2025','E ainda parece o começo']],
+      quotes:['O carinho aparece mais nos detalhes do que nas grandes declarações.','Mesmo quando o assunto era simples, vocês encontravam jeito de permanecer juntos.','A saudade foi uma das emoções mais presentes nessa história.'],
+      final:'Algumas histórias merecem ser eternizadas.',
+      intro:'Algumas histórias não cabem em palavras.'
+    },
+    mae:{
+      label:'MÃE',icon:'🌷',accentColor:'#ff6b9d',
+      modal:'Crie uma homenagem emocionante para quem sempre cuidou e esteve presente.',
+      phone1:'Uma homenagem para<br><span class="neon">quem sempre foi lar.</span>',
+      phone2label:'Ela está presente há',phone2num:'∞',phone2unit:'ANOS',
+      phone3label:'Gestos de carinho',phone3unit:'MEMÓRIAS',
+      phone4word:'mãe',phone5:'mais amoroso 🌷',phone6:'a trilha sonora dela',
+      timeline:[['🌷','Sempre','Ela esteve presente'],['🤍','Cuidado','Cada gesto virou memória'],['🏠','Lar','O abraço que acalma tudo'],['✨','Hoje','Uma homenagem para eternizar']],
+      quotes:['Algumas pessoas não apenas cuidam. Elas viram abrigo.','O amor dela aparece nos detalhes que ninguém vê.','Mãe é a primeira forma de amor que a vida ensina.'],
+      final:'Alguns amores merecem ser homenageados para sempre.',
+      intro:'O amor mais constante da vida.'
+    },
+    pai:{
+      label:'PAI',icon:'🛡️',accentColor:'#ff8c42',
+      modal:'Monte uma retrospectiva celebrando histórias, conselhos, força e presença.',
+      phone1:'Uma história feita de<br><span class="neon">exemplo e presença.</span>',
+      phone2label:'Anos de proteção',phone2num:'∞',phone2unit:'ANOS',
+      phone3label:'Conselhos e histórias',phone3unit:'MEMÓRIAS',
+      phone4word:'herói',phone5:'mais presente 🛡️',phone6:'a trilha sonora dele',
+      timeline:[['🛡️','Proteção','Sempre esteve por perto'],['🧭','Exemplo','Ensinou mais por atitudes'],['💬','Conselhos','Palavras que ficaram'],['🔥','Hoje','Uma homenagem para guardar']],
+      quotes:['Pai é presença que guia, mesmo em silêncio.','Alguns ensinamentos ficam para sempre.','O amor também mora no cuidado silencioso.'],
+      final:'Heróis de verdade merecem ser lembrados.',
+      intro:'Alguns heróis não usam capa.'
+    },
+    familia:{
+      label:'FAMÍLIA',icon:'🏠',accentColor:'#ffd700',
+      modal:'Crie uma retrospectiva familiar com momentos, gerações e mensagens especiais.',
+      phone1:'A história de uma<br><span class="neon">família inteira.</span>',
+      phone2label:'Gerações reunidas há',phone2num:'∞',phone2unit:'ANOS',
+      phone3label:'Momentos compartilhados',phone3unit:'MEMÓRIAS',
+      phone4word:'família',phone5:'mais unido 🏠',phone6:'a trilha da família',
+      timeline:[['🏠','Raízes','Onde tudo começou'],['📸','Memórias','Momentos que uniram todos'],['🫶','Presença','Cada pessoa faz parte'],['✨','Hoje','Uma história de gerações']],
+      quotes:['Família é onde a vida ganha significado.','Cada foto guarda um pedaço de todos vocês.','Algumas memórias atravessam gerações.'],
+      final:'Histórias de família merecem durar para sempre.',
+      intro:'Família é onde a história começa.'
+    },
+    amigos:{
+      label:'AMIGOS',icon:'🤝',accentColor:'#00d4ff',
+      modal:'Transforme amizade, risadas e conversas em um recap estilo Spotify Wrapped.',
+      phone1:'A amizade de vocês<br><span class="neon">como nunca antes.</span>',
+      phone2label:'Anos de parceria',phone2num:'5+',phone2unit:'ANOS',
+      phone3label:'Mensagens trocadas',phone3unit:'MEMÓRIAS',
+      phone4word:'parceiros',phone5:'mais hilário 😂',phone6:'a trilha dos amigos',
+      timeline:[['😂','Risadas','Momentos impossíveis de esquecer'],['💬','Conversas','Assuntos que só vocês entendem'],['🤝','Parceria','Um pelo outro sempre'],['🔥','Hoje','Mais histórias para viver']],
+      quotes:['Vocês transformaram dias comuns em histórias boas.','A amizade aparece nas piadas, nos conselhos e na presença.','Algumas pessoas chegam e ficam para sempre.'],
+      final:'Amizades verdadeiras merecem ser eternizadas.',
+      intro:'Algumas amizades viram família.'
+    },
+    formatura:{
+      label:'FORMATURA',icon:'🎓',accentColor:'#9d4edd',
+      modal:'Crie uma retrospectiva de conquista, esforço, superação e orgulho.',
+      phone1:'Uma conquista que<br><span class="neon">merece ser lembrada.</span>',
+      phone2label:'Anos de dedicação',phone2num:'5',phone2unit:'ANOS',
+      phone3label:'Noites de estudo',phone3unit:'MEMÓRIAS',
+      phone4word:'vitória',phone5:'mais marcante 🎓',phone6:'a trilha da conquista',
+      timeline:[['📚','Começo','O primeiro passo foi dado'],['☕','Rotina','Dias difíceis também fizeram parte'],['🎓','Conquista','O sonho virou realidade'],['✨','Hoje','Uma nova fase começa']],
+      quotes:['A conquista de hoje carrega todo esforço de ontem.','Cada etapa difícil também fez parte da vitória.','O diploma é só o começo de uma história maior.'],
+      final:'Conquistas grandes merecem ser eternizadas.',
+      intro:'Todo esforço merece ser lembrado.'
+    },
+    bebe:{
+      label:'BEBÊ',icon:'🍼',accentColor:'#ff9eb5',
+      modal:'Registre as primeiras fases, descobertas, sorrisos e momentos mais fofos.',
+      phone1:'Pequenos momentos,<br><span class="neon">memórias gigantes.</span>',
+      phone2label:'Dias de descobertas',phone2num:'365',phone2unit:'DIAS',
+      phone3label:'Sorrisos registrados',phone3unit:'MEMÓRIAS',
+      phone4word:'amor',phone5:'mais fofo 🍼',phone6:'canção de ninar',
+      timeline:[['🍼','Começo','Tudo era novidade'],['👶','Sorrisos','Cada risada mudou o dia'],['🐾','Passinhos','Cada fase uma emoção'],['✨','Hoje','Um amor que só cresce']],
+      quotes:['Alguns pequenos momentos viram memórias enormes.','Cada sorriso conta uma nova descoberta.','O amor cresceu junto com cada fase.'],
+      final:'Infâncias merecem ser guardadas com carinho.',
+      intro:'Cada descoberta virou amor.'
+    },
+    pet:{
+      label:'PET',icon:'🐾',accentColor:'#ff9f43',
+      modal:'Crie uma homenagem fofa para seu melhor amigo de quatro patas.',
+      phone1:'Uma história de amor<br><span class="neon">em quatro patas.</span>',
+      phone2label:'Dias de companhia',phone2num:'∞',phone2unit:'DIAS',
+      phone3label:'Carinhos e brincadeiras',phone3unit:'MEMÓRIAS',
+      phone4word:'patinhas',phone5:'mais fofo 🐾',phone6:'trilha sonora do pet',
+      timeline:[['🐾','Chegada','A casa nunca mais foi igual'],['🎾','Bagunça','Cada travessura virou memória'],['❤️','Companhia','Sempre perto, sempre amor'],['✨','Hoje','Um melhor amigo para sempre']],
+      quotes:['Alguns anjos chegam com patas.','O amor deles é simples, puro e infinito.','Cada olhar parecia dizer: estou aqui.'],
+      final:'Amores de quatro patas também merecem eternidade.',
+      intro:'Amor também tem quatro patas.'
+    }
+  };
+
+  let categoriaSelecionada = 'casal';
+
+  const modal = document.getElementById('createModal');
+  const categoriaInput = document.getElementById('categoriaInput');
+  const categoriaDescricao = document.getElementById('categoriaDescricao');
+
+  // ---- CATEGORY LOGIC ----
+  function aplicarCategoria(cat) {
+    categoriaSelecionada = cat || 'casal';
+    const cfg = CATEGORY_CONFIG[categoriaSelecionada] || CATEGORY_CONFIG.casal;
+
+    document.querySelectorAll('.card, .cat-card').forEach(c =>
+      c.classList.toggle('active', c.dataset.category === categoriaSelecionada));
+
+    if (categoriaInput) categoriaInput.value = categoriaSelecionada;
+    if (categoriaDescricao) categoriaDescricao.textContent = cfg.modal;
+
+    // Apply accent color via CSS vars
+    if (window._lb && window._lb.getTheme) {
+      const t = window._lb.getTheme(categoriaSelecionada);
+      const r = document.documentElement;
+      r.style.setProperty('--accent', t.accent);
+      r.style.setProperty('--accent-rgb', t.accentRgb);
+      r.style.setProperty('--glow', t.glow);
+    }
+
+    const temaEx = document.getElementById('temaExemplo');
+    if (temaEx) temaEx.textContent = cfg.label;
+    // Update wizard step-1 category label
+    if (window._wizardSetCat) {
+      const icons = {casal:'♡',mae:'🌷',pai:'🛡️',familia:'🏠',amigos:'🤝',formatura:'🎓',bebe:'🍼',pet:'🐾'};
+      window._wizardSetCat((icons[categoriaSelecionada]||'♡') + ' ' + cfg.label);
+    }
+
+    const p1 = document.getElementById('phone1Text');
+    if (p1) p1.innerHTML = cfg.phone1;
+    const p2l = document.getElementById('phone2Label');
+    if (p2l) p2l.textContent = cfg.phone2label;
+    const p2n = document.getElementById('phone2Num');
+    if (p2n) p2n.textContent = cfg.phone2num;
+    const p2u = document.getElementById('phone2Unit');
+    if (p2u) p2u.textContent = cfg.phone2unit;
+    const p3l = document.getElementById('phone3Label');
+    if (p3l) p3l.textContent = cfg.phone3label;
+    const p3u = document.getElementById('phone3Unit');
+    if (p3u) p3u.textContent = cfg.phone3unit;
+    const p4 = document.getElementById('phone4Word');
+    if (p4) p4.textContent = cfg.phone4word;
+    const p5 = document.getElementById('phone5Phrase');
+    if (p5) p5.textContent = cfg.phone5;
+    const p6 = document.getElementById('phone6Sub');
+    if (p6) p6.textContent = cfg.phone6;
+  }
+
+  // ---- MODAL ----
+  function abrirFormulario(cat) {
+    if (cat) aplicarCategoria(cat);
+    modal?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    if (window._wizardReset) window._wizardReset();
+  }
+  function fecharFormulario() {
+    modal?.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.card, .cat-card').forEach(card => {
+    card.addEventListener('click', () => abrirFormulario(card.dataset.category));
+  });
+  document.querySelectorAll('.js-open-modal').forEach(btn => {
+    btn.addEventListener('click', () => abrirFormulario());
+  });
+  document.getElementById('closeModal')?.addEventListener('click', fecharFormulario);
+  modal?.addEventListener('click', e => { if (e.target === modal) fecharFormulario(); });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') fecharFormulario();
+  });
+
+  // ---- NAV SMOOTH SCROLL (desktop nav + mobile menu) ----
+  document.querySelectorAll('nav a[href^="#"], .mobile-menu a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      const target = document.querySelector(link.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      fecharFormulario();
+      fecharMenuMobile();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  // ---- HAMBURGER / MOBILE MENU ----
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobileMenu');
+  const mobileBackdrop = document.getElementById('mobileMenuBackdrop');
+
+  function abrirMenuMobile() {
+    hamburger?.classList.add('active');
+    mobileMenu?.classList.add('active');
+    mobileBackdrop?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function fecharMenuMobile() {
+    hamburger?.classList.remove('active');
+    mobileMenu?.classList.remove('active');
+    mobileBackdrop?.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+  hamburger?.addEventListener('click', () => {
+    if (mobileMenu?.classList.contains('active')) fecharMenuMobile();
+    else abrirMenuMobile();
+  });
+  mobileBackdrop?.addEventListener('click', fecharMenuMobile);
+
+  // ════════ ENTREGA 1: MOCKUP CAROUSEL ════════
+  (function initMockup(){
+    const slides = document.querySelectorAll('.mockup-slide');
+    const dotsWrap = document.getElementById('mockupDots');
+    if (!slides.length || !dotsWrap) return;
+    // build dots
+    slides.forEach((_, i) => {
+      const d = document.createElement('span');
+      if (i === 0) d.classList.add('active');
+      dotsWrap.appendChild(d);
+    });
+    const dots = dotsWrap.querySelectorAll('span');
+    let idx = 0;
+    setInterval(() => {
+      slides[idx].classList.remove('active');
+      dots[idx].classList.remove('active');
+      idx = (idx + 1) % slides.length;
+      slides[idx].classList.add('active');
+      dots[idx].classList.add('active');
+    }, 2600);
+  })();
+
+  // "Ver demonstração" — por enquanto rola até categorias (demo interativa vem na Entrega 2)
+  document.getElementById('verDemoBtn')?.addEventListener('click', () => {
+    document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+
+  // ════════ WIZARD MULTI-STEP CONTROLLER ════════
+  (function initWizard(){
+    const steps = Array.from(document.querySelectorAll('.wizard-step'));
+    const progress = document.getElementById('wizardProgress');
+    const btnNext = document.getElementById('wzNext');
+    const btnBack = document.getElementById('wzBack');
+    const skipWrap = document.getElementById('wzSkip');
+    const skipBtn = document.getElementById('wzSkipBtn');
+    if (!steps.length || !progress) return;
+
+    const TOTAL = steps.length; // 7
+    const OPTIONAL = [1, 3, 5]; // data, fotos, whatsapp+msg podem ser puladas
+    let cur = 0;
+
+    // Build progress bars
+    progress.innerHTML = '';
+    for (let i=0;i<TOTAL;i++){
+      const bar = document.createElement('div');
+      bar.className = 'wp-bar';
+      bar.innerHTML = '<div class="wp-fill"></div>';
+      progress.appendChild(bar);
+    }
+    const bars = progress.querySelectorAll('.wp-bar');
+
+    function render(){
+      steps.forEach((s,i)=>s.classList.toggle('active', i===cur));
+      bars.forEach((b,i)=>b.classList.toggle('done', i<=cur));
+      btnBack.style.display = cur===0 ? 'none' : 'block';
+      skipWrap.style.display = OPTIONAL.includes(cur) ? 'block' : 'none';
+      // Last step: hide Next (payment buttons take over)
+      if (cur === TOTAL-1){
+        btnNext.style.display = 'none';
+      } else {
+        btnNext.style.display = 'block';
+        btnNext.textContent = cur === TOTAL-2 ? 'Revisar e finalizar →' : 'Continuar →';
+      }
+      // scroll modal to top on step change
+      const box = document.querySelector('.modal-box');
+      if (box) box.scrollTop = 0;
+    }
+
+    function validate(step){
+      // hide all errors
+      document.querySelectorAll('.wz-error').forEach(e=>e.style.display='none');
+      if (step===0){
+        const n1=document.getElementById('nome1').value.trim();
+        const n2=document.getElementById('nome2').value.trim();
+        if(!n1||!n2){ const e=document.querySelector('[data-err="0"]'); if(e)e.style.display='block'; return false; }
+      }
+      if (step===2){
+        const em=document.getElementById('email').value.trim();
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){ const e=document.querySelector('[data-err="2"]'); if(e)e.style.display='block'; return false; }
+      }
+      return true;
+    }
+
+    btnNext.addEventListener('click', ()=>{
+      if(!validate(cur)) return;
+      if(cur < TOTAL-1){ cur++; render(); }
+    });
+    btnBack.addEventListener('click', ()=>{ if(cur>0){ cur--; render(); } });
+    skipBtn.addEventListener('click', ()=>{ if(cur < TOTAL-1){ cur++; render(); } });
+
+    // Reset to step 0 whenever modal opens
+    window._wizardReset = () => { cur = 0; render(); };
+
+    // Update category label in step 1 when category changes
+    window._wizardSetCat = (label) => {
+      const el = document.getElementById('wzCatLabel');
+      if (el) el.textContent = label;
     };
 
-    const r=await fetch(`${PAGBANK_API}/orders`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${process.env.PAGBANK_TOKEN}`},
-      body:JSON.stringify(orderBody)
-    });
-    const order=await r.json();
-    if(!r.ok){console.error('PagBank:',JSON.stringify(order));return res.status(500).json({erro:'Erro ao gerar Pix.'});}
+    render();
+  })();
 
-    const qr=(order.qr_codes||[])[0]||{};
-    const pngLink=(qr.links||[]).find(l=>l.media==='image/png');
-    res.json({
-      retrospectiveId:id,
-      orderId:order.id,
-      qrText:qr.text||'',
-      qrPng:pngLink?pngLink.href:''
-    });
+  // ============================================================
+  // MUSIC TABS — YouTube link vs arquivo local
+  // ============================================================
+  let musicMode = 'search'; // 'search' | 'yt' | 'file'
+  let selectedMusic = null; // { title, artist, artwork, previewUrl, itunesUrl, duration }
+  let _searchTimer  = null;
+  let _previewAudio = null;
 
-    setImmediate(()=>processFiles(req,req.body||{},id).catch(e=>console.error('BG:',e.message)));
-  }catch(err){
-    console.error('Pix error:',err.message);
-    res.status(500).json({erro:'Erro ao gerar Pix. Tente novamente.'});
+  window.switchMusicTab = function(tab) {
+    musicMode = tab;
+    const panels = { search: 'musicPanelSearch', yt: 'musicPanelYt', file: 'musicPanelFile' };
+    const btns   = { search: 'musicTabSearch',   yt: 'musicTabYt',   file: 'musicTabFile' };
+    Object.keys(panels).forEach(t => {
+      const p = document.getElementById(panels[t]);
+      const b = document.getElementById(btns[t]);
+      if (p) p.style.display = t === tab ? 'block' : 'none';
+      if (b) {
+        b.style.background = t === tab ? 'rgba(255,45,120,.2)' : 'transparent';
+        b.style.color      = t === tab ? '#fff' : 'rgba(255,255,255,.5)';
+      }
+    });
+  };
+
+  // ── MUSIC SEARCH ──
+  function fmtDuration(secs) {
+    if (!secs) return '';
+    return `${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')}`;
+  }
+
+  function renderResults(results) {
+    const box = document.getElementById('musicSearchResults');
+    if (!box) return;
+    if (!results.length) {
+      box.innerHTML = '<p style="color:rgba(255,255,255,.3);font-size:13px;text-align:center;padding:20px">Nenhuma música encontrada</p>';
+      return;
+    }
+    box.innerHTML = results.map(r => `
+      <div class="music-result-item" data-id="${r.id}">
+        <img class="music-result-artwork" src="${r.artwork||''}" alt="" onerror="this.style.background='rgba(255,45,120,.12)'">
+        <div class="music-result-info">
+          <div class="music-result-title">${r.title||''}</div>
+          <div class="music-result-artist">${r.artist||''}</div>
+          ${r.duration ? `<div class="music-result-duration">${fmtDuration(r.duration)}</div>` : ''}
+        </div>
+        <div class="music-result-actions">
+          ${r.preview ? `<button class="music-btn-preview" onclick="previewMusic('${r.preview.replace(/'/g,"\'")}',this)">▶ Ouvir</button>` : ''}
+          <button class="music-btn-select" onclick='selectMusic(${JSON.stringify(r).replace(/'/g,"&apos;")})'>Selecionar</button>
+        </div>
+      </div>`).join('');
+  }
+
+  window.previewMusic = function(url, btn) {
+    // Stop previous
+    if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+    document.querySelectorAll('.music-btn-preview').forEach(b => b.textContent = '▶ Ouvir');
+    const audio = new Audio(url);
+    audio.volume = 0.7;
+    audio.play().then(() => { _previewAudio = audio; btn.textContent = '⏸ Parar'; }).catch(() => {});
+    audio.addEventListener('ended', () => { btn.textContent = '▶ Ouvir'; _previewAudio = null; });
+  };
+
+  window.selectMusic = function(r) {
+    selectedMusic = r;
+    // Show selected card
+    const card = document.getElementById('musicSelectedCard');
+    document.getElementById('selectedArtwork').src = r.artwork || '';
+    document.getElementById('selectedTitle').textContent  = r.title  || '';
+    document.getElementById('selectedArtist').textContent = r.artist || '';
+    if (r.preview) {
+      const a = document.getElementById('previewAudioSearch');
+      if (a) { a.src = r.preview; a.style.display = 'block'; }
+    }
+    if (card) card.style.display = 'block';
+    // Hide results, clear search
+    const res = document.getElementById('musicSearchResults');
+    if (res) res.innerHTML = '';
+    const inp = document.getElementById('musicSearch');
+    if (inp) inp.value = r.title + ' — ' + r.artist;
+    // Scroll to card
+    card?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+
+  window.clearSelectedMusic = function() {
+    selectedMusic = null;
+    const card = document.getElementById('musicSelectedCard');
+    if (card) card.style.display = 'none';
+    const inp  = document.getElementById('musicSearch');
+    if (inp)  { inp.value = ''; inp.focus(); }
+    if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+  };
+
+  // Debounced search
+  document.getElementById('musicSearch')?.addEventListener('input', function() {
+    const q = this.value.trim();
+    const loading = document.getElementById('musicSearchLoading');
+    const results = document.getElementById('musicSearchResults');
+    clearTimeout(_searchTimer);
+    if (selectedMusic) return; // already selected
+    if (q.length < 2) {
+      if (loading) loading.style.display = 'none';
+      if (results) results.innerHTML = '';
+      return;
+    }
+    if (loading) loading.style.display = 'block';
+    if (results) results.innerHTML = '';
+    _searchTimer = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/music/search?q=${encodeURIComponent(q)}`);
+        const data = await res.json();
+        if (loading) loading.style.display = 'none';
+        renderResults(data.results || []);
+      } catch {
+        if (loading) loading.style.display = 'none';
+        if (results) results.innerHTML = '<p style="color:rgba(255,255,255,.3);font-size:13px;text-align:center;padding:20px">Erro ao buscar. Tente novamente.</p>';
+      }
+    }, 500);
+  });
+
+  // YouTube/link preview
+  function extractYouTubeId(url) {
+    const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+    return m ? m[1] : null;
+  }
+  function extractSpotifyId(url) {
+    const m = url.match(/spotify\.com\/track\/([A-Za-z0-9]+)/);
+    return m ? m[1] : null;
+  }
+
+  document.getElementById('musicLink')?.addEventListener('input', function() {
+    const url = this.value.trim();
+    const wrap = document.getElementById('ytPreviewWrap');
+    const embed = document.getElementById('ytEmbed');
+    const nameLbl= document.getElementById('ytLinkName');
+    if (!url) { wrap.style.display='none'; return; }
+
+    const ytId = extractYouTubeId(url);
+    if (ytId) {
+      // Show thumbnail preview instead of iframe (avoids "watch on YouTube" block)
+      embed.innerHTML = `
+        <div style="position:relative;cursor:pointer;border-radius:12px;overflow:hidden"
+             onclick="this.innerHTML='<iframe width=100% height=120 src=https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1 frameborder=0 allow=autoplay;encrypted-media allowfullscreen style=display:block></iframe>'">
+          <img src="https://img.youtube.com/vi/${ytId}/mqdefault.jpg" style="width:100%;height:90px;object-fit:cover;display:block;filter:brightness(.65)">
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center">
+            <div style="width:42px;height:42px;border-radius:50%;background:#ff2d78;display:flex;align-items:center;justify-content:center;font-size:18px">▶</div>
+          </div>
+        </div>`;
+      nameLbl.textContent = '✅ YouTube detectado — prévia pronta';
+      nameLbl.style.color = '#7aff9e';
+      wrap.style.display = 'block';
+      return;
+    }
+    const spId = extractSpotifyId(url);
+    if (spId) {
+      embed.innerHTML = `<iframe src="https://open.spotify.com/embed/track/${spId}?theme=0" width="100%" height="80" frameborder="0" allowtransparency="true" allow="autoplay;clipboard-write;encrypted-media" loading="lazy" style="display:block;border-radius:10px"></iframe>`;
+      nameLbl.textContent = '✅ Spotify detectado — prévia pronta';
+      nameLbl.style.color = '#7aff9e';
+      wrap.style.display = 'block';
+      return;
+    }
+    // Outros links
+    wrap.style.display = 'block';
+    embed.innerHTML = `<div style="padding:10px 14px;background:rgba(255,255,255,.06);border-radius:10px;font-size:13px;color:rgba(255,255,255,.6)">🔗 ${url.slice(0,55)}${url.length>55?'...':''}</div>`;
+    nameLbl.textContent = '✅ Link adicionado';
+    nameLbl.style.color = '#7aff9e';
+  });
+
+  // Helpers para salvar dados de música
+  function getMusicData() {
+    if (musicMode === 'search' && selectedMusic) {
+      return {
+        musicLink:    selectedMusic.itunesUrl || '',
+        musicName:    `${selectedMusic.title} — ${selectedMusic.artist}`,
+        musicFile:    null,
+        musicArtwork: selectedMusic.artwork  || '',
+        musicPreview: selectedMusic.preview  || '',
+        musicTitle:   selectedMusic.title    || '',
+        musicArtist:  selectedMusic.artist   || '',
+      };
+    }
+    if (musicMode === 'yt') {
+      const url = document.getElementById('musicLink')?.value.trim() || '';
+      return { musicLink: url, musicName: url ? 'Música via link' : '', musicFile: null };
+    }
+    const file = document.getElementById('music')?.files?.[0] || null;
+    return { musicLink: '', musicName: file ? file.name.replace(/\.[^/.]+$/,'') : '', musicFile: file };
+  }
+
+  // ============================================================
+  // WHATSAPP ZIP/TXT — aceita ambos os formatos
+  // ============================================================
+  async function extractWhatsAppText(file) {
+    const name = file.name.toLowerCase();
+
+    // .txt direto
+    if (name.endsWith('.txt')) return await file.text();
+
+    // .zip — extrai o primeiro .txt dentro dele
+    if (name.endsWith('.zip') || file.type === 'application/zip') {
+      // Load JSZip dynamically
+      if (typeof JSZip === 'undefined') {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const zip = await JSZip.loadAsync(file);
+      // Find the first .txt file in the zip
+      const txtFile = Object.values(zip.files).find(f => !f.dir && f.name.endsWith('.txt'));
+      if (!txtFile) throw new Error('Nenhum arquivo .txt encontrado no ZIP.');
+      return await txtFile.async('string');
+    }
+
+    throw new Error('Formato não reconhecido. Use .txt ou .zip.');
+  }
+
+  // WhatsApp file change handler
+  document.getElementById('whatsappFile')?.addEventListener('change', async function() {
+    const file = this.files?.[0];
+    const status = document.getElementById('wppStatus');
+    if (!file) { status.style.display='none'; return; }
+
+    status.style.display = 'block';
+    status.style.background = 'rgba(255,255,255,.06)';
+    status.style.color = '#ccc';
+    status.textContent = '⏳ Lendo conversa...';
+
+    try {
+      const text = await extractWhatsAppText(file);
+      const lines = text.split('\n').filter(Boolean).length;
+      status.style.background = 'rgba(255,45,120,.1)';
+      status.style.border = '1px solid rgba(255,45,120,.3)';
+      status.style.color = '#ff7aa9';
+      status.textContent = `✅ Conversa carregada! ${lines.toLocaleString('pt-BR')} linhas detectadas.`;
+      // Cache insights so payBtn doesn't need to re-parse
+      try { window._cachedInsights = analisarConversaWhatsApp(text); } catch(e) {}
+    } catch(e) {
+      status.style.background = 'rgba(255,100,100,.1)';
+      status.style.border = '1px solid rgba(255,100,100,.3)';
+      status.style.color = '#ff8888';
+      status.textContent = '❌ ' + (e.message || 'Erro ao ler o arquivo.');
+    }
+  });
+
+    // ---- FILE: PHOTOS ----
+  const photosInput = document.getElementById('photos');
+  const imgPreviewGrid = document.getElementById('imgPreviewGrid');
+
+  photosInput?.addEventListener('change', () => {
+    imgPreviewGrid.innerHTML = '';
+    const files = Array.from(photosInput.files).slice(0, 10);
+    files.forEach(file => {
+      const img = document.createElement('img');
+      img.src = URL.createObjectURL(file);
+      img.onload = () => URL.revokeObjectURL(img.src);
+      imgPreviewGrid.appendChild(img);
+    });
+  });
+
+  // Drag-drop fotos
+  const photoDropArea = document.getElementById('photoDropArea');
+  photoDropArea?.addEventListener('dragover', e => { e.preventDefault(); photoDropArea.classList.add('drag-over'); });
+  photoDropArea?.addEventListener('dragleave', () => photoDropArea.classList.remove('drag-over'));
+  photoDropArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    photoDropArea.classList.remove('drag-over');
+    photosInput.files = e.dataTransfer.files;
+    photosInput.dispatchEvent(new Event('change'));
+  });
+
+  // ---- FILE: MUSIC ----
+  const musicInput = document.getElementById('music');
+  const musicPreviewBox = document.getElementById('musicPreviewBox');
+  const musicPreviewName = document.getElementById('musicPreviewName');
+  const previewAudio = document.getElementById('previewAudio');
+  const musicError = document.getElementById('musicError');
+
+  musicInput?.addEventListener('change', () => {
+    const file = musicInput.files?.[0];
+    musicError.style.display = 'none';
+    musicPreviewBox.classList.remove('visible');
+
+    if (!file) return;
+
+    // Verify audio
+    const validTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg', 'audio/aac', 'audio/m4a', 'audio/x-m4a'];
+    const isValidExt = /\.(mp3|wav|ogg|aac|m4a)$/i.test(file.name);
+
+    if (!validTypes.includes(file.type) && !isValidExt) {
+      musicError.style.display = 'block';
+      return;
+    }
+
+    const url = URL.createObjectURL(file);
+    previewAudio.src = url;
+    musicPreviewName.textContent = '🎵 ' + file.name.replace(/\.[^/.]+$/, '');
+    musicPreviewBox.classList.add('visible');
+  });
+
+  // Drag-drop musica
+  const musicDropArea = document.getElementById('musicDropArea');
+  musicDropArea?.addEventListener('dragover', e => { e.preventDefault(); musicDropArea.classList.add('drag-over'); });
+  musicDropArea?.addEventListener('dragleave', () => musicDropArea.classList.remove('drag-over'));
+  musicDropArea?.addEventListener('drop', e => {
+    e.preventDefault();
+    musicDropArea.classList.remove('drag-over');
+    musicInput.files = e.dataTransfer.files;
+    musicInput.dispatchEvent(new Event('change'));
+  });
+
+  // ---- WHATSAPP ANALYSIS ----
+  function analisarConversaWhatsApp(texto) {
+    const clean = (texto || '').toLowerCase();
+    const linhas = clean.split(/\r?\n/).filter(Boolean);
+    const totalMessages = Math.max(linhas.length, 0);
+    const loveCount = (clean.match(/eu te amo|te amo|amo você|amo vc/g) || []).length;
+    const saudadeCount = (clean.match(/saudade|sdds|saudades/g) || []).length;
+    const kkkCount = (clean.match(/kkk+/g) || []).length;
+    const emojis = clean.match(/[\u{1F300}-\u{1FAFF}❤️💕💖💘💝😍😂😭🥺🔥✨]/gu) || [];
+    const emojiMap = {};
+    emojis.forEach(e => emojiMap[e] = (emojiMap[e] || 0) + 1);
+    const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '❤️';
+    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro']);
+    const words = clean.normalize('NFD').replace(/[\u0300-\u036f]/g,'').match(/\b[a-z]{4,}\b/g) || [];
+    const wordMap = {};
+    words.forEach(w => { if (!stop.has(w)) wordMap[w] = (wordMap[w] || 0) + 1; });
+    let topWord = Object.entries(wordMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
+    if ((clean.match(/amor/g) || []).length >= 2) topWord = 'amor';
+    const hourMap = {};
+    (texto.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g) || []).forEach(h => {
+      const hour = h.split(':')[0].padStart(2,'0');
+      hourMap[hour] = (hourMap[hour] || 0) + 1;
+    });
+    const favoriteHour = Object.entries(hourMap).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const favoriteTime = favoriteHour ? `${favoriteHour}:00` : '23:47';
+    const emotionalLevel = loveCount + saudadeCount + kkkCount > 40 ? 'Muito alto' : loveCount + saudadeCount > 10 ? 'Alto' : 'Especial';
+    return {
+      totalMessages: totalMessages || 18432,
+      topWord,
+      loveCount: loveCount || 82,
+      saudadeCount: saudadeCount || 103,
+      favoriteTime,
+      topEmoji,
+      emotionalLevel,
+      generatedPhrases: [
+        `A palavra que mais marcou essa história foi: ${topWord}.`,
+        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — sinal de presença mesmo na distância.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.',
+        kkkCount > 0 ? 'O humor também fez parte: foram muitas risadas no caminho.' : 'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
+      ]
+    };
+  }
+
+  function fileToDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  async function salvarDadosLocal() {
+    const nome1 = document.getElementById('nome1')?.value || 'Robson';
+    const nome2 = document.getElementById('nome2')?.value || 'Raa';
+    const mensagem = document.getElementById('mensagem')?.value || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.';
+    const fotos = Array.from(photosInput?.files || []).slice(0, 6);
+    const fotosBase64 = [];
+    for (const foto of fotos.slice(0, 3)) {
+      try { fotosBase64.push(await fileToDataURL(foto)); } catch(e) {}
+    }
+
+    // Music: link or file
+    const md = getMusicData();
+    let musicSrc = null, musicName = 'Trilha sonora da história', musicLink = '';
+    if (md.musicLink) {
+      musicLink = md.musicLink;
+      musicName = 'Música via link';
+    } else if (md.musicFile) {
+      try { musicSrc = await fileToDataURL(md.musicFile); } catch(e) {}
+      musicName = md.musicName || 'Trilha sonora da história';
+    }
+
+    // WhatsApp: txt or zip
+    const whatsappFile = document.getElementById('whatsappFile')?.files?.[0];
+    let insights = { totalMessages:18432, topWord:'amor', loveCount:82, saudadeCount:103, favoriteTime:'23:47', topEmoji:'😂', emotionalLevel:'Alto', generatedPhrases:['Vocês transformaram mensagens simples em uma história extraordinária.','O carinho aparece mais nos detalhes do que nas grandes frases.','Mesmo nas mensagens simples, vocês criaram um lar um no outro.'] };
+    if (whatsappFile) {
+      try {
+        const txt = await extractWhatsAppText(whatsappFile);
+        insights = analisarConversaWhatsApp(txt);
+      } catch(e) { console.warn('WhatsApp parse error:', e); }
+    }
+
+    const dataInicio = document.getElementById('dataInicio')?.value || '';
+
+    const dados = {
+      nome1, nome2, mensagem, dataInicio,
+      categoria: categoriaSelecionada,
+      photos: fotosBase64,
+      musicSrc, musicName, musicLink,
+      musicArtwork: md.musicArtwork || '',
+      musicPreview: md.musicPreview || '',
+      musicTitle: md.musicTitle || '',
+      musicArtist: md.musicArtist || '',
+      insights,
+      criadoEm: Date.now()
+    };
+    try {
+      localStorage.setItem('loveblastData', JSON.stringify(dados));
+    } catch(e) {
+      const dadosSemMidia = { ...dados, photos: [], musicSrc: null };
+      try { localStorage.setItem('loveblastData', JSON.stringify(dadosSemMidia)); } catch(e2) {}
+    }
+    return dados;
+  }
+
+  // ---- PREVIEW BUTTON ----
+  document.getElementById('previewBtn')?.addEventListener('click', async () => {
+    const btn = document.getElementById('previewBtn');
+    btn.textContent = '⏳ Gerando prévia...';
+    btn.disabled = true;
+    try {
+      const dados = await salvarDadosLocal();
+      const pr  = document.getElementById('previewResult');
+      const box = document.getElementById('miniRetro');
+      if (!box) return;
+
+      const cat = dados.categoria || 'casal';
+      const cfg = CATEGORY_CONFIG[cat] || CATEGORY_CONFIG.casal;
+      const n1  = dados.nome1 || 'Você';
+      const n2  = dados.nome2 || 'Pessoa especial';
+      const ins = dados.insights || {};
+      const total = Number(ins.totalMessages || 18432).toLocaleString('pt-BR');
+      const books = Math.round(Number(ins.totalMessages || 18432) / 1500);
+
+      // Collect photo object URLs from input
+      const photoFiles = Array.from(photosInput?.files || []).slice(0, 6);
+      const photoUrls  = photoFiles.map(f => URL.createObjectURL(f));
+
+      // Timeline with real years
+      const tl = cfg.timeline || [['❤️','Início','Se conheceram'],['💬','+1 ano','Primeiras conversas'],['✈️','+2 anos','Aventuras'],['🔥','Hoje','E ainda é o começo']];
+      const tlHTML = tl.map(([ico, yr, desc]) =>
+        `<div class="mini-tl-item">
+          <div class="mini-tl-ico">${ico}</div>
+          <div class="mini-tl-yr">${yr}</div>
+          <div class="mini-tl-desc">${desc}</div>
+        </div>`).join('');
+
+      // Photos panel — show real photos + locked placeholders
+      const visiblePhotos = photoUrls.slice(0, 3);
+      const photosHTML = [
+        ...visiblePhotos.map(src => `<img src="${src}" alt="foto">`),
+        `<div class="mp-locked"><span>🔒</span><span>GALERIA</span></div>`,
+        `<div class="mp-locked"><span>🔒</span><span>MAIS</span></div>`,
+      ].join('');
+
+      // Music info
+      const hasMusicLink = !!dados.musicLink;
+      const hasMusicFile = !!dados.musicSrc;
+      const musicName = dados.musicName || 'Trilha sonora da história';
+
+      // Detect YouTube ID for thumbnail
+      let ytThumb = '';
+      if (hasMusicLink) {
+        const ytM = dados.musicLink.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([-\w]{11})/);
+        if (ytM) ytThumb = `<img src="https://img.youtube.com/vi/${ytM[1]}/mqdefault.jpg"
+          style="width:100%;height:80px;object-fit:cover;border-radius:10px;margin-top:10px;border:1px solid rgba(255,45,120,.3)">`;
+      }
+
+      box.innerHTML = `
+        <!-- 01 ABERTURA -->
+        <div class="mini-panel" style="background:linear-gradient(135deg,#0d0018,#1a0414)">
+          <div class="mini-num">01 ABERTURA</div>
+          <div class="mini-names"><span>${n1}</span> <span class="amp">&</span> <span>${n2}</span></div>
+          <div class="mini-sub">${cfg.intro || 'Algumas histórias não cabem em palavras.'}</div>
+          <div class="mini-badge">${cfg.icon || '♡'} ${cfg.label || 'CASAL'}</div>
+        </div>
+
+        <!-- 02 FOTOS -->
+        <div class="mini-panel">
+          <div class="mini-num">02 NOSSAS MEMÓRIAS</div>
+          <div class="mini-title">Momentos <span>inesquecíveis</span></div>
+          <div class="mini-photos">${photosHTML}</div>
+        </div>
+
+        <!-- 03 IDENTIDADE DO CASAL -->
+        <div class="mini-panel" style="padding:0;overflow:hidden">
+          <div style="background:linear-gradient(90deg,#ff2d78,rgba(255,45,120,.5));padding:8px 14px;display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:10px;font-weight:900;letter-spacing:.12em;color:#fff">♡ CARTÃO DO CASAL</span>
+            <span style="font-size:10px;color:rgba(255,255,255,.6)">VÁLIDO PARA SEMPRE</span>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="mini-num" style="margin-bottom:8px">03 IDENTIDADE DO CASAL</div>
+            <div style="font-family:'Dancing Script',cursive;font-size:clamp(20px,6vw,28px);color:#fff;margin-bottom:12px;line-height:1">${n1} <span style="color:#ff2d78">&</span> ${n2}</div>
+            <div style="display:flex;flex-direction:column;gap:7px;font-size:12px">
+              <div style="display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.07)">
+                <span style="color:rgba(255,255,255,.4);font-weight:700">TIPO</span>
+                <span style="color:#fff;font-weight:900">${cfg.icon||'♡'} ${cfg.label||'CASAL'}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.07)">
+                <span style="color:rgba(255,255,255,.4);font-weight:700">MENSAGENS</span>
+                <span style="color:#ff2d78;font-weight:900">${total}</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="color:rgba(255,255,255,.4);font-weight:700">CONEXÃO</span>
+                <div style="display:flex;align-items:center;gap:6px">
+                  <div style="width:70px;height:5px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden">
+                    <div style="height:100%;width:85%;background:linear-gradient(90deg,#ff2d78,#ff8a00);border-radius:99px"></div>
+                  </div>
+                  <span style="color:#ff2d78;font-weight:900;font-size:11px">${ins.emotionalLevel||'Alto'}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 04 VOCÊS EM NÚMEROS -->
+        <div class="mini-panel">
+          <div class="mini-num">04 VOCÊS EM NÚMEROS</div>
+          <div class="mini-title" style="margin-bottom:12px">A conversa de <span>${n1}</span></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            ${[
+              ['💬', total, 'mensagens'],
+              ['❤️', ins.topWord||'amor', 'palavra fav.'],
+              ['😂', ins.topEmoji||'😂', 'emoji fav.'],
+              ['💌', (ins.loveCount||82)+'×', 'eu te amo'],
+              ['🥹', (ins.saudadeCount||103)+'×', 'saudade'],
+              ['🌙', ins.favoriteTime||'23:47', 'horário'],
+            ].map(([ico,val,lbl]) => `<div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,45,120,.2);border-radius:10px;padding:10px 6px;text-align:center">
+              <div style="font-size:18px;margin-bottom:4px">${ico}</div>
+              <div style="font-size:clamp(12px,3vw,15px);font-weight:900;color:#ff2d78;overflow-wrap:anywhere;line-height:1.1">${val}</div>
+              <div style="font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.3);margin-top:3px">${lbl}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+
+        <!-- 05 MÚSICA -->
+        <div class="mini-panel">
+          <div class="mini-num">07 NOSSA MÚSICA ♡</div>
+          <div class="mini-title">Nossa <span>trilha sonora</span></div>
+          <div class="mini-sub" style="margin-top:8px">${musicName}</div>
+          ${ytThumb}
+          ${!hasMusicLink && !hasMusicFile ? '<div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.3)">Nenhuma música adicionada ainda</div>' : ''}
+        </div>
+
+        <!-- 06 MENSAGEM -->
+        <div class="mini-panel">
+          <div class="mini-num">08 MENSAGEM ESPECIAL</div>
+          <div class="mini-carta">
+            <h4>Para ${n2},</h4>
+            <p>${dados.mensagem || 'Cada mensagem, cada risada, cada momento virou parte da nossa história.'}</p>
+          </div>
+        </div>
+
+        <!-- LOCKED -->
+        <div class="mini-locked"><span class="lock-ico">🔒</span><span class="lock-text">CONTADOR AO VIVO — disponível após pagamento</span></div>
+        <div class="mini-locked"><span class="lock-ico">🔒</span><span class="lock-text">MAPA ESTELAR DA DATA ESPECIAL — disponível após pagamento</span></div>
+        <div class="mini-locked"><span class="lock-ico">🔒</span><span class="lock-text">FINAL ÉPICO + QR CODE — disponível após pagamento</span></div>
+
+        <div class="mini-scroll-hint">▲ ROLE PARA CIMA PARA VER MAIS ▲</div>
+      `;
+
+      if (pr) pr.classList.add('active');
+
+      // Scroll payBtn into view so user sees it on mobile
+      setTimeout(() => {
+        const payBtn = document.getElementById('payBtn');
+        if (payBtn) payBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 300);
+
+    } finally {
+      btn.textContent = '✨ Ver prévia';
+      btn.disabled = false;
+    }
+  });
+
+  // ---- PAY BUTTON ----
+  document.getElementById('payBtn')?.addEventListener('click', async () => {
+    const payBtn = document.getElementById('payBtn');
+    const nome1 = document.getElementById('nome1')?.value.trim();
+    const nome2 = document.getElementById('nome2')?.value.trim();
+    const email = document.getElementById('email')?.value.trim();
+    if (!nome1 || !nome2 || !email) {
+      alert('Preencha nome, nome da pessoa e e-mail.');
+      return;
+    }
+
+    // Modo local
+    const isLocal = location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (isLocal) {
+      const localData = { nome1, nome2, email,
+        mensagem: document.getElementById('mensagem')?.value || '',
+        categoria: categoriaSelecionada,
+        dataInicio: document.getElementById('dataInicio')?.value || '' };
+      try { localStorage.setItem('loveblastData', JSON.stringify(localData)); } catch(e) {}
+      window.open(location.href.replace('index.html','view.html'), '_blank');
+      return;
+    }
+
+    payBtn.disabled = true;
+    payBtn.textContent = 'CRIANDO SESSÃO...';
+
+    try {
+      const formData = new FormData();
+      formData.append('nome1', nome1);
+      formData.append('nome2', nome2);
+      formData.append('email', email);
+      formData.append('mensagem', document.getElementById('mensagem')?.value || '');
+      formData.append('categoria', categoriaSelecionada);
+      const dataInicioVal = document.getElementById('dataInicio')?.value || '';
+      if (dataInicioVal) formData.append('dataInicio', dataInicioVal);
+
+
+      // Compress photos client-side before upload (max 800px, quality 0.75)
+      // This reduces 4MB photos to ~150KB — 25x smaller, much faster upload
+      const photoFiles = Array.from(photosInput?.files || []).slice(0, 10);
+      const compressedPhotos = await compressImages(photoFiles, 800, 0.75);
+      compressedPhotos.forEach(f => formData.append('photos', f));
+
+      // Music
+      const md2 = getMusicData();
+      if (md2.musicFile) {
+        formData.append('music', md2.musicFile);
+        formData.append('musicName', md2.musicName);
+      } else if (md2.musicLink) {
+        formData.append('musicLink', md2.musicLink);
+        formData.append('musicName', md2.musicName || 'Música via link');
+      }
+      if (md2.musicArtwork) formData.append('musicArtwork', md2.musicArtwork);
+      if (md2.musicPreview) formData.append('musicPreview', md2.musicPreview);
+      if (md2.musicTitle)   formData.append('musicTitle',   md2.musicTitle);
+      if (md2.musicArtist)  formData.append('musicArtist',  md2.musicArtist);
+
+      // WhatsApp — send raw file + cached insights (no re-parsing)
+      const whatsFile = document.getElementById('whatsappFile')?.files?.[0];
+      if (whatsFile) {
+        formData.append('whatsappFile', whatsFile);
+        if (window._cachedInsights) {
+          formData.append('insights', JSON.stringify(window._cachedInsights));
+        }
+      }
+
+      const response = await fetch('/criar-sessao', { method: 'POST', body: formData });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.erro || 'Erro ao iniciar pagamento.');
+      if (data.checkoutUrl) { window.location.href = data.checkoutUrl; return; }
+      alert('Não foi possível iniciar o pagamento.');
+    } catch(error) {
+      alert(error.message || 'Erro ao iniciar pagamento.');
+      payBtn.disabled = false;
+      payBtn.textContent = '💳 Pagar R$ 9,90';
+    }
+  });
+
+  // ── PIX via PagBank ──
+  let pixPollTimer = null;
+
+  document.getElementById('pixBtn')?.addEventListener('click', async () => {
+    const nome1 = document.getElementById('nome1')?.value.trim();
+    const nome2 = document.getElementById('nome2')?.value.trim();
+    const email = document.getElementById('email')?.value.trim();
+    if (!nome1 || !nome2 || !email) { alert('Preencha nome, pessoa e e-mail.'); return; }
+
+    lb_track('pay_click', { metodo: 'pix' });
+
+    // Open modal in loading state
+    const modal = document.getElementById('pixModal');
+    document.getElementById('pixLoading').style.display = 'block';
+    document.getElementById('pixContent').style.display = 'none';
+    modal.style.display = 'flex';
+
+    try {
+      const formData = new FormData();
+      formData.append('nome1', nome1);
+      formData.append('nome2', nome2);
+      formData.append('email', email);
+      formData.append('mensagem', document.getElementById('mensagem')?.value || '');
+      formData.append('categoria', categoriaSelecionada);
+      const di = document.getElementById('dataInicio')?.value || '';
+      if (di) formData.append('dataInicio', di);
+
+      const photoFiles = Array.from(photosInput?.files || []).slice(0,10);
+      const compressed = await compressImages(photoFiles, 800, 0.75);
+      compressed.forEach(f => formData.append('photos', f));
+
+      const md = getMusicData();
+      if (md.musicFile) { formData.append('music', md.musicFile); formData.append('musicName', md.musicName); }
+      else if (md.musicLink) { formData.append('musicLink', md.musicLink); formData.append('musicName', md.musicName||'Música via link'); }
+      if (md.musicArtwork) formData.append('musicArtwork', md.musicArtwork);
+      if (md.musicPreview) formData.append('musicPreview', md.musicPreview);
+      if (md.musicTitle)   formData.append('musicTitle', md.musicTitle);
+      if (md.musicArtist)  formData.append('musicArtist', md.musicArtist);
+
+      const wpp = document.getElementById('whatsappFile')?.files?.[0];
+      if (wpp) { formData.append('whatsappFile', wpp); if (window._cachedInsights) formData.append('insights', JSON.stringify(window._cachedInsights)); }
+
+      const res = await fetch('/criar-pix', { method:'POST', body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.erro || 'Erro ao gerar Pix.');
+
+      // Show QR
+      document.getElementById('pixLoading').style.display = 'none';
+      document.getElementById('pixContent').style.display = 'block';
+      document.getElementById('pixQrImg').src = data.qrPng || '';
+      document.getElementById('pixCode').value = data.qrText || '';
+
+      // Poll for payment confirmation every 4s
+      if (pixPollTimer) clearInterval(pixPollTimer);
+      pixPollTimer = setInterval(async () => {
+        try {
+          const sr = await fetch('/status-pix/' + data.orderId);
+          const sd = await sr.json();
+          if (sd.status === 'approved') {
+            clearInterval(pixPollTimer);
+            document.getElementById('pixStatus').innerHTML = '✅ Pagamento confirmado! Redirecionando...';
+            setTimeout(() => {
+              window.location.href = '/view.html?id=' + data.retrospectiveId + '&session_id=pix_' + data.orderId;
+            }, 1500);
+          }
+        } catch {}
+      }, 4000);
+
+    } catch(err) {
+      document.getElementById('pixModal').style.display = 'none';
+      alert(err.message || 'Erro ao gerar Pix.');
+    }
+  });
+
+  window.fecharPix = function() {
+    document.getElementById('pixModal').style.display = 'none';
+    if (pixPollTimer) clearInterval(pixPollTimer);
+  };
+
+  window.copiarPix = function() {
+    const code = document.getElementById('pixCode');
+    code.select();
+    navigator.clipboard?.writeText(code.value).then(() => {
+      const btn = event.target;
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      setTimeout(() => btn.textContent = orig, 1500);
+    });
+  };
+
+  // ── Compress images via canvas (runs in <1s per photo)
+  function compressImages(files, maxPx, quality) {
+    return Promise.all(files.map(file => new Promise(resolve => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const w = Math.round(img.width * scale);
+        const h = Math.round(img.height * scale);
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        canvas.toBlob(blob => {
+          resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' }));
+        }, 'image/jpeg', quality);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    })));
+  }
+  // Init
+  aplicarCategoria('casal');
+
+  // Show local mode notice if opened as file://
+  if (location.protocol === 'file:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    const notice = document.getElementById('localModeNotice');
+    const payBtn2 = document.getElementById('payBtn');
+    if (notice) notice.style.display = 'block';
+    if (payBtn2) {
+      payBtn2.textContent = '👁 Ver retrospectiva';
+      payBtn2.style.background = 'linear-gradient(90deg,#ff6b1a,#ff2d78)';
+    }
   }
 });
+</script>
+<script src="/loveblast-shared.js"></script>
+<script>
 
-// Check Pix status (frontend polls)
-app.get('/status-pix/:orderId',async(req,res)=>{
-  try{
-    if(!process.env.PAGBANK_TOKEN)return res.json({status:'error'});
-    const r=await fetch(`${PAGBANK_API}/orders/${req.params.orderId}`,{
-      headers:{'Authorization':`Bearer ${process.env.PAGBANK_TOKEN}`}
-    });
-    const order=await r.json();
-    const charge=(order.charges||[])[0];
-    const paid=charge&&charge.status==='PAID';
-    const id=order.reference_id;
-    if(paid&&id)markPaid(id);
-    res.json({status:paid?'approved':'pending',retrospectiveId:id});
-  }catch(e){res.json({status:'error'});}
+
+// ── LoveBlast Analytics ──
+function lb_track(event, meta) {
+  fetch('/api/track', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ event, referrer: document.referrer||'', ...meta })
+  }).catch(()=>{});
+}
+
+// Page home
+lb_track('page_home');
+
+// Modal open
+document.querySelectorAll('.js-open-modal, .card, .cat-card').forEach(el => {
+  el.addEventListener('click', () => lb_track('modal_open'), { once: true });
 });
 
-// PagBank webhook
-app.post('/webhook-pagbank',express.json(),(req,res)=>{
-  try{
-    const order=req.body||{};
-    const charge=(order.charges||[])[0];
-    if(charge&&charge.status==='PAID'){
-      const id=order.reference_id;
-      if(id)markPaid(id);
-    }
-    res.sendStatus(200);
-  }catch(e){res.sendStatus(200);}
-});
+// Preview click
+document.getElementById('previewBtn')?.addEventListener('click', () => lb_track('preview_click'), { once: true });
 
-app.post('/webhook',express.raw({type:'application/json'}),(req,res)=>{
-  let event;try{event=process.env.STRIPE_WEBHOOK_SECRET?stripe.webhooks.constructEvent(req.body,req.headers['stripe-signature'],process.env.STRIPE_WEBHOOK_SECRET):JSON.parse(req.body);}catch(e){return res.status(400).send(`Webhook Error: ${e.message}`);}
-  if(event.type==='checkout.session.completed'){const id=event.data.object?.metadata?.retrospectiveId;if(id)markPaid(id);}
-  if(event.type==='checkout.session.async_payment_failed'){const id=event.data.object?.metadata?.retrospectiveId;if(id)track('purchase_failed',{retroId:id});}
-  res.json({received:true});
-});
-
-// Music search — iTunes Search API (free, no key)
-app.get('/api/music/search', async (req, res) => {
-  const q = (req.query.q || '').trim();
-  if (!q || q.length < 2) return res.json({ results: [] });
-  try {
-    const https = require('https');
-    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=8&country=BR`;
-    https.get(url, (r) => {
-      let data = '';
-      r.on('data', chunk => data += chunk);
-      r.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          const results = (json.results || []).map(t => ({
-            id:       t.trackId,
-            title:    t.trackName,
-            artist:   t.artistName,
-            album:    t.collectionName,
-            duration: Math.round(t.trackTimeMillis / 1000),
-            artwork:  (t.artworkUrl100 || '').replace('100x100', '300x300'),
-            preview:  t.previewUrl || '',
-            itunesUrl:t.trackViewUrl || ''
-          }));
-          res.json({ results });
-        } catch { res.json({ results: [] }); }
-      });
-    }).on('error', () => res.json({ results: [] }));
-  } catch { res.json({ results: [] }); }
-});
-
-app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'../public/index.html')));
-app.listen(PORT,()=>console.log(`LoveBlast porta ${PORT}`));
+// Pay click
+document.getElementById('payBtn')?.addEventListener('click', () => lb_track('pay_click'), { once: true });
+</script>
+</body>
+</html>
