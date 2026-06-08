@@ -75,6 +75,87 @@ app.post('/criar-sessao',upload.fields([{name:'photos',maxCount:12},{name:'music
 });
 
 // Webhook
+// ── PIX via PagBank (API de Pedidos) ──
+const PAGBANK_API = (process.env.PAGBANK_ENV === 'sandbox')
+  ? 'https://sandbox.api.pagseguro.com'
+  : 'https://api.pagseguro.com';
+
+app.post('/criar-pix',upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]),async(req,res)=>{
+  try{
+    if(!process.env.PAGBANK_TOKEN)return res.status(500).json({erro:'PAGBANK_TOKEN nao configurado no Railway.'});
+    const{nome1,nome2,email,mensagem='',categoria='casal'}=req.body||{};
+    if(!nome1||!nome2||!email)return res.status(400).json({erro:'Preencha nome, pessoa e email.'});
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({erro:'Email invalido.'});
+
+    const id=createId();
+    writeRetro({id,nome1,nome2,email,mensagem:(mensagem||'').slice(0,500),categoria,dataInicio:req.body.dataInicio||'',musicLink:(req.body.musicLink||'').trim(),musicName:req.body.musicName||'Trilha sonora',musicArtwork:req.body.musicArtwork||'',musicPreview:req.body.musicPreview||'',musicTitle:req.body.musicTitle||'',musicArtist:req.body.musicArtist||'',insights:(()=>{try{return JSON.parse(req.body.insights||'null');}catch{return null;}})(),photos:[],musicSrc:'',pago:false,metodo:'pix',criadoEm:new Date().toISOString()});
+    track('checkout_initiated',{id,nome1,nome2,categoria,email,metodo:'pix'});
+
+    const valorCents=Number(process.env.PRICE_CENTS)||990;
+    const appUrl=(process.env.APP_URL||'').replace(/\/+$/,'');
+    const expDate=new Date(Date.now()+3600000).toISOString(); // 1 hora
+
+    const orderBody={
+      reference_id:id,
+      customer:{name:`${nome1} ${nome2}`.slice(0,60),email,tax_id:'00000000191'},
+      items:[{name:'LoveBlast - Retrospectiva',quantity:1,unit_amount:valorCents}],
+      qr_codes:[{amount:{value:valorCents},expiration_date:expDate}],
+      notification_urls:[`${appUrl}/webhook-pagbank`]
+    };
+
+    const r=await fetch(`${PAGBANK_API}/orders`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${process.env.PAGBANK_TOKEN}`},
+      body:JSON.stringify(orderBody)
+    });
+    const order=await r.json();
+    if(!r.ok){console.error('PagBank:',JSON.stringify(order));return res.status(500).json({erro:'Erro ao gerar Pix.'});}
+
+    const qr=(order.qr_codes||[])[0]||{};
+    const pngLink=(qr.links||[]).find(l=>l.media==='image/png');
+    res.json({
+      retrospectiveId:id,
+      orderId:order.id,
+      qrText:qr.text||'',
+      qrPng:pngLink?pngLink.href:''
+    });
+
+    setImmediate(()=>processFiles(req,req.body||{},id).catch(e=>console.error('BG:',e.message)));
+  }catch(err){
+    console.error('Pix error:',err.message);
+    res.status(500).json({erro:'Erro ao gerar Pix. Tente novamente.'});
+  }
+});
+
+// Check Pix status (frontend polls)
+app.get('/status-pix/:orderId',async(req,res)=>{
+  try{
+    if(!process.env.PAGBANK_TOKEN)return res.json({status:'error'});
+    const r=await fetch(`${PAGBANK_API}/orders/${req.params.orderId}`,{
+      headers:{'Authorization':`Bearer ${process.env.PAGBANK_TOKEN}`}
+    });
+    const order=await r.json();
+    const charge=(order.charges||[])[0];
+    const paid=charge&&charge.status==='PAID';
+    const id=order.reference_id;
+    if(paid&&id)markPaid(id);
+    res.json({status:paid?'approved':'pending',retrospectiveId:id});
+  }catch(e){res.json({status:'error'});}
+});
+
+// PagBank webhook
+app.post('/webhook-pagbank',express.json(),(req,res)=>{
+  try{
+    const order=req.body||{};
+    const charge=(order.charges||[])[0];
+    if(charge&&charge.status==='PAID'){
+      const id=order.reference_id;
+      if(id)markPaid(id);
+    }
+    res.sendStatus(200);
+  }catch(e){res.sendStatus(200);}
+});
+
 app.post('/webhook',express.raw({type:'application/json'}),(req,res)=>{
   let event;try{event=process.env.STRIPE_WEBHOOK_SECRET?stripe.webhooks.constructEvent(req.body,req.headers['stripe-signature'],process.env.STRIPE_WEBHOOK_SECRET):JSON.parse(req.body);}catch(e){return res.status(400).send(`Webhook Error: ${e.message}`);}
   if(event.type==='checkout.session.completed'){const id=event.data.object?.metadata?.retrospectiveId;if(id)markPaid(id);}
