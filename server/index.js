@@ -77,22 +77,34 @@ app.post('/criar-sessao',upload.fields([{name:'photos',maxCount:12},{name:'music
 // Webhook
 // ── PIX via Efí Pay ──
 const https = require('https');
-const EFI_API = (process.env.EFI_ENV === 'sandbox')
+const IS_SANDBOX = process.env.EFI_ENV === 'sandbox';
+const EFI_API = IS_SANDBOX
   ? 'https://pix-h.api.efipay.com.br'
   : 'https://pix.api.efipay.com.br';
 
-// Obtém access_token via OAuth2 + certificado mTLS
+function efiCreds() {
+  if (IS_SANDBOX) return {
+    clientId:     process.env.EFI_CLIENT_ID_SANDBOX,
+    clientSecret: process.env.EFI_CLIENT_SECRET_SANDBOX,
+    certBase64:   process.env.EFI_CERT_BASE64_SANDBOX,
+  };
+  return {
+    clientId:     process.env.EFI_CLIENT_ID,
+    clientSecret: process.env.EFI_CLIENT_SECRET,
+    certBase64:   process.env.EFI_CERT_BASE64,
+  };
+}
+
 async function efiToken() {
-  const cert = process.env.EFI_CERT_BASE64;
-  if (!cert) throw new Error('EFI_CERT_BASE64 nao configurado.');
-  const pfx = Buffer.from(cert, 'base64');
-  const creds = Buffer.from(`${process.env.EFI_CLIENT_ID}:${process.env.EFI_CLIENT_SECRET}`).toString('base64');
+  const { clientId, clientSecret, certBase64 } = efiCreds();
+  if (!certBase64) throw new Error('EFI_CERT_BASE64 nao configurado.');
+  const pfx = Buffer.from(certBase64, 'base64');
+  const creds = Buffer.from(clientId + ':' + clientSecret).toString('base64');
   const agent = new https.Agent({ pfx, passphrase: '' });
-  const r = await fetch(`${EFI_API}/oauth/token`, {
+  const r = await fetch(EFI_API + '/oauth/token', {
     method: 'POST',
-    headers: { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/json' },
     body: JSON.stringify({ grant_type: 'client_credentials' }),
-    // @ts-ignore — Node 18+ fetch aceita dispatcher/agent via undici; fallback via node-fetch
     agent
   });
   const data = await r.json();
@@ -100,19 +112,18 @@ async function efiToken() {
   return data.access_token;
 }
 
-// Requisição genérica autenticada à API Efí
 async function efiReq(method, path, body) {
-  const cert = process.env.EFI_CERT_BASE64;
-  const pfx = Buffer.from(cert, 'base64');
+  const { certBase64 } = efiCreds();
+  const pfx = Buffer.from(certBase64, 'base64');
   const token = await efiToken();
   const agent = new https.Agent({ pfx, passphrase: '' });
   const opts = {
     method,
-    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
     agent
   };
   if (body) opts.body = JSON.stringify(body);
-  return fetch(`${EFI_API}${path}`, opts);
+  return fetch(EFI_API + path, opts);
 }
 
 app.post('/criar-pix', upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]), async (req, res) => {
@@ -237,24 +248,29 @@ app.get('/api/music/search', async (req, res) => {
   const q = (req.query.q || '').trim();
   if (!q || q.length < 2) return res.json({ results: [] });
   try {
+    const https = require('https');
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=8&country=BR`;
-    const r = await fetch(url);
-    const json = await r.json();
-    const results = (json.results || []).map(t => ({
-      id:       t.trackId,
-      title:    t.trackName,
-      artist:   t.artistName,
-      album:    t.collectionName,
-      duration: Math.round(t.trackTimeMillis / 1000),
-      artwork:  (t.artworkUrl100 || '').replace('100x100', '300x300'),
-      preview:  t.previewUrl || '',
-      itunesUrl:t.trackViewUrl || ''
-    }));
-    res.json({ results });
-  } catch(e) {
-    console.error('Music search error:', e.message);
-    res.json({ results: [] });
-  }
+    https.get(url, (r) => {
+      let data = '';
+      r.on('data', chunk => data += chunk);
+      r.on('end', () => {
+        try {
+          const json = JSON.parse(data);
+          const results = (json.results || []).map(t => ({
+            id:       t.trackId,
+            title:    t.trackName,
+            artist:   t.artistName,
+            album:    t.collectionName,
+            duration: Math.round(t.trackTimeMillis / 1000),
+            artwork:  (t.artworkUrl100 || '').replace('100x100', '300x300'),
+            preview:  t.previewUrl || '',
+            itunesUrl:t.trackViewUrl || ''
+          }));
+          res.json({ results });
+        } catch { res.json({ results: [] }); }
+      });
+    }).on('error', () => res.json({ results: [] }));
+  } catch { res.json({ results: [] }); }
 });
 
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'../public/index.html')));
