@@ -1276,7 +1276,39 @@ nav a:hover{background:rgba(255,45,120,.12)}
       <div class="wz-step-title">Quando tudo começou?</div>
       <div class="wz-step-desc">A data em que vocês se conheceram ou começaram a história.</div>
       <label>Data</label>
-      <input id="dataInicio" type="date" style="color-scheme:dark">
+      <input id="dataInicio" type="hidden">
+      <!-- Drum Picker -->
+      <div id="drumPicker" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;user-select:none">
+        <!-- fade top -->
+        <div style="position:relative">
+          <div style="pointer-events:none;position:absolute;top:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,rgba(8,8,14,.95),transparent);z-index:2"></div>
+          <div style="pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,rgba(8,8,14,.95),transparent);z-index:2"></div>
+          <!-- linha de seleção -->
+          <div style="pointer-events:none;position:absolute;top:50%;left:16px;right:16px;height:44px;transform:translateY(-50%);border-top:1px solid rgba(255,45,120,.4);border-bottom:1px solid rgba(255,45,120,.4);z-index:3;border-radius:10px;background:rgba(255,45,120,.06)"></div>
+          <div style="display:flex;height:220px">
+            <!-- Dia -->
+            <div class="drum-col" id="drumDay" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none">
+            </div>
+            <!-- Mês -->
+            <div class="drum-col" id="drumMonth" style="flex:2;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none">
+            </div>
+            <!-- Ano -->
+            <div class="drum-col" id="drumYear" style="flex:1.5;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none">
+            </div>
+          </div>
+        </div>
+      </div>
+      <style>
+        .drum-col::-webkit-scrollbar{display:none}
+        .drum-item{
+          height:44px;display:flex;align-items:center;justify-content:center;
+          scroll-snap-align:center;font-size:17px;font-weight:600;color:rgba(255,255,255,.3);
+          transition:color .15s,font-size .15s;cursor:pointer;
+        }
+        .drum-item.selected{color:#fff;font-size:19px;font-weight:800}
+        /* padding top/bottom para centralizar primeiro/último item */
+        .drum-col::before,.drum-col::after{content:'';display:block;height:88px}
+      </style>
     </div>
 
     <!-- STEP 3: EMAIL -->
@@ -2126,11 +2158,119 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Live preview listeners — aqui getMusicData já existe
-  ['nome1','nome2','dataInicio','mensagem'].forEach(id => {
+  ['nome1','nome2','mensagem'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', () => window._updatePreview?.());
   });
   document.getElementById('photos')?.addEventListener('change', () => window._updatePreview?.());
   document.getElementById('wzRefreshPreview')?.addEventListener('click', () => window._updatePreview?.());
+
+  // ── DRUM DATE PICKER ──
+  (function initDrumPicker() {
+    const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const now = new Date();
+    let selDay = now.getDate();
+    let selMonth = now.getMonth(); // 0-based
+    let selYear = now.getFullYear();
+
+    const colDay   = document.getElementById('drumDay');
+    const colMonth = document.getElementById('drumMonth');
+    const colYear  = document.getElementById('drumYear');
+    if (!colDay) return;
+
+    // Gera items
+    function fillDays() {
+      const maxDay = new Date(selYear, selMonth + 1, 0).getDate();
+      colDay.innerHTML = '';
+      for (let d = 1; d <= maxDay; d++) {
+        const el = document.createElement('div');
+        el.className = 'drum-item' + (d === selDay ? ' selected' : '');
+        el.textContent = String(d).padStart(2, '0');
+        colDay.appendChild(el);
+      }
+    }
+    function fillMonths() {
+      colMonth.innerHTML = '';
+      MONTHS.forEach((m, i) => {
+        const el = document.createElement('div');
+        el.className = 'drum-item' + (i === selMonth ? ' selected' : '');
+        el.textContent = m;
+        colMonth.appendChild(el);
+      });
+    }
+    function fillYears() {
+      colYear.innerHTML = '';
+      for (let y = 1970; y <= selYear; y++) {
+        const el = document.createElement('div');
+        el.className = 'drum-item' + (y === selYear ? ' selected' : '');
+        el.textContent = y;
+        colYear.appendChild(el);
+      }
+    }
+
+    function scrollTo(col, idx) {
+      col.scrollTop = idx * 44;
+    }
+
+    function updateInput() {
+      const mm = String(selMonth + 1).padStart(2, '0');
+      const dd = String(selDay).padStart(2, '0');
+      const hidden = document.getElementById('dataInicio');
+      if (hidden) hidden.value = `${selYear}-${mm}-${dd}`;
+      window._updatePreview?.();
+    }
+
+    function highlightSelected(col, idx) {
+      col.querySelectorAll('.drum-item').forEach((el, i) => {
+        el.classList.toggle('selected', i === idx);
+      });
+    }
+
+    function onScroll(col, type) {
+      const idx = Math.round(col.scrollTop / 44);
+      if (type === 'day') {
+        const maxDay = new Date(selYear, selMonth + 1, 0).getDate();
+        selDay = Math.min(Math.max(1, idx + 1), maxDay);
+        highlightSelected(col, selDay - 1);
+      } else if (type === 'month') {
+        selMonth = Math.min(Math.max(0, idx), 11);
+        highlightSelected(col, selMonth);
+        // re-check day validity
+        const maxDay = new Date(selYear, selMonth + 1, 0).getDate();
+        if (selDay > maxDay) { selDay = maxDay; fillDays(); scrollTo(colDay, selDay - 1); }
+      } else {
+        const years = selYear - 1970 + 1;
+        selYear = 1970 + Math.min(Math.max(0, idx), years - 1);
+        highlightSelected(col, selYear - 1970);
+      }
+      updateInput();
+    }
+
+    let scrollTimers = {};
+    function attachScroll(col, type) {
+      col.addEventListener('scroll', () => {
+        clearTimeout(scrollTimers[type]);
+        scrollTimers[type] = setTimeout(() => {
+          onScroll(col, type);
+          // snap
+          const idx = Math.round(col.scrollTop / 44);
+          col.scrollTo({ top: idx * 44, behavior: 'smooth' });
+        }, 80);
+      });
+    }
+
+    fillDays(); fillMonths(); fillYears();
+    // Scroll to today
+    setTimeout(() => {
+      scrollTo(colDay, selDay - 1);
+      scrollTo(colMonth, selMonth);
+      scrollTo(colYear, selYear - 1970);
+      updateInput();
+    }, 50);
+
+    attachScroll(colDay, 'day');
+    attachScroll(colMonth, 'month');
+    attachScroll(colYear, 'year');
+  })();
 
   // ============================================================
   // WHATSAPP ZIP/TXT — aceita ambos os formatos
