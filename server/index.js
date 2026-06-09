@@ -95,35 +95,55 @@ function efiCreds() {
   };
 }
 
+// Faz requisição HTTPS com certificado mTLS (obrigatório pela API Efí)
+function httpsRequest(urlStr, method, headers, bodyStr, pfx) {
+  return new Promise((resolve, reject) => {
+    const url = new URL(urlStr);
+    const options = {
+      hostname: url.hostname,
+      path: url.pathname + url.search,
+      method,
+      headers,
+      pfx,
+      passphrase: '',
+      rejectUnauthorized: true,
+    };
+    const req = https.request(options, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve({ status: res.statusCode, body: data }));
+    });
+    req.on('error', reject);
+    if (bodyStr) req.write(bodyStr);
+    req.end();
+  });
+}
+
 async function efiToken() {
   const { clientId, clientSecret, certBase64 } = efiCreds();
   if (!certBase64) throw new Error('EFI_CERT_BASE64 nao configurado.');
   const pfx = Buffer.from(certBase64, 'base64');
   const creds = Buffer.from(clientId + ':' + clientSecret).toString('base64');
-  const agent = new https.Agent({ pfx, passphrase: '' });
-  const r = await fetch(EFI_API + '/oauth/token', {
-    method: 'POST',
-    headers: { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ grant_type: 'client_credentials' }),
-    agent
-  });
-  const data = await r.json();
-  if (!r.ok) throw new Error(data.error_description || 'Erro ao autenticar no Efi.');
+  const body = JSON.stringify({ grant_type: 'client_credentials' });
+  const res = await httpsRequest(
+    EFI_API + '/oauth/token', 'POST',
+    { 'Authorization': 'Basic ' + creds, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) },
+    body, pfx
+  );
+  const data = JSON.parse(res.body);
+  if (res.status !== 200) throw new Error(data.error_description || 'Erro ao autenticar no Efi.');
   return data.access_token;
 }
 
-async function efiReq(method, path, body) {
+async function efiReq(method, path, bodyObj) {
   const { certBase64 } = efiCreds();
   const pfx = Buffer.from(certBase64, 'base64');
   const token = await efiToken();
-  const agent = new https.Agent({ pfx, passphrase: '' });
-  const opts = {
-    method,
-    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' },
-    agent
-  };
-  if (body) opts.body = JSON.stringify(body);
-  return fetch(EFI_API + path, opts);
+  const bodyStr = bodyObj ? JSON.stringify(bodyObj) : null;
+  const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+  if (bodyStr) headers['Content-Length'] = Buffer.byteLength(bodyStr);
+  const res = await httpsRequest(EFI_API + path, method, headers, bodyStr, pfx);
+  return { ok: res.status >= 200 && res.status < 300, status: res.status, json: async () => JSON.parse(res.body) };
 }
 
 app.post('/criar-pix', upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]), async (req, res) => {
