@@ -1259,6 +1259,22 @@ function hydrate(raw){
     if(musicPlayer) musicPlayer.style.display='flex';
     if(semMusicaMsg) semMusicaMsg.style.display='none';
     setupMusicPlayer(audio);
+
+    // Autoplay na primeira interação do usuário (navegadores bloqueiam autoplay direto)
+    function iniciarMusica() {
+      audio.play().then(() => {
+        isPlaying = true;
+        const b = document.getElementById('playBtn'); if (b) b.textContent = '⏸';
+        const a = document.getElementById('albumArt'); if (a) a.classList.add('spinning');
+      }).catch(() => {});
+      // remove os listeners depois de tocar uma vez
+      ['click','touchstart','scroll','keydown'].forEach(ev =>
+        document.removeEventListener(ev, iniciarMusica)
+      );
+    }
+    ['click','touchstart','scroll','keydown'].forEach(ev =>
+      document.addEventListener(ev, iniciarMusica, { once: false, passive: true })
+    );
   } else if(!data.musicLink){
     if(musicPlayer) musicPlayer.style.display='none';
     if(semMusicaMsg) semMusicaMsg.style.display='block';
