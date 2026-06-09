@@ -847,7 +847,13 @@ function buildPanel(type,data,t,ins,isBasico,isCreator){
         { ico:'💌', val: loveCount+'×',   label:'vezes "eu te amo"' },
         { ico:'🥹', val: saudadeC+'×',    label:'vezes "saudade"' },
         { ico:'🌙', val: favTime,          label:'horário preferido' },
-      ].map(s => `
+      ];
+      if (ins.formatoOk) {
+        if (ins.madrugadaPct > 0) stats.push({ ico:'🌃', val: ins.madrugadaPct+'%', label:'conversas de madrugada' });
+        if (ins.recordeDia) stats.push({ ico:'🔥', val: ins.recordeDia.qtd.toLocaleString('pt-BR'), label:'recorde num só dia' });
+        if (ins.totalDias) stats.push({ ico:'📅', val: ins.totalDias.toLocaleString('pt-BR'), label:'dias conversando' });
+      }
+      const statsRendered = stats.map(s => `
         <div style="background:rgba(255,255,255,.05);border:1px solid rgba(var(--ac-rgb),.2);border-radius:14px;padding:16px 12px;text-align:center;transition:.2s" onmouseover="this.style.borderColor='var(--ac)'" onmouseout="this.style.borderColor='rgba(var(--ac-rgb),.2)'">
           <div style="font-size:24px;margin-bottom:6px">${s.ico}</div>
           <div style="font-size:clamp(16px,2.5vw,22px);font-weight:900;color:var(--ac);text-shadow:0 0 14px var(--glow);line-height:1.1;overflow-wrap:anywhere">${s.val}</div>
@@ -861,7 +867,7 @@ function buildPanel(type,data,t,ins,isBasico,isCreator){
         </h2>
         ${diasJuntos ? `<p style="font-size:14px;color:rgba(255,255,255,.4);margin-bottom:18px">${anosJuntos} juntos · ${diasJuntos} dias de história</p>` : '<div style="margin-bottom:18px"></div>'}
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-          ${stats}
+          ${statsRendered}
         </div>
       </div>`;
     }
