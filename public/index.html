@@ -1327,7 +1327,7 @@ nav a:hover{background:rgba(255,45,120,.12)}
       </div>
 
       <!-- Results -->
-      <div id="musicSearchResults" style="margin-top:12px;overflow-y:visible"></div>
+      <div id="musicSearchResults" style="margin-top:12px"></div>
 
       <!-- Selected music card -->
       <div id="musicSelectedCard" style="display:none;margin-top:12px;padding:14px;border:1.5px solid rgba(255,45,120,.5);border-radius:14px;background:rgba(255,45,120,.08);position:relative">
@@ -1416,7 +1416,7 @@ nav a:hover{background:rgba(255,45,120,.12)}
       <div class="wz-step-label">✨ Tudo pronto!</div>
       <div class="wz-step-title">Veja a prévia e finalize</div>
       <div class="wz-step-desc">Confira como ficou e escolha a forma de pagamento.</div>
-      <button id="previewBtn" class="btn-full" type="button">✨ Ver prévia completa</button>
+      <button id="previewBtn" class="btn-full" type="button">✨ Ver prévia</button>
 
     <div id="previewResult" class="preview-result">
       <div class="mini-retro" id="miniRetro">
@@ -1426,15 +1426,15 @@ nav a:hover{background:rgba(255,45,120,.12)}
 
     <p id="localModeNotice" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(255,107,26,.12);border:1px solid rgba(255,107,26,.4);border-radius:10px;font-size:12px;color:#ffb380;text-align:center">⚡ Modo local: clique em "Ver prévia" para visualizar a retrospectiva direto. Para cobrar pagamento, rode o servidor (<code>npm start</code>).</p>
 
-    <!-- Promo badge -->
+    <!-- Promo badge above pay button -->
     <div style="margin-top:16px;padding:14px 16px;border:1.5px solid rgba(255,45,120,.5);border-radius:16px;background:linear-gradient(135deg,rgba(255,45,120,.12),rgba(255,107,26,.08));text-align:center">
       <div style="font-size:11px;font-weight:900;letter-spacing:.12em;color:#ff7aa9;margin-bottom:6px">💕 PROMOÇÃO DIA DOS NAMORADOS</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:4px">
+      <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:8px">
         <span style="font-size:16px;color:rgba(255,255,255,.4);text-decoration:line-through;font-weight:700">R$ 19,90</span>
         <span style="font-size:28px;font-weight:900;color:#ff2d78;text-shadow:0 0 16px rgba(255,45,120,.5)">R$ 9,90</span>
         <span style="background:rgba(255,45,120,.2);border:1px solid rgba(255,45,120,.4);color:#ff7aa9;font-size:11px;font-weight:900;padding:3px 8px;border-radius:99px">-50%</span>
       </div>
-    </div>
+      </div>
     </div><!-- /step revisão -->
 
       </div><!-- /wz-content -->
@@ -1448,8 +1448,8 @@ nav a:hover{background:rgba(255,45,120,.12)}
         </div>
       </div>
 
-      <!-- botões de pagamento — aparecem só no último step -->
-      <div id="wzPayFooter" style="display:none;padding:0 36px 24px;flex-shrink:0">
+      <!-- botões pagamento — só aparecem no último step -->
+      <div id="wzPayFooter" style="display:none;padding:0 36px 24px">
         <button id="payBtn" class="btn-full secondary" type="button">💳 Pagar com Cartão — R$ 9,90</button>
         <button id="pixBtn" class="btn-full" type="button" style="margin-top:10px;background:linear-gradient(90deg,#00b899,#00d4aa);box-shadow:0 0 20px rgba(0,212,170,.3)">⚡ Pagar com Pix — R$ 9,90</button>
       </div>
@@ -1764,6 +1764,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
+  // variáveis de música — declaradas antes do wizard para evitar ReferenceError
+  let musicMode = 'search';
+  let selectedMusic = null;
+  let _searchTimer = null;
+  let _previewAudio = null;
+
   // ════════ WIZARD MULTI-STEP CONTROLLER ════════
   (function initWizard(){
     const steps = Array.from(document.querySelectorAll('.wizard-step'));
@@ -1905,10 +1911,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // ============================================================
   // MUSIC TABS — YouTube link vs arquivo local
   // ============================================================
-  let musicMode = 'search'; // 'search' | 'yt' | 'file'
-  let selectedMusic = null; // { title, artist, artwork, previewUrl, itunesUrl, duration }
-  let _searchTimer  = null;
-  let _previewAudio = null;
+  
 
   window.switchMusicTab = function(tab) {
     musicMode = tab;
@@ -2483,12 +2486,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (pr) pr.classList.add('active');
 
-      // Rola o conteúdo para mostrar a prévia
+      // Scroll to top to show preview
       setTimeout(() => {
-        const content = document.getElementById('wzContent');
-        if (content) content.scrollTo({ top: 0, behavior: 'smooth' });
-        const pr2 = document.getElementById('previewResult');
-        if (pr2) pr2.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const box = document.querySelector('.modal-box');
+        if (box) box.scrollTop = 0;
       }, 300);
 
     } finally {
