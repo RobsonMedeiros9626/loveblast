@@ -382,6 +382,29 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
 
 <audio id="audioFinal" style="display:none"></audio>
 
+<!-- Mini-player flutuante fixo -->
+<div id="floatPlayer" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9999;
+  background:rgba(15,8,14,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border:1px solid rgba(var(--ac-rgb),.4);border-radius:50px;padding:8px 8px 8px 8px;
+  display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);
+  max-width:240px;transition:.3s;cursor:default">
+  <div id="floatArt" style="width:40px;height:40px;border-radius:50%;flex-shrink:0;overflow:hidden;
+    background:linear-gradient(135deg,var(--ac),#ff6b1a);display:flex;align-items:center;justify-content:center;font-size:18px">🎵</div>
+  <div id="floatInfo" style="flex:1;min-width:0;overflow:hidden">
+    <div id="floatTitle" style="font-size:12px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Nossa música</div>
+    <div id="floatArtist" style="font-size:10px;color:rgba(255,255,255,.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+  </div>
+  <button id="floatPlayBtn" onclick="togglePlay()" style="width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    border:none;background:var(--ac);color:#fff;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px var(--glow)">▶</button>
+</div>
+<style>
+  #floatArt.spinning{animation:floatSpin 4s linear infinite}
+  @keyframes floatSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+  @media(max-width:600px){
+    #floatPlayer{bottom:14px;right:14px;left:14px;max-width:none}
+  }
+</style>
+
 <script>
 /* ============================================================
    parseLocalDate — evita bug UTC
@@ -1260,14 +1283,29 @@ function hydrate(raw){
     if(semMusicaMsg) semMusicaMsg.style.display='none';
     setupMusicPlayer(audio);
 
+    // Mini-player flutuante
+    const fp = document.getElementById('floatPlayer');
+    if (fp) {
+      fp.style.display = 'flex';
+      const ft = document.getElementById('floatTitle');
+      const fa = document.getElementById('floatArtist');
+      const fart = document.getElementById('floatArt');
+      if (ft) ft.textContent = data.musicTitle || data.musicName || 'Nossa música';
+      if (fa) fa.textContent = data.musicArtist || '';
+      if (fart && data.musicArtwork) {
+        fart.innerHTML = `<img src="${data.musicArtwork}" style="width:100%;height:100%;object-fit:cover" alt="">`;
+      }
+    }
+
     // Autoplay na primeira interação do usuário (navegadores bloqueiam autoplay direto)
     function iniciarMusica() {
       audio.play().then(() => {
         isPlaying = true;
         const b = document.getElementById('playBtn'); if (b) b.textContent = '⏸';
+        const fb = document.getElementById('floatPlayBtn'); if (fb) fb.textContent = '⏸';
         const a = document.getElementById('albumArt'); if (a) a.classList.add('spinning');
+        const fart = document.getElementById('floatArt'); if (fart) fart.classList.add('spinning');
       }).catch(() => {});
-      // remove os listeners depois de tocar uma vez
       ['click','touchstart','scroll','keydown'].forEach(ev =>
         document.removeEventListener(ev, iniciarMusica)
       );
@@ -1325,12 +1363,22 @@ function setupMusicPlayer(audio){
     set('timeNow',fmtTime(audio.currentTime));
   });
   audio.addEventListener('loadedmetadata',()=>set('timeTot',fmtTime(audio.duration)));
-  audio.addEventListener('ended',()=>{isPlaying=false;const b=document.getElementById('playBtn');if(b)b.textContent='▶';const a=document.getElementById('albumArt');if(a)a.classList.remove('spinning');});
+  audio.addEventListener('ended',()=>{isPlaying=false;const b=document.getElementById('playBtn');if(b)b.textContent='▶';const a=document.getElementById('albumArt');if(a)a.classList.remove('spinning');const fb=document.getElementById('floatPlayBtn');if(fb)fb.textContent='▶';const fart=document.getElementById('floatArt');if(fart)fart.classList.remove('spinning');});
 }
 function togglePlay(){
   const b=document.getElementById('playBtn'),a=document.getElementById('albumArt');
-  if(isPlaying){audioEl.pause();isPlaying=false;if(b)b.textContent='▶';if(a)a.classList.remove('spinning');}
-  else audioEl.play().then(()=>{isPlaying=true;if(b)b.textContent='⏸';if(a)a.classList.add('spinning');}).catch(()=>{});
+  const fb=document.getElementById('floatPlayBtn'),fart=document.getElementById('floatArt');
+  if(isPlaying){
+    audioEl.pause();isPlaying=false;
+    if(b)b.textContent='▶';if(a)a.classList.remove('spinning');
+    if(fb)fb.textContent='▶';if(fart)fart.classList.remove('spinning');
+  } else {
+    audioEl.play().then(()=>{
+      isPlaying=true;
+      if(b)b.textContent='⏸';if(a)a.classList.add('spinning');
+      if(fb)fb.textContent='⏸';if(fart)fart.classList.add('spinning');
+    }).catch(()=>{});
+  }
 }
 function seekMusic(e){
   if(!audioEl.duration)return;
