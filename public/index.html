@@ -2295,7 +2295,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // ── PIX via PagBank ──
+  // ── PIX via Efí Pay ──
   let pixPollTimer = null;
 
   document.getElementById('pixBtn')?.addEventListener('click', async () => {
@@ -2306,11 +2306,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     lb_track('pay_click', { metodo: 'pix' });
 
-    // Open modal in loading state
-    const modal = document.getElementById('pixModal');
     document.getElementById('pixLoading').style.display = 'block';
     document.getElementById('pixContent').style.display = 'none';
-    modal.style.display = 'flex';
+    document.getElementById('pixModal').style.display = 'flex';
 
     try {
       const formData = new FormData();
@@ -2337,33 +2335,32 @@ document.addEventListener('DOMContentLoaded', () => {
       const wpp = document.getElementById('whatsappFile')?.files?.[0];
       if (wpp) { formData.append('whatsappFile', wpp); if (window._cachedInsights) formData.append('insights', JSON.stringify(window._cachedInsights)); }
 
-      const res = await fetch('/criar-pix', { method:'POST', body: formData });
+      const res = await fetch('/criar-pix', { method: 'POST', body: formData });
       const data = await res.json();
       if (!res.ok) throw new Error(data.erro || 'Erro ao gerar Pix.');
 
-      // Show QR
       document.getElementById('pixLoading').style.display = 'none';
       document.getElementById('pixContent').style.display = 'block';
       document.getElementById('pixQrImg').src = data.qrPng || '';
       document.getElementById('pixCode').value = data.qrText || '';
 
-      // Poll for payment confirmation every 4s
+      // Polling a cada 4s usando txid
       if (pixPollTimer) clearInterval(pixPollTimer);
       pixPollTimer = setInterval(async () => {
         try {
-          const sr = await fetch('/status-pix/' + data.orderId);
+          const sr = await fetch('/status-pix/' + data.txid);
           const sd = await sr.json();
           if (sd.status === 'approved') {
             clearInterval(pixPollTimer);
             document.getElementById('pixStatus').innerHTML = '✅ Pagamento confirmado! Redirecionando...';
             setTimeout(() => {
-              window.location.href = '/view.html?id=' + data.retrospectiveId + '&session_id=pix_' + data.orderId;
+              window.location.href = '/view.html?id=' + data.retrospectiveId;
             }, 1500);
           }
         } catch {}
       }, 4000);
 
-    } catch(err) {
+    } catch (err) {
       document.getElementById('pixModal').style.display = 'none';
       alert(err.message || 'Erro ao gerar Pix.');
     }
