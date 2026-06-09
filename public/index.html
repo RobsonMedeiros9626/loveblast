@@ -1994,7 +1994,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const loading = document.getElementById('musicSearchLoading');
     const results = document.getElementById('musicSearchResults');
     clearTimeout(_searchTimer);
-    if (selectedMusic) return; // already selected
+
+    // Se tinha música selecionada e o usuário digitou de novo, limpa a seleção
+    if (selectedMusic) {
+      selectedMusic = null;
+      const card = document.getElementById('musicSelectedCard');
+      if (card) card.style.display = 'none';
+      if (_previewAudio) { _previewAudio.pause(); _previewAudio = null; }
+    }
+
     if (q.length < 2) {
       if (loading) loading.style.display = 'none';
       if (results) results.innerHTML = '';
