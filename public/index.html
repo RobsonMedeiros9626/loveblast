@@ -2259,13 +2259,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fillDays(); fillMonths(); fillYears();
-    // Scroll to today
-    setTimeout(() => {
-      scrollTo(colDay, selDay - 1);
-      scrollTo(colMonth, selMonth);
-      scrollTo(colYear, selYear - 1970);
+
+    function scrollToToday() {
+      colDay.scrollTop = (selDay - 1) * 44;
+      colMonth.scrollTop = selMonth * 44;
+      colYear.scrollTop = (selYear - 1970) * 44;
       updateInput();
-    }, 50);
+    }
+
+    // Tenta scrollar imediatamente e também quando o modal abrir
+    setTimeout(scrollToToday, 100);
+    setTimeout(scrollToToday, 400);
+
+    // Observa quando o drumPicker fica visível (modal abre)
+    const observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) { scrollToToday(); }
+    }, { threshold: 0.1 });
+    const picker = document.getElementById('drumPicker');
+    if (picker) observer.observe(picker);
 
     attachScroll(colDay, 'day');
     attachScroll(colMonth, 'month');
