@@ -75,85 +75,154 @@ app.post('/criar-sessao',upload.fields([{name:'photos',maxCount:12},{name:'music
 });
 
 // Webhook
-// ── PIX via PagBank (API de Pedidos) ──
-const PAGBANK_API = (process.env.PAGBANK_ENV === 'sandbox')
-  ? 'https://sandbox.api.pagseguro.com'
-  : 'https://api.pagseguro.com';
+// ── PIX via Efí Pay ──
+const https = require('https');
+const EFI_API = (process.env.EFI_ENV === 'sandbox')
+  ? 'https://pix-h.api.efipay.com.br'
+  : 'https://pix.api.efipay.com.br';
 
-app.post('/criar-pix',upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]),async(req,res)=>{
-  try{
-    if(!process.env.PAGBANK_TOKEN)return res.status(500).json({erro:'PAGBANK_TOKEN nao configurado no Railway.'});
-    const{nome1,nome2,email,mensagem='',categoria='casal'}=req.body||{};
-    if(!nome1||!nome2||!email)return res.status(400).json({erro:'Preencha nome, pessoa e email.'});
-    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return res.status(400).json({erro:'Email invalido.'});
+// Obtém access_token via OAuth2 + certificado mTLS
+async function efiToken() {
+  const cert = process.env.EFI_CERT_BASE64;
+  if (!cert) throw new Error('EFI_CERT_BASE64 nao configurado.');
+  const pfx = Buffer.from(cert, 'base64');
+  const creds = Buffer.from(`${process.env.EFI_CLIENT_ID}:${process.env.EFI_CLIENT_SECRET}`).toString('base64');
+  const agent = new https.Agent({ pfx, passphrase: '' });
+  const r = await fetch(`${EFI_API}/oauth/token`, {
+    method: 'POST',
+    headers: { 'Authorization': `Basic ${creds}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ grant_type: 'client_credentials' }),
+    // @ts-ignore — Node 18+ fetch aceita dispatcher/agent via undici; fallback via node-fetch
+    agent
+  });
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error_description || 'Erro ao autenticar no Efi.');
+  return data.access_token;
+}
 
-    const id=createId();
-    writeRetro({id,nome1,nome2,email,mensagem:(mensagem||'').slice(0,500),categoria,dataInicio:req.body.dataInicio||'',musicLink:(req.body.musicLink||'').trim(),musicName:req.body.musicName||'Trilha sonora',musicArtwork:req.body.musicArtwork||'',musicPreview:req.body.musicPreview||'',musicTitle:req.body.musicTitle||'',musicArtist:req.body.musicArtist||'',insights:(()=>{try{return JSON.parse(req.body.insights||'null');}catch{return null;}})(),photos:[],musicSrc:'',pago:false,metodo:'pix',criadoEm:new Date().toISOString()});
-    track('checkout_initiated',{id,nome1,nome2,categoria,email,metodo:'pix'});
+// Requisição genérica autenticada à API Efí
+async function efiReq(method, path, body) {
+  const cert = process.env.EFI_CERT_BASE64;
+  const pfx = Buffer.from(cert, 'base64');
+  const token = await efiToken();
+  const agent = new https.Agent({ pfx, passphrase: '' });
+  const opts = {
+    method,
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    agent
+  };
+  if (body) opts.body = JSON.stringify(body);
+  return fetch(`${EFI_API}${path}`, opts);
+}
 
-    const valorCents=Number(process.env.PRICE_CENTS)||990;
-    const appUrl=(process.env.APP_URL||'').replace(/\/+$/,'');
-    const expDate=new Date(Date.now()+3600000).toISOString(); // 1 hora
+app.post('/criar-pix', upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]), async (req, res) => {
+  try {
+    if (!process.env.EFI_CLIENT_ID) return res.status(500).json({erro: 'EFI_CLIENT_ID nao configurado no Railway.'});
+    const {nome1, nome2, email, mensagem='', categoria='casal'} = req.body || {};
+    if (!nome1 || !nome2 || !email) return res.status(400).json({erro: 'Preencha nome, pessoa e email.'});
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({erro: 'Email invalido.'});
 
-    const orderBody={
-      reference_id:id,
-      customer:{name:`${nome1} ${nome2}`.slice(0,60),email,tax_id:'00000000191'},
-      items:[{name:'LoveBlast - Retrospectiva',quantity:1,unit_amount:valorCents}],
-      qr_codes:[{amount:{value:valorCents},expiration_date:expDate}],
-      notification_urls:[`${appUrl}/webhook-pagbank`]
+    const id = createId();
+    writeRetro({id, nome1, nome2, email, mensagem: (mensagem||'').slice(0,500), categoria,
+      dataInicio: req.body.dataInicio||'', musicLink: (req.body.musicLink||'').trim(),
+      musicName: req.body.musicName||'Trilha sonora', musicArtwork: req.body.musicArtwork||'',
+      musicPreview: req.body.musicPreview||'', musicTitle: req.body.musicTitle||'',
+      musicArtist: req.body.musicArtist||'',
+      insights: (()=>{try{return JSON.parse(req.body.insights||'null');}catch{return null;}})(),
+      photos: [], musicSrc: '', pago: false, metodo: 'pix', criadoEm: new Date().toISOString()
+    });
+    track('checkout_initiated', {id, nome1, nome2, categoria, email, metodo: 'pix'});
+
+    const valorCents = Number(process.env.PRICE_CENTS) || 990;
+    const valorReais = (valorCents / 100).toFixed(2);
+    const appUrl = (process.env.APP_URL || '').replace(/\/+$/, '');
+
+    // POST /v2/cob — cobrança imediata sem CPF do devedor
+    const cobBody = {
+      calendario: { expiracao: 3600 },
+      valor: { original: valorReais },
+      chave: process.env.EFI_PIX_KEY,          // chave Pix cadastrada na conta Efí
+      solicitacaoPagador: `LoveBlast - ${nome1} & ${nome2}`
     };
 
-    const r=await fetch(`${PAGBANK_API}/orders`,{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${process.env.PAGBANK_TOKEN}`},
-      body:JSON.stringify(orderBody)
-    });
-    const order=await r.json();
-    if(!r.ok){console.error('PagBank:',JSON.stringify(order));return res.status(500).json({erro:'Erro ao gerar Pix.'});}
+    const r = await efiReq('POST', '/v2/cob', cobBody);
+    const cob = await r.json();
+    if (!r.ok) {
+      console.error('Efi cob error:', JSON.stringify(cob));
+      return res.status(500).json({erro: 'Erro ao gerar Pix. Tente novamente.'});
+    }
 
-    const qr=(order.qr_codes||[])[0]||{};
-    const pngLink=(qr.links||[]).find(l=>l.media==='image/png');
+    // Salvar txid para poder consultar o status depois
+    const retro = readRetro(id);
+    if (retro) { retro.efiTxid = cob.txid; writeRetro(retro); }
+
+    // Gerar QR Code image via endpoint exclusivo Efí
+    const locId = cob.loc?.id;
+    let qrPng = '';
+    if (locId) {
+      const qrR = await efiReq('GET', `/v2/loc/${locId}/qrcode`);
+      if (qrR.ok) {
+        const qrData = await qrR.json();
+        qrPng = qrData.imagemQrcode || '';  // base64 data URL
+      }
+    }
+
     res.json({
-      retrospectiveId:id,
-      orderId:order.id,
-      qrText:qr.text||'',
-      qrPng:pngLink?pngLink.href:''
+      retrospectiveId: id,
+      txid: cob.txid,
+      qrText: cob.pixCopiaECola || '',
+      qrPng
     });
 
-    setImmediate(()=>processFiles(req,req.body||{},id).catch(e=>console.error('BG:',e.message)));
-  }catch(err){
-    console.error('Pix error:',err.message);
-    res.status(500).json({erro:'Erro ao gerar Pix. Tente novamente.'});
+    setImmediate(() => processFiles(req, req.body || {}, id).catch(e => console.error('BG:', e.message)));
+  } catch (err) {
+    console.error('Pix error:', err.message);
+    res.status(500).json({erro: 'Erro ao gerar Pix. Tente novamente.'});
   }
 });
 
-// Check Pix status (frontend polls)
-app.get('/status-pix/:orderId',async(req,res)=>{
-  try{
-    if(!process.env.PAGBANK_TOKEN)return res.json({status:'error'});
-    const r=await fetch(`${PAGBANK_API}/orders/${req.params.orderId}`,{
-      headers:{'Authorization':`Bearer ${process.env.PAGBANK_TOKEN}`}
-    });
-    const order=await r.json();
-    const charge=(order.charges||[])[0];
-    const paid=charge&&charge.status==='PAID';
-    const id=order.reference_id;
-    if(paid&&id)markPaid(id);
-    res.json({status:paid?'approved':'pending',retrospectiveId:id});
-  }catch(e){res.json({status:'error'});}
+// Polling de status — frontend consulta a cada 4s
+app.get('/status-pix/:txid', async (req, res) => {
+  try {
+    if (!process.env.EFI_CLIENT_ID) return res.json({status: 'error'});
+    const r = await efiReq('GET', `/v2/cob/${req.params.txid}`);
+    const cob = await r.json();
+    // status CONCLUIDA = pago
+    const paid = cob.status === 'CONCLUIDA';
+    // referência de volta ao id da retrospectiva via solicitacaoPagador não é confiável;
+    // buscamos pelo txid gravado no arquivo
+    let retroId = null;
+    if (paid) {
+      const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.json') && !f.startsWith('_'));
+      for (const f of files) {
+        try {
+          const d = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8'));
+          if (d.efiTxid === req.params.txid) { retroId = d.id; break; }
+        } catch {}
+      }
+      if (retroId) markPaid(retroId);
+    }
+    res.json({status: paid ? 'approved' : 'pending', retrospectiveId: retroId});
+  } catch (e) { res.json({status: 'error'}); }
 });
 
-// PagBank webhook
-app.post('/webhook-pagbank',express.json(),(req,res)=>{
-  try{
-    const order=req.body||{};
-    const charge=(order.charges||[])[0];
-    if(charge&&charge.status==='PAID'){
-      const id=order.reference_id;
-      if(id)markPaid(id);
+// Webhook Efí Pay (notificação de pagamento)
+app.post('/webhook-efi', express.json(), (req, res) => {
+  try {
+    const pixArr = req.body?.pix || [];
+    for (const p of pixArr) {
+      const txid = p.txid;
+      if (!txid) continue;
+      const files = fs.readdirSync(DATA_DIR).filter(f => f.endsWith('.json') && !f.startsWith('_'));
+      for (const f of files) {
+        try {
+          const d = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), 'utf8'));
+          if (d.efiTxid === txid) { markPaid(d.id); break; }
+        } catch {}
+      }
     }
     res.sendStatus(200);
-  }catch(e){res.sendStatus(200);}
+  } catch (e) { res.sendStatus(200); }
 });
 
 app.post('/webhook',express.raw({type:'application/json'}),(req,res)=>{
