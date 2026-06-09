@@ -237,29 +237,24 @@ app.get('/api/music/search', async (req, res) => {
   const q = (req.query.q || '').trim();
   if (!q || q.length < 2) return res.json({ results: [] });
   try {
-    const https = require('https');
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&limit=8&country=BR`;
-    https.get(url, (r) => {
-      let data = '';
-      r.on('data', chunk => data += chunk);
-      r.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          const results = (json.results || []).map(t => ({
-            id:       t.trackId,
-            title:    t.trackName,
-            artist:   t.artistName,
-            album:    t.collectionName,
-            duration: Math.round(t.trackTimeMillis / 1000),
-            artwork:  (t.artworkUrl100 || '').replace('100x100', '300x300'),
-            preview:  t.previewUrl || '',
-            itunesUrl:t.trackViewUrl || ''
-          }));
-          res.json({ results });
-        } catch { res.json({ results: [] }); }
-      });
-    }).on('error', () => res.json({ results: [] }));
-  } catch { res.json({ results: [] }); }
+    const r = await fetch(url);
+    const json = await r.json();
+    const results = (json.results || []).map(t => ({
+      id:       t.trackId,
+      title:    t.trackName,
+      artist:   t.artistName,
+      album:    t.collectionName,
+      duration: Math.round(t.trackTimeMillis / 1000),
+      artwork:  (t.artworkUrl100 || '').replace('100x100', '300x300'),
+      preview:  t.previewUrl || '',
+      itunesUrl:t.trackViewUrl || ''
+    }));
+    res.json({ results });
+  } catch(e) {
+    console.error('Music search error:', e.message);
+    res.json({ results: [] });
+  }
 });
 
 app.get('*',(req,res)=>res.sendFile(path.join(__dirname,'../public/index.html')));
