@@ -1882,12 +1882,11 @@ function wrFechar(){
   // NUNCA usa localStorage como fallback (evita mostrar dados de outra pessoa)
   if(id||sid){
     try{
-      // pago=1 only on first load from Stripe success_url (has session_id)
-      // On subsequent opens (shared link), just load without pago=1
-      const isPagoLoad = !!sid;
+      // O pagamento agora é confirmado SOMENTE pelo servidor (webhook do Stripe/Efí
+      // ou verificação da sessão Stripe). O cliente não pode mais marcar como pago.
       const ep=id
-        ?`/api/retrospectiva/${encodeURIComponent(id)}${isPagoLoad?'?pago=1':''}`
-        :`/api/retrospectiva-por-sessao/${encodeURIComponent(sid)}?pago=1`;
+        ?`/api/retrospectiva/${encodeURIComponent(id)}`
+        :`/api/retrospectiva-por-sessao/${encodeURIComponent(sid)}`;
       const r=await fetch(ep);
       if(r.ok){
         const data=await r.json();
