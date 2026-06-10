@@ -1827,9 +1827,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2600);
   })();
 
-  // "Ver demonstração" — por enquanto rola até categorias (demo interativa vem na Entrega 2)
+  // "Ver demonstração" — abre retrospectiva de exemplo (modo demo, sem pagamento)
   document.getElementById('verDemoBtn')?.addEventListener('click', () => {
-    document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    const cat = (typeof categoriaSelecionada !== 'undefined' && categoriaSelecionada) ? categoriaSelecionada : 'casal';
+    window.open('/view.html?demo=' + cat, '_blank');
   });
 
   // variáveis de música — declaradas antes do wizard para evitar ReferenceError
