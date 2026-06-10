@@ -1235,19 +1235,6 @@ nav a:hover{background:rgba(255,45,120,.12)}
     </div>
   </div>
 
-  <!-- SUPORTE -->
-  <div style="margin-top:28px;text-align:center">
-    <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:14px">Precisa de ajuda? Fale com a gente 💬</div>
-    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <a href="https://wa.me/5584981636405?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20LoveBlast" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:99px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.4);color:#25d366;font-weight:800;font-size:14px;text-decoration:none;transition:.2s" onmouseover="this.style.background='rgba(37,211,102,.22)'" onmouseout="this.style.background='rgba(37,211,102,.12)'">
-        <span style="font-size:18px">📱</span> Suporte no WhatsApp
-      </a>
-      <a href="mailto:oi11oi912@gmail.com?subject=Suporte%20LoveBlast" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:99px;background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.4);color:#ff7aa9;font-weight:800;font-size:14px;text-decoration:none;transition:.2s" onmouseover="this.style.background='rgba(255,45,120,.2)'" onmouseout="this.style.background='rgba(255,45,120,.1)'">
-        <span style="font-size:18px">✉️</span> Suporte por E-mail
-      </a>
-    </div>
-  </div>
-
 </section>
 
 <!-- MODAL -->
@@ -1827,10 +1814,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2600);
   })();
 
-  // "Ver demonstração" — abre retrospectiva de exemplo (modo demo, sem pagamento)
+  // "Ver demonstração" — por enquanto rola até categorias (demo interativa vem na Entrega 2)
   document.getElementById('verDemoBtn')?.addEventListener('click', () => {
-    const cat = (typeof categoriaSelecionada !== 'undefined' && categoriaSelecionada) ? categoriaSelecionada : 'casal';
-    window.open('/view.html?demo=' + cat, '_blank');
+    document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
   // variáveis de música — declaradas antes do wizard para evitar ReferenceError
@@ -1938,6 +1924,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const content = document.getElementById('wzContent');
       if (content) content.scrollTop = 0;
       updatePreview();
+      if (cur === 1 && window._scrollDrumToday) {
+        [30, 150, 350].forEach(ms => setTimeout(window._scrollDrumToday, ms));
+      }
     }
 
     function validate(step){
@@ -2273,13 +2262,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fillDays(); fillMonths(); fillYears();
-    // Scroll to today
-    setTimeout(() => {
-      scrollTo(colDay, selDay - 1);
-      scrollTo(colMonth, selMonth);
-      scrollTo(colYear, selYear - 1970);
+
+    function scrollToToday() {
+      if (!colDay.offsetParent) return false;
+      colDay.scrollTop = (selDay - 1) * 44;
+      colMonth.scrollTop = selMonth * 44;
+      colYear.scrollTop = (selYear - 1970) * 44;
       updateInput();
-    }, 50);
+      return true;
+    }
+    window._scrollDrumToday = scrollToToday;
+    [50, 200, 500].forEach(ms => setTimeout(scrollToToday, ms));
 
     attachScroll(colDay, 'day');
     attachScroll(colMonth, 'month');
