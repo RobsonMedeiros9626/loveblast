@@ -364,6 +364,7 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
 <header class="topbar">
   <div class="logo">♡ LoveBlast</div>
   <div class="actions">
+    <button class="action-btn" id="openWrappedBtn" style="display:none;background:linear-gradient(90deg,#1db954,#9d4edd);color:#fff" onclick="document.getElementById('wrappedWrap').classList.add('active');wrGo(0)">✨ Ver no estilo Wrapped</button>
     <button class="action-btn" onclick="compartilharArte()">Compartilhar</button>
     <button class="action-btn primary" onclick="iniciarDownload()">⬇ Baixar</button>
   </div>
@@ -378,6 +379,15 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
   <div class="extra-label">EXTRA: O QUE ESSA HISTÓRIA REVELA</div>
   <div class="extra-items" id="extraItems"></div>
 </div>
+</div>
+
+<!-- TEMA WRAPPED (slides estilo Spotify) -->
+<div id="wrappedWrap">
+  <div class="wr-bars" id="wrBars"></div>
+  <button class="wr-close" onclick="document.getElementById('wrappedWrap').classList.remove('active')">✕</button>
+  <div class="wr-track" id="wrTrack"></div>
+  <div class="wr-tap"><div onclick="wrPrev()"></div><div onclick="wrNext()"></div></div>
+  <div class="wr-nav" id="wrNav"></div>
 </div>
 
 <audio id="audioFinal" style="display:none"></audio>
@@ -403,6 +413,41 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
   @media(max-width:600px){
     #floatPlayer{bottom:14px;right:14px;left:14px;max-width:none}
   }
+
+  /* ═══════ TEMA WRAPPED (estilo Spotify) ═══════ */
+  #wrappedWrap{display:none;position:fixed;inset:0;z-index:50;background:#000;overflow:hidden}
+  #wrappedWrap.active{display:block}
+  .wr-track{display:flex;height:100%;transition:transform .5s cubic-bezier(.4,0,.2,1)}
+  .wr-slide{min-width:100vw;height:100dvh;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 28px;text-align:center;position:relative;overflow:hidden}
+  .wr-slide h1{font-size:clamp(32px,9vw,68px);font-weight:900;line-height:1.05;letter-spacing:-.02em;margin-bottom:16px}
+  .wr-slide h2{font-size:clamp(20px,5vw,32px);font-weight:800;line-height:1.2;margin-bottom:12px}
+  .wr-big{font-size:clamp(64px,22vw,180px);font-weight:900;line-height:.9;letter-spacing:-.04em}
+  .wr-label{font-size:13px;font-weight:900;letter-spacing:.18em;text-transform:uppercase;opacity:.7;margin-bottom:18px}
+  .wr-sub{font-size:clamp(15px,3.5vw,20px);font-weight:600;opacity:.85;max-width:560px;line-height:1.4}
+  .wr-slide .wr-emoji{font-size:clamp(60px,18vw,140px);line-height:1;margin-bottom:10px}
+  /* paletas vibrantes por slide */
+  .wr-c1{background:linear-gradient(160deg,#ff2d78,#7b1fa2);color:#fff}
+  .wr-c2{background:linear-gradient(160deg,#1db954,#0a5c2b);color:#fff}
+  .wr-c3{background:linear-gradient(160deg,#ffd93d,#ff6b1a);color:#1a1a1a}
+  .wr-c4{background:linear-gradient(160deg,#2d9cff,#1a1a8a);color:#fff}
+  .wr-c5{background:linear-gradient(160deg,#ff6b9d,#c2185b);color:#fff}
+  .wr-c6{background:linear-gradient(160deg,#9d4edd,#3a0ca3);color:#fff}
+  .wr-c7{background:linear-gradient(160deg,#ff8a00,#e52e71);color:#fff}
+  .wr-photo{width:min(72vw,300px);aspect-ratio:1;object-fit:cover;border-radius:18px;box-shadow:0 16px 50px rgba(0,0,0,.5);margin-bottom:22px}
+  .wr-nav{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:60}
+  .wr-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.35);transition:.3s}
+  .wr-dot.on{background:#fff;width:24px;border-radius:99px}
+  .wr-tap{position:fixed;inset:0;z-index:55;display:flex}
+  .wr-tap div{flex:1}
+  .wr-bars{position:fixed;top:14px;left:14px;right:14px;display:flex;gap:5px;z-index:60}
+  .wr-bar{flex:1;height:3px;background:rgba(255,255,255,.3);border-radius:99px;overflow:hidden}
+  .wr-bar i{display:block;height:100%;width:0;background:#fff;border-radius:99px}
+  .wr-bar.done i{width:100%}
+  .wr-bar.now i{animation:wrFill 6s linear forwards}
+  @keyframes wrFill{from{width:0}to{width:100%}}
+  .wr-close{position:fixed;top:18px;right:16px;z-index:65;width:36px;height:36px;border-radius:50%;border:none;background:rgba(0,0,0,.4);color:#fff;font-size:18px;cursor:pointer;backdrop-filter:blur(8px)}
+  .wr-fadein{animation:wrFadeIn .6s ease both}
+  @keyframes wrFadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
 </style>
 
 <script>
@@ -1257,6 +1302,15 @@ function hydrate(raw){
   const grid=document.getElementById('arteFinal');
   grid.innerHTML=t.panels.map(p=>buildPanel(p,data,t,ins,false,isCreator)).join('');
 
+  // Tema Wrapped (slides estilo Spotify) — renderiza em paralelo ao clássico
+  buildWrapped(data, ins);
+  if (data.tema === 'wrapped') {
+    document.getElementById('wrappedWrap')?.classList.add('active');
+  }
+  // botão flutuante para abrir o Wrapped a qualquer momento
+  const wrBtn = document.getElementById('openWrappedBtn');
+  if (wrBtn) wrBtn.style.display = 'flex';
+
   // Set abertura bg
   const ab=document.getElementById('painelAbertura');
   if(ab) ab.style.backgroundImage=`url('${t.bg}')`;
@@ -1589,9 +1643,161 @@ function loadYTVideo(videoId, wrapEl) {
   }, 2000);
 }
 
+function gerarDemoData(cat){
+  const demoFotos = [
+    'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800',
+    'https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800',
+    'https://images.unsplash.com/photo-1529333166437-7750a6dd5a70?w=800',
+    'https://images.unsplash.com/photo-1494774157365-9e04c6720e47?w=800',
+  ];
+  const base = {
+    id: 'demo-'+cat,
+    categoria: cat,
+    dataInicio: '2023-06-09',
+    photos: demoFotos,
+    musicTitle: 'Photograph',
+    musicArtist: 'Ed Sheeran',
+    musicName: 'Photograph — Ed Sheeran',
+    musicArtwork: '',
+    musicPreview: '',
+    musicLink: '',
+    pago: true,
+    isDemo: true,
+    insights: {
+      formatoOk: true,
+      totalMessages: 17353,
+      topWord: 'amor',
+      loveCount: 220,
+      saudadeCount: 95,
+      kkkCount: 412,
+      topEmoji: '😂',
+      favoriteTime: '23:00',
+      emotionalLevel: 'Muito alto',
+      madrugadaPct: 34,
+      recordeDia: { data: '14/02/2024', qtd: 487 },
+      totalDias: 612,
+      generatedPhrases: [
+        'A palavra que mais marcou essa história foi: amor.',
+        'A saudade apareceu 95 vezes — presença mesmo na distância.',
+        'O humor fez parte: foram muitas risadas no caminho.'
+      ]
+    },
+    carta: 'Analisando toda a história de vocês, percebemos que esse relacionamento sempre foi marcado por companheirismo, humor e uma saudade que só existe quando o amor é de verdade. Em cada madrugada conversando, em cada "eu te amo", vocês foram construindo algo raro. Que essa história continue sendo escrita, uma mensagem de cada vez. ♡'
+  };
+  const nomes = {
+    casal: { nome1:'Robson', nome2:'Paloma' },
+    amigos: { nome1:'Ana', nome2:'Bia' },
+    mae: { nome1:'Lucas', nome2:'Dona Marta' },
+    pai: { nome1:'Júlia', nome2:'Seu Carlos' },
+    familia: { nome1:'Família Silva', nome2:'' },
+    formatura: { nome1:'Pedro', nome2:'' },
+    bebe: { nome1:'Sofia', nome2:'' },
+    pet: { nome1:'Thor', nome2:'' },
+  };
+  return { ...base, ...(nomes[cat]||nomes.casal), mensagem: base.carta };
+}
+
+/* ═══════ TEMA WRAPPED ═══════ */
+let wrIdx = 0, wrTotal = 0, wrTimer = null;
+
+function buildWrapped(data, ins){
+  const n1 = data.nome1||'Você', n2 = data.nome2||'';
+  const nomes = n2 ? `${n1} & ${n2}` : n1;
+  const fotos = (Array.isArray(data.photos)?data.photos.filter(Boolean):[]);
+  const foto = fotos[0] || 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800';
+
+  // tempo juntos
+  let tempoStr = '';
+  if (data.dataInicio) {
+    const d = parseLocalDate(data.dataInicio);
+    const dias = Math.floor((new Date()-d)/86400000);
+    const anos = Math.floor(dias/365), meses = Math.floor((dias%365)/30);
+    tempoStr = anos>0 ? `${anos} ${anos===1?'ano':'anos'}` : meses>0 ? `${meses} ${meses===1?'mês':'meses'}` : `${dias} dias`;
+  }
+
+  const slides = [
+    `<div class="wr-slide wr-c6">
+      <div class="wr-label wr-fadein">Sua retrospectiva</div>
+      <h1 class="wr-fadein">${nomes}</h1>
+      <p class="wr-sub wr-fadein">Prepare o coração. Isso é tudo que a história de vocês revela. 💫</p>
+    </div>`,
+
+    `<div class="wr-slide wr-c1">
+      <img src="${foto}" class="wr-photo wr-fadein" alt="">
+      <div class="wr-label wr-fadein">vocês trocaram</div>
+      <div class="wr-big wr-fadein">${Number(ins.totalMessages||0).toLocaleString('pt-BR')}</div>
+      <p class="wr-sub wr-fadein">mensagens. Cada uma um tijolo nessa história.</p>
+    </div>`,
+
+    `<div class="wr-slide wr-c3">
+      <div class="wr-emoji wr-fadein">💌</div>
+      <div class="wr-label wr-fadein">vocês disseram "eu te amo"</div>
+      <div class="wr-big wr-fadein">${ins.loveCount||0}×</div>
+      <p class="wr-sub wr-fadein">e cada vez valeu como se fosse a primeira.</p>
+    </div>`,
+
+    `<div class="wr-slide wr-c4">
+      <div class="wr-emoji wr-fadein">🌙</div>
+      <div class="wr-label wr-fadein">horário favorito de vocês</div>
+      <div class="wr-big wr-fadein">${ins.favoriteTime||'23:00'}</div>
+      <p class="wr-sub wr-fadein">${(ins.madrugadaPct>20)?`${ins.madrugadaPct}% das conversas foram de madrugada. Sono? Que sono.`:'A melhor hora do dia era falar com você.'}</p>
+    </div>`,
+
+    `<div class="wr-slide wr-c2">
+      <div class="wr-emoji wr-fadein">${ins.topEmoji||'😂'}</div>
+      <div class="wr-label wr-fadein">o emoji de vocês</div>
+      <h1 class="wr-fadein" style="font-size:clamp(40px,12vw,90px)">${ins.topEmoji||'😂'}</h1>
+      <p class="wr-sub wr-fadein">apareceu mais que qualquer palavra. Vocês riem juntos.</p>
+    </div>`,
+
+    `<div class="wr-slide wr-c5">
+      <div class="wr-label wr-fadein">a palavra que define vocês</div>
+      <h1 class="wr-fadein" style="font-family:Georgia,serif;font-style:italic">${ins.topWord||'amor'}</h1>
+      ${ins.saudadeCount?`<p class="wr-sub wr-fadein">E "saudade" apareceu ${ins.saudadeCount}× — porque sentir falta também é amor.</p>`:'<p class="wr-sub wr-fadein">a essência de tudo que vocês construíram.</p>'}
+    </div>`,
+
+    `<div class="wr-slide wr-c7">
+      ${tempoStr?`<div class="wr-label wr-fadein">juntos há</div><div class="wr-big wr-fadein">${tempoStr}</div>`:'<div class="wr-emoji wr-fadein">♾️</div>'}
+      <p class="wr-sub wr-fadein">e que venham muitos capítulos mais. ♡</p>
+    </div>`,
+  ];
+
+  wrTotal = slides.length;
+  document.getElementById('wrTrack').innerHTML = slides.join('');
+  document.getElementById('wrNav').innerHTML = slides.map((_,i)=>`<div class="wr-dot${i===0?' on':''}"></div>`).join('');
+  document.getElementById('wrBars').innerHTML = slides.map((_,i)=>`<div class="wr-bar${i===0?' now':''}"><i></i></div>`).join('');
+  wrIdx = 0;
+  wrGo(0);
+}
+
+function wrGo(i){
+  if (i<0||i>=wrTotal) return;
+  wrIdx = i;
+  document.getElementById('wrTrack').style.transform = `translateX(-${i*100}vw)`;
+  document.querySelectorAll('.wr-dot').forEach((d,k)=>d.classList.toggle('on',k===i));
+  const bars = document.querySelectorAll('.wr-bar');
+  bars.forEach((b,k)=>{ b.classList.remove('now','done'); if(k<i)b.classList.add('done'); else if(k===i)b.classList.add('now'); });
+  // re-trigger fade-in animation
+  const slide = document.querySelectorAll('.wr-slide')[i];
+  if (slide) slide.querySelectorAll('.wr-fadein').forEach(el=>{ el.style.animation='none'; void el.offsetWidth; el.style.animation=''; });
+  // auto-advance
+  clearTimeout(wrTimer);
+  if (i < wrTotal-1) wrTimer = setTimeout(()=>wrGo(i+1), 6000);
+}
+function wrNext(){ wrGo(Math.min(wrIdx+1, wrTotal-1)); }
+function wrPrev(){ wrGo(Math.max(wrIdx-1, 0)); }
+
 (async function init(){
   const params=new URLSearchParams(location.search);
   const id=params.get('id'),sid=params.get('session_id');
+  const demo=params.get('demo');
+
+  // MODO DEMO: carrega retrospectiva de exemplo sem servidor
+  if(demo){
+    const cat = ['casal','amigos','mae','pai','familia','formatura','bebe','pet'].includes(demo) ? demo : 'casal';
+    hydrate(gerarDemoData(cat));
+    return;
+  }
 
   // Se tem id ou session_id na URL, SEMPRE busca do servidor
   // NUNCA usa localStorage como fallback (evita mostrar dados de outra pessoa)
