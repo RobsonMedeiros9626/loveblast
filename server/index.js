@@ -3,7 +3,8 @@ const express=require('express'),cors=require('cors'),path=require('path'),fs=re
 const app=express(),PORT=process.env.PORT||8080;
 // Volume persistente do Railway (RAILWAY_VOLUME_MOUNT_PATH = /app/data). Local: ../data
 const VOLUME=process.env.RAILWAY_VOLUME_MOUNT_PATH||path.join(__dirname,'../data');
-const DATA_DIR=path.join(VOLUME,'retros'),UPLOAD_DIR=path.join(VOLUME,'uploads');
+// As retrospectivas (.json) ficam na RAIZ do volume; uploads numa subpasta
+const DATA_DIR=VOLUME,UPLOAD_DIR=path.join(VOLUME,'uploads');
 const stripe=process.env.STRIPE_SECRET_KEY?Stripe(process.env.STRIPE_SECRET_KEY):null;
 const upload=multer({storage:multer.diskStorage({destination:(req,file,cb)=>{fs.mkdirSync(UPLOAD_DIR,{recursive:true});cb(null,UPLOAD_DIR);},filename:(req,file,cb)=>{const ext=path.extname(file.originalname||'').toLowerCase()||'.bin';cb(null,`tmp-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);}}),limits:{fileSize:20*1024*1024,fields:20}});
 fs.mkdirSync(DATA_DIR,{recursive:true});fs.mkdirSync(UPLOAD_DIR,{recursive:true});
