@@ -1,6 +1,9 @@
 require('dotenv').config();
 const express=require('express'),cors=require('cors'),path=require('path'),fs=require('fs'),multer=require('multer'),Stripe=require('stripe');
-const app=express(),PORT=process.env.PORT||8080,DATA_DIR=path.join(__dirname,'../data'),UPLOAD_DIR=path.join(__dirname,'../public/uploads');
+const app=express(),PORT=process.env.PORT||8080;
+// Volume persistente do Railway (RAILWAY_VOLUME_MOUNT_PATH = /app/data). Local: ../data
+const VOLUME=process.env.RAILWAY_VOLUME_MOUNT_PATH||path.join(__dirname,'../data');
+const DATA_DIR=path.join(VOLUME,'retros'),UPLOAD_DIR=path.join(VOLUME,'uploads');
 const stripe=process.env.STRIPE_SECRET_KEY?Stripe(process.env.STRIPE_SECRET_KEY):null;
 const upload=multer({storage:multer.diskStorage({destination:(req,file,cb)=>{fs.mkdirSync(UPLOAD_DIR,{recursive:true});cb(null,UPLOAD_DIR);},filename:(req,file,cb)=>{const ext=path.extname(file.originalname||'').toLowerCase()||'.bin';cb(null,`tmp-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);}}),limits:{fileSize:20*1024*1024,fields:20}});
 fs.mkdirSync(DATA_DIR,{recursive:true});fs.mkdirSync(UPLOAD_DIR,{recursive:true});
@@ -23,6 +26,8 @@ app.get('/og-image.png',(req,res)=>{const svg=`<svg width="1200" height="630" xm
 app.get('/view.html',(req,res,next)=>{const id=req.query.id;if(!id)return next();try{const data=readRetro(id);if(!data)return next();const n1=(data.nome1||'Você').replace(/[<>"]/g,''),n2=(data.nome2||'Pessoa').replace(/[<>"]/g,'');let html=fs.readFileSync(path.join(__dirname,'../public/view.html'),'utf8');html=html.replace(/♡ Minha retrospectiva no LoveBlast/g,`♡ ${n1} & ${n2} — LoveBlast`).replace(/Criei uma retrospectiva especial\. Clica para ver a nossa história ❤️/g,`A retrospectiva de ${n1} & ${n2} está pronta!`).replace(/Clica para ver a nossa retrospectiva ❤️ — criado no LoveBlast/g,`A retrospectiva de ${n1} & ${n2}. LoveBlast ❤️`);res.send(html);}catch{next();}});
 
 app.use(express.static(path.join(__dirname,'../public')));
+// Serve fotos/músicas do volume persistente
+app.use('/uploads', express.static(UPLOAD_DIR, { maxAge: '30d' }));
 
 // Helpers
 function createId(){return`${Date.now().toString(36)}-${Math.random().toString(36).slice(2,10)}`;}
