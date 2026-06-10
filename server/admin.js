@@ -3,6 +3,7 @@
 // ============================================================
 const path = require('path');
 const fs   = require('fs');
+const express = require('express');
 
 const DATA_DIR = path.join(__dirname, '../data');
 const PRICE    = Number(process.env.PRICE_CENTS||990) / 100;
@@ -344,20 +345,53 @@ new Chart(document.getElementById('chartVisits'), {
 }
 
 module.exports = function(app) {
-  const TOKEN = process.env.TOKEN_SECRET || 'loveblast_super_secreto_123456789';
+  const SENHA = process.env.ADMIN_PASSWORD || process.env.TOKEN_SECRET || 'loveblast_super_secreto_123456789';
+  const crypto = require('crypto');
+  // token de sessão derivado da senha (muda se a senha mudar)
+  const SESSION_TOKEN = crypto.createHash('sha256').update('loveblast-admin:' + SENHA).digest('hex');
+  const COOKIE_NAME = 'lb_admin';
+
+  function temSessao(req) {
+    const raw = req.headers.cookie || '';
+    const m = raw.match(new RegExp('(?:^|;\\s*)' + COOKIE_NAME + '=([^;]+)'));
+    return m && m[1] === SESSION_TOKEN;
+  }
+
+  function paginaLogin(erro) {
+    return `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>LoveBlast Admin</title></head>
+    <body style="background:#0a0a0f;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:16px">
+      <div style="font-size:48px">🔒</div>
+      <div style="font-size:20px;font-weight:700">Painel LoveBlast</div>
+      ${erro ? '<div style="color:#ff6b6b;font-size:13px">Senha incorreta. Tente novamente.</div>' : ''}
+      <form method="POST" action="/admin/login" style="display:flex;flex-direction:column;gap:10px;width:280px">
+        <input name="senha" type="password" placeholder="Senha de acesso" autofocus autocomplete="current-password" style="padding:12px 14px;border-radius:8px;border:1px solid #ff2d78;background:#1a0414;color:#fff;font-size:15px;outline:none">
+        <button type="submit" style="padding:12px 20px;background:linear-gradient(90deg,#ff2d78,#ff6b1a);border:none;border-radius:8px;color:#fff;font-weight:900;cursor:pointer;font-size:15px">Entrar</button>
+      </form>
+    </body></html>`;
+  }
 
   function auth(req, res, next) {
-    const t = req.query.token || req.headers['x-admin-token'];
-    if (t === TOKEN) return next();
-    res.status(401).send(`<!DOCTYPE html><html><body style="background:#0a0a0f;color:#fff;font-family:Arial;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:16px">
-      <div style="font-size:48px">🔒</div>
-      <div style="font-size:20px;font-weight:700">Acesso restrito</div>
-      <form method="GET" style="display:flex;gap:8px">
-        <input name="token" type="password" placeholder="Token de acesso" autofocus style="padding:10px 14px;border-radius:8px;border:1px solid #ff2d78;background:#1a0414;color:#fff;font-size:15px;outline:none;width:260px">
-        <button type="submit" style="padding:10px 20px;background:linear-gradient(90deg,#ff2d78,#ff6b1a);border:none;border-radius:8px;color:#fff;font-weight:900;cursor:pointer;font-size:15px">Entrar</button>
-      </form>
-    </body></html>`);
+    if (temSessao(req)) return next();
+    res.status(401).send(paginaLogin(false));
   }
+
+  // Recebe a senha via POST e seta cookie de sessão (token nunca vai pra URL)
+  app.post('/admin/login', express.urlencoded({ extended: false }), (req, res) => {
+    const senha = (req.body && req.body.senha) || '';
+    if (senha === SENHA) {
+      // cookie HttpOnly: não acessível por JS, expira em 12h
+      res.setHeader('Set-Cookie',
+        `${COOKIE_NAME}=${SESSION_TOKEN}; HttpOnly; Path=/; Max-Age=43200; SameSite=Strict${process.env.APP_URL && process.env.APP_URL.startsWith('https') ? '; Secure' : ''}`);
+      return res.redirect('/admin');
+    }
+    res.status(401).send(paginaLogin(true));
+  });
+
+  // Logout
+  app.get('/admin/logout', (req, res) => {
+    res.setHeader('Set-Cookie', `${COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0`);
+    res.redirect('/admin');
+  });
 
   app.get('/admin', auth, (req, res) => {
     const retros    = getAllRetros();
