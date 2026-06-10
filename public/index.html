@@ -1814,10 +1814,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2600);
   })();
 
-  // "Ver demonstração" — abre retrospectiva de exemplo (modo demo, sem pagamento)
+  // "Ver demonstração" — por enquanto rola até categorias (demo interativa vem na Entrega 2)
   document.getElementById('verDemoBtn')?.addEventListener('click', () => {
-    const cat = (typeof categoriaSelecionada !== 'undefined' && categoriaSelecionada) ? categoriaSelecionada : 'casal';
-    window.open('/view.html?demo=' + cat, '_blank');
+    document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
   });
 
   // variáveis de música — declaradas antes do wizard para evitar ReferenceError
@@ -1925,6 +1924,10 @@ document.addEventListener('DOMContentLoaded', () => {
       const content = document.getElementById('wzContent');
       if (content) content.scrollTop = 0;
       updatePreview();
+      // step da data (índice 1) — posiciona o drum picker na data atual
+      if (cur === 1 && window._scrollDrumToday) {
+        [30, 150, 350].forEach(ms => setTimeout(window._scrollDrumToday, ms));
+      }
     }
 
     function validate(step){
@@ -2260,13 +2263,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     fillDays(); fillMonths(); fillYears();
-    // Scroll to today
-    setTimeout(() => {
-      scrollTo(colDay, selDay - 1);
-      scrollTo(colMonth, selMonth);
-      scrollTo(colYear, selYear - 1970);
+
+    function scrollToToday() {
+      // só funciona se o elemento estiver visível (tem altura)
+      if (!colDay.offsetParent) return false;
+      colDay.scrollTop = (selDay - 1) * 44;
+      colMonth.scrollTop = selMonth * 44;
+      colYear.scrollTop = (selYear - 1970) * 44;
       updateInput();
-    }, 50);
+      return true;
+    }
+    // expõe para o wizard chamar quando o step da data abrir
+    window._scrollDrumToday = scrollToToday;
+
+    // tenta várias vezes (caso o step já esteja visível)
+    [50, 200, 500].forEach(ms => setTimeout(scrollToToday, ms));
 
     attachScroll(colDay, 'day');
     attachScroll(colMonth, 'month');
