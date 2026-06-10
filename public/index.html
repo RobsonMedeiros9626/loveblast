@@ -1814,9 +1814,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2600);
   })();
 
-  // "Ver demonstração" — por enquanto rola até categorias (demo interativa vem na Entrega 2)
+  // "Ver demonstração" — abre retrospectiva de exemplo (modo demo, sem pagamento)
   document.getElementById('verDemoBtn')?.addEventListener('click', () => {
-    document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    const cat = (typeof categoriaSelecionada !== 'undefined' && categoriaSelecionada) ? categoriaSelecionada : 'casal';
+    window.open('/view.html?demo=' + cat, '_blank');
   });
 
   // variáveis de música — declaradas antes do wizard para evitar ReferenceError
@@ -2396,134 +2397,44 @@ document.addEventListener('DOMContentLoaded', () => {
     musicInput.dispatchEvent(new Event('change'));
   });
 
-  // ---- WHATSAPP ANALYSIS (avançada) ----
+  // ---- WHATSAPP ANALYSIS ----
   function analisarConversaWhatsApp(texto) {
-    const raw = texto || '';
-    const linhas = raw.split(/\r?\n/);
-
-    // Regex para linha de mensagem do WhatsApp: data, hora, autor, texto
-    // Formatos: "12/03/2024 23:47 - Fulano: msg"  ou  "[12/03/2024, 23:47:10] Fulano: msg"
-    const reMsg = /^[\[]?(\d{1,2}\/\d{1,2}\/\d{2,4})[,]?\s+(\d{1,2}:\d{2})(?::\d{2})?[\]]?\s*[-–]?\s*([^:]{1,40}?):\s(.*)$/;
-
-    const msgs = [];
-    let ultima = null;
-    for (const linha of linhas) {
-      const m = linha.match(reMsg);
-      if (m) {
-        ultima = { data: m[1], hora: m[2], autor: m[3].trim(), texto: m[4] };
-        msgs.push(ultima);
-      } else if (ultima && linha.trim()) {
-        // linha de continuação da mensagem anterior
-        ultima.texto += '\n' + linha;
-      }
-    }
-
-    // Se não detectou formato estruturado, usa contagem bruta
-    const formatoOk = msgs.length > 5;
-    const clean = raw.toLowerCase();
-
-    // ---- Participantes ----
-    const autorCount = {};
-    msgs.forEach(m => {
-      const a = m.autor;
-      if (a.length < 40 && !/adicionou|removeu|criou|saiu|mudou|alterou|mensagens e ligações/i.test(a)) {
-        autorCount[a] = (autorCount[a] || 0) + 1;
-      }
-    });
-    const participantes = Object.entries(autorCount).sort((a,b)=>b[1]-a[1]).slice(0,2);
-    const pessoaA = participantes[0]?.[0] || '';
-    const pessoaB = participantes[1]?.[0] || '';
-
-    // ---- Métricas globais ----
-    const totalMessages = formatoOk ? msgs.length : Math.max(linhas.filter(Boolean).length, 0);
+    const clean = (texto || '').toLowerCase();
+    const linhas = clean.split(/\r?\n/).filter(Boolean);
+    const totalMessages = Math.max(linhas.length, 0);
     const loveCount = (clean.match(/eu te amo|te amo|amo você|amo vc/g) || []).length;
     const saudadeCount = (clean.match(/saudade|sdds|saudades/g) || []).length;
-    const kkkCount = (clean.match(/kk+|haha+|rsrs+/g) || []).length;
-
+    const kkkCount = (clean.match(/kkk+/g) || []).length;
     const emojis = clean.match(/[\u{1F300}-\u{1FAFF}❤️💕💖💘💝😍😂😭🥺🔥✨]/gu) || [];
     const emojiMap = {};
     emojis.forEach(e => emojiMap[e] = (emojiMap[e] || 0) + 1);
     const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '❤️';
-
-    // ---- Palavra-chave ----
-    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro','isso','tem','vou','aqui','mais','muito','tudo','bem','está','esta','também','tambem','quando','depois','mídia','midia','oculta','arquivo','figurinha']);
+    const stop = new Set(['que','para','com','uma','por','não','sim','você','voce','meu','minha','seu','sua','de','da','do','das','dos','em','eu','tu','te','to','ta','tá','pra','pro']);
     const words = clean.normalize('NFD').replace(/[\u0300-\u036f]/g,'').match(/\b[a-z]{4,}\b/g) || [];
     const wordMap = {};
     words.forEach(w => { if (!stop.has(w)) wordMap[w] = (wordMap[w] || 0) + 1; });
     let topWord = Object.entries(wordMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || 'amor';
-
-    // ---- Horário favorito + madrugadas ----
+    if ((clean.match(/amor/g) || []).length >= 2) topWord = 'amor';
     const hourMap = {};
-    let madrugadaCount = 0;
-    msgs.forEach(m => {
-      const h = parseInt(m.hora.split(':')[0]);
-      hourMap[h] = (hourMap[h]||0)+1;
-      if (h >= 0 && h <= 5) madrugadaCount++;
+    (texto.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/g) || []).forEach(h => {
+      const hour = h.split(':')[0].padStart(2,'0');
+      hourMap[hour] = (hourMap[hour] || 0) + 1;
     });
-    const favHour = Object.entries(hourMap).sort((a,b)=>b[1]-a[1])[0]?.[0];
-    const favoriteTime = favHour != null ? `${String(favHour).padStart(2,'0')}:00` : '23:47';
-    const madrugadaPct = totalMessages ? Math.round(madrugadaCount/totalMessages*100) : 0;
-
-    // ---- Mensagens por dia / recordes ----
-    const dayMap = {};
-    msgs.forEach(m => { dayMap[m.data] = (dayMap[m.data]||0)+1; });
-    const dias = Object.entries(dayMap).sort((a,b)=>b[1]-a[1]);
-    const recordeDia = dias[0] || null;
-    const totalDias = Object.keys(dayMap).length;
-
-    // ---- Timeline ----
-    const primeiraMsg = msgs[0] || null;
-    const ultimaMsg = msgs[msgs.length-1] || null;
-    const primeiroTeAmo = msgs.find(m => /te amo|amo você|amo vc/i.test(m.texto));
-    const primeiraFoto = msgs.find(m => /<mídia oculta>|imagem ocultada|image omitted|figurinha omitida/i.test(m.texto));
-
-    // ---- Por pessoa: tempo de resposta, iniciador, emojis ----
-    function perfilPessoa(nome) {
-      const msgsP = msgs.filter(m => m.autor === nome);
-      const total = msgsP.length;
-      const emojisP = (msgsP.map(m=>m.texto).join(' ').match(/[\u{1F300}-\u{1FAFF}❤️💕😍😂😭🥺]/gu)||[]).length;
-      const tamanhoMedio = total ? Math.round(msgsP.reduce((s,m)=>s+m.texto.length,0)/total) : 0;
-      return { nome, total, emojisP, tamanhoMedio };
-    }
-    const perfilA = pessoaA ? perfilPessoa(pessoaA) : null;
-    const perfilB = pessoaB ? perfilPessoa(pessoaB) : null;
-
-    // quem inicia mais (primeira msg do dia)
-    const iniciadorMap = {};
-    let dataAtual = null;
-    msgs.forEach(m => {
-      if (m.data !== dataAtual) { iniciadorMap[m.autor]=(iniciadorMap[m.autor]||0)+1; dataAtual=m.data; }
-    });
-    const iniciador = Object.entries(iniciadorMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || pessoaA;
-
+    const favoriteHour = Object.entries(hourMap).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const favoriteTime = favoriteHour ? `${favoriteHour}:00` : '23:47';
+    const emotionalLevel = loveCount + saudadeCount + kkkCount > 40 ? 'Muito alto' : loveCount + saudadeCount > 10 ? 'Alto' : 'Especial';
     return {
-      // métricas básicas (compatível com código existente)
       totalMessages: totalMessages || 18432,
       topWord,
       loveCount: loveCount || 82,
       saudadeCount: saudadeCount || 103,
       favoriteTime,
       topEmoji,
-      emotionalLevel: loveCount+saudadeCount+kkkCount > 40 ? 'Muito alto' : loveCount+saudadeCount > 10 ? 'Alto' : 'Especial',
-      // novos campos
-      formatoOk,
-      pessoaA, pessoaB,
-      perfilA, perfilB,
-      iniciador,
-      kkkCount,
-      madrugadaCount, madrugadaPct,
-      totalDias,
-      recordeDia: recordeDia ? { data: recordeDia[0], qtd: recordeDia[1] } : null,
-      timeline: {
-        primeira: primeiraMsg ? { data: primeiraMsg.data } : null,
-        ultima: ultimaMsg ? { data: ultimaMsg.data } : null,
-        primeiroTeAmo: primeiroTeAmo ? { data: primeiroTeAmo.data } : null,
-        primeiraFoto: primeiraFoto ? { data: primeiraFoto.data } : null,
-      },
+      emotionalLevel,
       generatedPhrases: [
         `A palavra que mais marcou essa história foi: ${topWord}.`,
-        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — presença mesmo na distância.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.',
-        kkkCount > 0 ? 'O humor fez parte: foram muitas risadas no caminho.' : 'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
+        saudadeCount > 0 ? `A saudade apareceu ${saudadeCount} vezes — sinal de presença mesmo na distância.` : 'O carinho apareceu mais nos detalhes do que nas grandes frases.',
+        kkkCount > 0 ? 'O humor também fez parte: foram muitas risadas no caminho.' : 'Mesmo nas mensagens simples, vocês criaram um lar um no outro.'
       ]
     };
   }
