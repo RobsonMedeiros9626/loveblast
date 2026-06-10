@@ -1709,62 +1709,113 @@ function buildWrapped(data, ins){
   const nomes = n2 ? `${n1} & ${n2}` : n1;
   const fotos = (Array.isArray(data.photos)?data.photos.filter(Boolean):[]);
   const foto = fotos[0] || 'https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=800';
+  const foto2 = fotos[1] || foto;
 
-  // tempo juntos
-  let tempoStr = '';
+  let tempoStr = '', diasJuntos = 0;
   if (data.dataInicio) {
     const d = parseLocalDate(data.dataInicio);
-    const dias = Math.floor((new Date()-d)/86400000);
-    const anos = Math.floor(dias/365), meses = Math.floor((dias%365)/30);
-    tempoStr = anos>0 ? `${anos} ${anos===1?'ano':'anos'}` : meses>0 ? `${meses} ${meses===1?'mês':'meses'}` : `${dias} dias`;
+    diasJuntos = Math.floor((new Date()-d)/86400000);
+    const anos = Math.floor(diasJuntos/365), meses = Math.floor((diasJuntos%365)/30);
+    tempoStr = anos>0 ? `${anos} ${anos===1?'ano':'anos'}` : meses>0 ? `${meses} ${meses===1?'mês':'meses'}` : `${diasJuntos} dias`;
   }
 
+  const totalMsg = Number(ins.totalMessages||0);
+  const love = ins.loveCount||0;
+  const saud = ins.saudadeCount||0;
+  const kkk  = ins.kkkCount||0;
+  const emoji = ins.topEmoji||'😂';
+  const word = ins.topWord||'amor';
+  const favTime = ins.favoriteTime||'23:00';
+  const madruga = ins.madrugadaPct||0;
+  const totalDias = ins.totalDias||0;
+  const recorde = ins.recordeDia;
+
+  // médias divertidas
+  const msgPorDia = totalDias ? Math.round(totalMsg/totalDias) : Math.round(totalMsg/365);
+  const minutosLendo = Math.round(totalMsg * 4 / 60); // ~4s lendo cada msg
+  const horasLendo = Math.round(minutosLendo/60);
+
+  // bolhas decorativas de fundo
+  const blobs = `<div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;opacity:.18">
+    <div style="position:absolute;top:-10%;left:-10%;width:50%;height:50%;border-radius:50%;background:#fff;filter:blur(60px)"></div>
+    <div style="position:absolute;bottom:-15%;right:-10%;width:55%;height:55%;border-radius:50%;background:#fff;filter:blur(70px)"></div>
+  </div>`;
+
   const slides = [
-    `<div class="wr-slide wr-c6">
-      <div class="wr-label wr-fadein">Sua retrospectiva</div>
+    // 1 — Abertura
+    `<div class="wr-slide wr-c6">${blobs}
+      <div class="wr-emoji wr-fadein">💝</div>
+      <div class="wr-label wr-fadein">A retrospectiva de</div>
       <h1 class="wr-fadein">${nomes}</h1>
-      <p class="wr-sub wr-fadein">Prepare o coração. Isso é tudo que a história de vocês revela. 💫</p>
+      <p class="wr-sub wr-fadein">Pega um lencinho. Isso aqui é tudo que a história de vocês revela. 💫</p>
+      <div class="wr-fadein" style="margin-top:24px;font-size:12px;font-weight:800;letter-spacing:.15em;opacity:.6;text-transform:uppercase">deslize para começar →</div>
     </div>`,
 
-    `<div class="wr-slide wr-c1">
+    // 2 — Total de mensagens + média
+    `<div class="wr-slide wr-c1">${blobs}
       <img src="${foto}" class="wr-photo wr-fadein" alt="">
       <div class="wr-label wr-fadein">vocês trocaram</div>
-      <div class="wr-big wr-fadein">${Number(ins.totalMessages||0).toLocaleString('pt-BR')}</div>
-      <p class="wr-sub wr-fadein">mensagens. Cada uma um tijolo nessa história.</p>
+      <div class="wr-big wr-fadein">${totalMsg.toLocaleString('pt-BR')}</div>
+      <p class="wr-sub wr-fadein">mensagens${tempoStr?` em ${tempoStr}`:''}.</p>
+      <div class="wr-fadein" style="margin-top:16px;background:rgba(255,255,255,.18);border-radius:14px;padding:12px 20px;font-size:15px;font-weight:800">📈 Isso dá uma média de ${msgPorDia.toLocaleString('pt-BR')} por dia</div>
     </div>`,
 
-    `<div class="wr-slide wr-c3">
+    // 3 — Tempo "lendo" um ao outro (dado divertido)
+    `<div class="wr-slide wr-c4">${blobs}
+      <div class="wr-emoji wr-fadein">⏳</div>
+      <div class="wr-label wr-fadein">vocês passaram cerca de</div>
+      <div class="wr-big wr-fadein">${horasLendo>0?horasLendo:minutosLendo}</div>
+      <p class="wr-sub wr-fadein">${horasLendo>0?'horas':'minutos'} só lendo as mensagens um do outro. Tempo bem investido. 💕</p>
+    </div>`,
+
+    // 4 — "eu te amo"
+    `<div class="wr-slide wr-c3">${blobs}
       <div class="wr-emoji wr-fadein">💌</div>
-      <div class="wr-label wr-fadein">vocês disseram "eu te amo"</div>
-      <div class="wr-big wr-fadein">${ins.loveCount||0}×</div>
-      <p class="wr-sub wr-fadein">e cada vez valeu como se fosse a primeira.</p>
+      <div class="wr-label wr-fadein">o "eu te amo" apareceu</div>
+      <div class="wr-big wr-fadein">${love}×</div>
+      <p class="wr-sub wr-fadein">${love>50?'Vocês não economizam no amor, hein?':'Cada um valeu como se fosse o primeiro.'}</p>
+      ${saud?`<div class="wr-fadein" style="margin-top:16px;background:rgba(0,0,0,.12);border-radius:14px;padding:12px 20px;font-size:15px;font-weight:800">🥹 E "saudade" apareceu ${saud}× — sentir falta também é amor</div>`:''}
     </div>`,
 
-    `<div class="wr-slide wr-c4">
+    // 5 — Horário + madrugada
+    `<div class="wr-slide wr-c2">${blobs}
       <div class="wr-emoji wr-fadein">🌙</div>
-      <div class="wr-label wr-fadein">horário favorito de vocês</div>
-      <div class="wr-big wr-fadein">${ins.favoriteTime||'23:00'}</div>
-      <p class="wr-sub wr-fadein">${(ins.madrugadaPct>20)?`${ins.madrugadaPct}% das conversas foram de madrugada. Sono? Que sono.`:'A melhor hora do dia era falar com você.'}</p>
+      <div class="wr-label wr-fadein">o horário de vocês</div>
+      <div class="wr-big wr-fadein">${favTime}</div>
+      <p class="wr-sub wr-fadein">era quando a conversa esquentava.</p>
+      ${madruga>15?`<div class="wr-fadein" style="margin-top:16px;background:rgba(255,255,255,.18);border-radius:14px;padding:12px 20px;font-size:15px;font-weight:800">🌃 ${madruga}% das conversas foram de madrugada. Dormir é pra fracos.</div>`:''}
     </div>`,
 
-    `<div class="wr-slide wr-c2">
-      <div class="wr-emoji wr-fadein">${ins.topEmoji||'😂'}</div>
-      <div class="wr-label wr-fadein">o emoji de vocês</div>
-      <h1 class="wr-fadein" style="font-size:clamp(40px,12vw,90px)">${ins.topEmoji||'😂'}</h1>
-      <p class="wr-sub wr-fadein">apareceu mais que qualquer palavra. Vocês riem juntos.</p>
+    // 6 — Emoji oficial
+    `<div class="wr-slide wr-c5">${blobs}
+      <div class="wr-label wr-fadein">o emoji oficial de vocês</div>
+      <div class="wr-fadein" style="font-size:clamp(90px,30vw,220px);line-height:1;margin:10px 0">${emoji}</div>
+      <p class="wr-sub wr-fadein">${kkk>0?`Foram ${kkk.toLocaleString('pt-BR')} risadas registradas. Rir junto é o segredo.`:'Ele resume vocês melhor que mil palavras.'}</p>
     </div>`,
 
-    `<div class="wr-slide wr-c5">
+    // 7 — Recorde de um dia (se houver)
+    recorde ? `<div class="wr-slide wr-c7">${blobs}
+      <div class="wr-emoji wr-fadein">🔥</div>
+      <div class="wr-label wr-fadein">o dia mais intenso foi</div>
+      <h2 class="wr-fadein">${recorde.data}</h2>
+      <div class="wr-big wr-fadein" style="font-size:clamp(48px,16vw,130px)">${recorde.qtd.toLocaleString('pt-BR')}</div>
+      <p class="wr-sub wr-fadein">mensagens em um único dia. O que rolou aí? 👀</p>
+    </div>` : '',
+
+    // 8 — Palavra que define
+    `<div class="wr-slide wr-c1">${blobs}
       <div class="wr-label wr-fadein">a palavra que define vocês</div>
-      <h1 class="wr-fadein" style="font-family:Georgia,serif;font-style:italic">${ins.topWord||'amor'}</h1>
-      ${ins.saudadeCount?`<p class="wr-sub wr-fadein">E "saudade" apareceu ${ins.saudadeCount}× — porque sentir falta também é amor.</p>`:'<p class="wr-sub wr-fadein">a essência de tudo que vocês construíram.</p>'}
+      <h1 class="wr-fadein" style="font-family:Georgia,serif;font-style:italic;font-size:clamp(44px,13vw,100px)">${word}</h1>
+      <p class="wr-sub wr-fadein">a essência de tudo que vocês construíram juntos.</p>
     </div>`,
 
-    `<div class="wr-slide wr-c7">
-      ${tempoStr?`<div class="wr-label wr-fadein">juntos há</div><div class="wr-big wr-fadein">${tempoStr}</div>`:'<div class="wr-emoji wr-fadein">♾️</div>'}
+    // 9 — Encerramento
+    `<div class="wr-slide wr-c6">${blobs}
+      <img src="${foto2}" class="wr-photo wr-fadein" alt="">
+      ${tempoStr?`<div class="wr-label wr-fadein">juntos há</div><h2 class="wr-fadein">${tempoStr}</h2>`:'<div class="wr-emoji wr-fadein">♾️</div>'}
       <p class="wr-sub wr-fadein">e que venham muitos capítulos mais. ♡</p>
     </div>`,
-  ];
+  ].filter(Boolean);
 
   wrTotal = slides.length;
   document.getElementById('wrTrack').innerHTML = slides.join('');
