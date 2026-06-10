@@ -58,8 +58,8 @@ async function processFiles(req,body,id){
 }
 
 // API routes
-app.get('/api/retrospectiva/:id',(req,res)=>{const data=req.query.pago==='1'?markPaid(req.params.id):readRetro(req.params.id);if(!data)return res.status(404).json({erro:'Nao encontrada.'});res.json(data);});
-app.get('/api/retrospectiva-por-sessao/:sid',async(req,res)=>{try{if(!stripe)return res.status(500).json({erro:'Stripe nao configurado.'});const s=await stripe.checkout.sessions.retrieve(req.params.sid);const id=s?.metadata?.retrospectiveId;if(!id)return res.status(404).json({erro:'Sessao sem retrospectiva.'});const data=req.query.pago==='1'?markPaid(id):readRetro(id);if(!data)return res.status(404).json({erro:'Nao encontrada.'});res.json(data);}catch(e){res.status(500).json({erro:'Erro ao carregar.'});}});
+app.get('/api/retrospectiva/:id',(req,res)=>{const data=readRetro(req.params.id);if(!data)return res.status(404).json({erro:'Nao encontrada.'});res.json(data);});
+app.get('/api/retrospectiva-por-sessao/:sid',async(req,res)=>{try{if(!stripe)return res.status(500).json({erro:'Stripe nao configurado.'});const s=await stripe.checkout.sessions.retrieve(req.params.sid);const id=s?.metadata?.retrospectiveId;if(!id)return res.status(404).json({erro:'Sessao sem retrospectiva.'});const realmentePago=s.payment_status==='paid';const data=realmentePago?markPaid(id):readRetro(id);if(!data)return res.status(404).json({erro:'Nao encontrada.'});res.json(data);}catch(e){res.status(500).json({erro:'Erro ao carregar.'});}});
 
 // Create session — FAST: save minimal → Stripe → return → process files bg
 app.post('/criar-sessao',upload.fields([{name:'photos',maxCount:12},{name:'music',maxCount:1},{name:'whatsappFile',maxCount:1}]),async(req,res)=>{
