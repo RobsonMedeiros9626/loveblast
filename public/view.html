@@ -814,8 +814,10 @@ function buildPanel(type,data,t,ins,isBasico,isCreator){
       const n1 = data.nome1||'Você', n2 = data.nome2||'Pessoa especial';
       const totalMsgs = Number(ins.totalMessages||18432).toLocaleString('pt-BR');
 
-      // Nível de conexão (decorativo, sempre alto e bonito)
-      const conex = Math.min(99, 80 + ((ins.loveCount||0) + (ins.saudadeCount||0) + (ins.kkkCount||0)) % 20);
+      // Mensagens por dia (média real, a partir dos dados da conversa)
+      const _totalMsg = Number(ins.totalMessages||0);
+      const _dias = ins.totalDias || (data.dataInicio ? Math.max(1, Math.floor((new Date()-parseLocalDate(data.dataInicio))/86400000)) : 365);
+      const msgPorDia = Math.max(1, Math.round(_totalMsg/_dias));
 
       // Número da história (a partir do id, estável)
       const histNum = (data.id ? Array.from(data.id).reduce((a,ch)=>a+ch.charCodeAt(0),0) : 5842) % 9000 + 1000;
@@ -861,11 +863,8 @@ function buildPanel(type,data,t,ins,isBasico,isCreator){
               <div style="font-size:15px;font-weight:900;color:#fff;margin-top:6px">${totalMsgs} <span style="font-size:11px;color:rgba(255,255,255,.4)">mensagens</span></div>
             </div>
             <div style="background:rgba(255,255,255,.04);border-radius:14px;padding:14px">
-              <div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:900;letter-spacing:.08em;color:rgba(255,255,255,.4)"><span style="font-size:15px">❤️</span> NÍVEL DE CONEXÃO</div>
-              <div style="display:flex;align-items:center;gap:8px;margin-top:8px">
-                <div style="flex:1;height:7px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden"><div style="height:100%;width:${conex}%;background:linear-gradient(90deg,var(--ac),#ff8a00);border-radius:99px"></div></div>
-                <span style="font-size:14px;font-weight:900;color:#fff">${conex}%</span>
-              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:10px;font-weight:900;letter-spacing:.08em;color:rgba(255,255,255,.4)"><span style="font-size:15px">💌</span> MENSAGENS POR DIA</div>
+              <div style="font-size:15px;font-weight:900;color:#fff;margin-top:6px">${msgPorDia.toLocaleString('pt-BR')} <span style="font-size:11px;color:rgba(255,255,255,.4)">em média</span></div>
             </div>
           </div>
 
