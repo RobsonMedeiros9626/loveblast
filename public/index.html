@@ -1277,37 +1277,22 @@ nav a:hover{background:rgba(255,45,120,.12)}
       <div class="wz-step-desc">A data em que vocês se conheceram ou começaram a história.</div>
       <label>Data</label>
       <input id="dataInicio" type="hidden">
-      <!-- Drum Picker -->
-      <div id="drumPicker" style="background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:20px;overflow:hidden;user-select:none">
-        <!-- fade top -->
-        <div style="position:relative">
-          <div style="pointer-events:none;position:absolute;top:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,rgba(8,8,14,.95),transparent);z-index:2"></div>
-          <div style="pointer-events:none;position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to top,rgba(8,8,14,.95),transparent);z-index:2"></div>
-          <!-- linha de seleção -->
-          <div style="pointer-events:none;position:absolute;top:50%;left:16px;right:16px;height:44px;transform:translateY(-50%);border-top:1px solid rgba(255,45,120,.4);border-bottom:1px solid rgba(255,45,120,.4);z-index:3;border-radius:10px;background:rgba(255,45,120,.06)"></div>
-          <div style="display:flex;height:220px">
-            <!-- Dia -->
-            <div class="drum-col" id="drumDay" style="flex:1;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none">
-            </div>
-            <!-- Mês -->
-            <div class="drum-col" id="drumMonth" style="flex:2;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none">
-            </div>
-            <!-- Ano -->
-            <div class="drum-col" id="drumYear" style="flex:1.5;overflow-y:scroll;scroll-snap-type:y mandatory;scrollbar-width:none">
-            </div>
-          </div>
-        </div>
+      <div style="display:flex;gap:10px">
+        <select id="selDay" class="date-select" style="flex:1"></select>
+        <select id="selMonth" class="date-select" style="flex:2"></select>
+        <select id="selYear" class="date-select" style="flex:1.5"></select>
       </div>
       <style>
-        .drum-col::-webkit-scrollbar{display:none}
-        .drum-item{
-          height:44px;display:flex;align-items:center;justify-content:center;
-          scroll-snap-align:center;font-size:17px;font-weight:600;color:rgba(255,255,255,.3);
-          transition:color .15s,font-size .15s;cursor:pointer;
+        .date-select{
+          padding:14px 12px;background:rgba(255,255,255,.06);
+          border:1px solid rgba(255,45,120,.35);border-radius:12px;
+          color:#fff;font-size:15px;font-weight:700;font-family:inherit;
+          outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;
+          background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff2d78' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+          background-repeat:no-repeat;background-position:right 12px center;padding-right:30px;
         }
-        .drum-item.selected{color:#fff;font-size:19px;font-weight:800}
-        /* padding top/bottom para centralizar primeiro/último item */
-        .drum-col::before,.drum-col::after{content:'';display:block;height:88px}
+        .date-select:focus{border-color:#ff2d78}
+        .date-select option{background:#1a0414;color:#fff}
       </style>
     </div>
 
@@ -1924,9 +1909,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const content = document.getElementById('wzContent');
       if (content) content.scrollTop = 0;
       updatePreview();
-      if (cur === 1 && window._scrollDrumToday) {
-        [30, 150, 350].forEach(ms => setTimeout(window._scrollDrumToday, ms));
-      }
     }
 
     function validate(step){
@@ -2167,116 +2149,57 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('photos')?.addEventListener('change', () => window._updatePreview?.());
   document.getElementById('wzRefreshPreview')?.addEventListener('click', () => window._updatePreview?.());
 
-  // ── DRUM DATE PICKER ──
-  (function initDrumPicker() {
+  // ── SELETOR DE DATA (dropdowns) ──
+  (function initDatePicker() {
     const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const now = new Date();
-    let selDay = now.getDate();
-    let selMonth = now.getMonth(); // 0-based
-    let selYear = now.getFullYear();
+    const selDay = document.getElementById('selDay');
+    const selMonth = document.getElementById('selMonth');
+    const selYear = document.getElementById('selYear');
+    if (!selDay) return;
+    const minYear = 1970, maxYear = now.getFullYear();
 
-    const colDay   = document.getElementById('drumDay');
-    const colMonth = document.getElementById('drumMonth');
-    const colYear  = document.getElementById('drumYear');
-    if (!colDay) return;
+    // popula meses
+    MONTHS.forEach((m,i) => {
+      const o = document.createElement('option'); o.value = i; o.textContent = m; selMonth.appendChild(o);
+    });
+    // popula anos (do atual para trás)
+    for (let y = maxYear; y >= minYear; y--) {
+      const o = document.createElement('option'); o.value = y; o.textContent = y; selYear.appendChild(o);
+    }
 
-    // Gera items
-    function fillDays() {
-      const maxDay = new Date(selYear, selMonth + 1, 0).getDate();
-      colDay.innerHTML = '';
-      for (let d = 1; d <= maxDay; d++) {
-        const el = document.createElement('div');
-        el.className = 'drum-item' + (d === selDay ? ' selected' : '');
-        el.textContent = String(d).padStart(2, '0');
-        colDay.appendChild(el);
+    function preencheDias() {
+      const m = parseInt(selMonth.value), y = parseInt(selYear.value);
+      const max = new Date(y, m+1, 0).getDate();
+      const atual = parseInt(selDay.value) || now.getDate();
+      selDay.innerHTML = '';
+      for (let d = 1; d <= max; d++) {
+        const o = document.createElement('option'); o.value = d; o.textContent = String(d).padStart(2,'0'); selDay.appendChild(o);
       }
-    }
-    function fillMonths() {
-      colMonth.innerHTML = '';
-      MONTHS.forEach((m, i) => {
-        const el = document.createElement('div');
-        el.className = 'drum-item' + (i === selMonth ? ' selected' : '');
-        el.textContent = m;
-        colMonth.appendChild(el);
-      });
-    }
-    function fillYears() {
-      colYear.innerHTML = '';
-      for (let y = 1970; y <= selYear; y++) {
-        const el = document.createElement('div');
-        el.className = 'drum-item' + (y === selYear ? ' selected' : '');
-        el.textContent = y;
-        colYear.appendChild(el);
-      }
-    }
-
-    function scrollTo(col, idx) {
-      col.scrollTop = idx * 44;
+      selDay.value = Math.min(atual, max);
     }
 
     function updateInput() {
-      const mm = String(selMonth + 1).padStart(2, '0');
-      const dd = String(selDay).padStart(2, '0');
+      const mm = String(parseInt(selMonth.value)+1).padStart(2,'0');
+      const dd = String(parseInt(selDay.value)).padStart(2,'0');
       const hidden = document.getElementById('dataInicio');
-      if (hidden) hidden.value = `${selYear}-${mm}-${dd}`;
+      if (hidden) hidden.value = selYear.value + '-' + mm + '-' + dd;
       window._updatePreview?.();
     }
 
-    function highlightSelected(col, idx) {
-      col.querySelectorAll('.drum-item').forEach((el, i) => {
-        el.classList.toggle('selected', i === idx);
-      });
-    }
+    // valores iniciais = hoje
+    selMonth.value = now.getMonth();
+    selYear.value = now.getFullYear();
+    preencheDias();
+    selDay.value = now.getDate();
+    updateInput();
 
-    function onScroll(col, type) {
-      const idx = Math.round(col.scrollTop / 44);
-      if (type === 'day') {
-        const maxDay = new Date(selYear, selMonth + 1, 0).getDate();
-        selDay = Math.min(Math.max(1, idx + 1), maxDay);
-        highlightSelected(col, selDay - 1);
-      } else if (type === 'month') {
-        selMonth = Math.min(Math.max(0, idx), 11);
-        highlightSelected(col, selMonth);
-        // re-check day validity
-        const maxDay = new Date(selYear, selMonth + 1, 0).getDate();
-        if (selDay > maxDay) { selDay = maxDay; fillDays(); scrollTo(colDay, selDay - 1); }
-      } else {
-        const years = selYear - 1970 + 1;
-        selYear = 1970 + Math.min(Math.max(0, idx), years - 1);
-        highlightSelected(col, selYear - 1970);
-      }
-      updateInput();
-    }
+    selMonth.addEventListener('change', () => { preencheDias(); updateInput(); });
+    selYear.addEventListener('change', () => { preencheDias(); updateInput(); });
+    selDay.addEventListener('change', updateInput);
 
-    let scrollTimers = {};
-    function attachScroll(col, type) {
-      col.addEventListener('scroll', () => {
-        clearTimeout(scrollTimers[type]);
-        scrollTimers[type] = setTimeout(() => {
-          onScroll(col, type);
-          // snap
-          const idx = Math.round(col.scrollTop / 44);
-          col.scrollTo({ top: idx * 44, behavior: 'smooth' });
-        }, 80);
-      });
-    }
-
-    fillDays(); fillMonths(); fillYears();
-
-    function scrollToToday() {
-      if (!colDay.offsetParent) return false;
-      colDay.scrollTop = (selDay - 1) * 44;
-      colMonth.scrollTop = selMonth * 44;
-      colYear.scrollTop = (selYear - 1970) * 44;
-      updateInput();
-      return true;
-    }
-    window._scrollDrumToday = scrollToToday;
-    [50, 200, 500].forEach(ms => setTimeout(scrollToToday, ms));
-
-    attachScroll(colDay, 'day');
-    attachScroll(colMonth, 'month');
-    attachScroll(colYear, 'year');
+    // compat com chamada antiga do wizard
+    window._scrollDrumToday = () => true;
   })();
 
   // ============================================================
@@ -2341,15 +2264,54 @@ document.addEventListener('DOMContentLoaded', () => {
   const photosInput = document.getElementById('photos');
   const imgPreviewGrid = document.getElementById('imgPreviewGrid');
 
-  photosInput?.addEventListener('change', () => {
+  // Lista própria de arquivos (permite remover individualmente)
+  let _photoFiles = [];
+
+  function _syncPhotosInput() {
+    // reconstrói o FileList do input a partir da nossa lista
+    const dt = new DataTransfer();
+    _photoFiles.forEach(f => dt.items.add(f));
+    photosInput.files = dt.files;
+    // atualiza o preview ao vivo do wizard
+    window._updatePreview?.();
+  }
+
+  function _renderPhotoGrid() {
     imgPreviewGrid.innerHTML = '';
-    const files = Array.from(photosInput.files).slice(0, 10);
-    files.forEach(file => {
+    _photoFiles.forEach((file, idx) => {
+      const wrap = document.createElement('div');
+      wrap.style.cssText = 'position:relative;display:inline-block';
       const img = document.createElement('img');
       img.src = URL.createObjectURL(file);
       img.onload = () => URL.revokeObjectURL(img.src);
-      imgPreviewGrid.appendChild(img);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.innerHTML = '✕';
+      btn.title = 'Remover foto';
+      btn.style.cssText = 'position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;border:none;background:rgba(0,0,0,.7);color:#fff;font-size:13px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2';
+      btn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        _photoFiles.splice(idx, 1);
+        _syncPhotosInput();
+        _renderPhotoGrid();
+      };
+      wrap.appendChild(img);
+      wrap.appendChild(btn);
+      imgPreviewGrid.appendChild(wrap);
     });
+  }
+
+  photosInput?.addEventListener('change', () => {
+    // adiciona os novos arquivos à lista (até 10 no total)
+    const novos = Array.from(photosInput.files);
+    novos.forEach(f => {
+      if (_photoFiles.length < 10 && !_photoFiles.some(x => x.name === f.name && x.size === f.size)) {
+        _photoFiles.push(f);
+      }
+    });
+    _syncPhotosInput();
+    _renderPhotoGrid();
   });
 
   // Drag-drop fotos
@@ -2359,8 +2321,14 @@ document.addEventListener('DOMContentLoaded', () => {
   photoDropArea?.addEventListener('drop', e => {
     e.preventDefault();
     photoDropArea.classList.remove('drag-over');
-    photosInput.files = e.dataTransfer.files;
-    photosInput.dispatchEvent(new Event('change'));
+    // adiciona os arquivos soltos à nossa lista
+    Array.from(e.dataTransfer.files).forEach(f => {
+      if (_photoFiles.length < 10 && !_photoFiles.some(x => x.name === f.name && x.size === f.size)) {
+        _photoFiles.push(f);
+      }
+    });
+    _syncPhotosInput();
+    _renderPhotoGrid();
   });
 
   // ---- FILE: MUSIC ----
