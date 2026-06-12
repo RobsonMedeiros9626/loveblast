@@ -2405,10 +2405,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const saudadeCount = (clean.match(/saudade|sdds|saudades/g) || []).length;
     const kkkCount = (clean.match(/kk+|haha+|rsrs+/g) || []).length;
 
-    const emojis = clean.match(/[\u{1F300}-\u{1FAFF}\u2764\uFE0F\u{1F495}\u{1F496}\u{1F498}\u{1F49D}\u{1F60D}\u{1F602}\u{1F62D}\u{1F97A}\u{1F525}\u2728]/gu) || [];
+    // Captura emojis completos (com modificadores) e ignora seletores de variação soltos
+    const emojiRe = /(?:\p{Emoji_Presentation}|\p{Extended_Pictographic})(?:\uFE0F|\u200D\p{Extended_Pictographic})*/gu;
+    const emojisRaw = clean.match(emojiRe) || [];
     const emojiMap = {};
-    emojis.forEach(e => emojiMap[e] = (emojiMap[e]||0)+1);
-    const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '\u2764\uFE0F';
+    emojisRaw.forEach(e => {
+      const limpo = e.replace(/[\uFE0F\u200D]/g, '').trim();
+      // ignora dígitos, símbolos vazios e caracteres de controle
+      if (!limpo || /^[\d#*\s]$/.test(limpo)) return;
+      emojiMap[e] = (emojiMap[e]||0)+1;
+    });
+    const topEmoji = Object.entries(emojiMap).sort((a,b)=>b[1]-a[1])[0]?.[0] || '❤️';
 
     const stop = new Set(['que','para','com','uma','por','nao','sim','voce','meu','minha','seu','sua','das','dos','tambem','quando','depois','midia','oculta','arquivo','figurinha','mais','muito','tudo','bem','esta','isso','tem','vou','aqui','pra','pro']);
     const words = clean.normalize('NFD').replace(/[\u0300-\u036f]/g,'').match(/\b[a-z]{4,}\b/g) || [];
@@ -2434,7 +2441,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function perfil(nome){
       const mp = msgs.filter(m=>m.autor===nome);
       const total = mp.length;
-      const emojisP = (mp.map(m=>m.texto).join(' ').match(/[\u{1F300}-\u{1FAFF}\u2764\uFE0F\u{1F60D}\u{1F602}\u{1F62D}\u{1F97A}]/gu)||[]).length;
+      const emojisP = (mp.map(m=>m.texto).join(' ').match(/(?:\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu)||[]).length;
       const tamanhoMedio = total ? Math.round(mp.reduce((s,m)=>s+m.texto.length,0)/total) : 0;
       return { nome, total, emojisP, tamanhoMedio };
     }
