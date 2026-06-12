@@ -1235,6 +1235,19 @@ nav a:hover{background:rgba(255,45,120,.12)}
     </div>
   </div>
 
+  <!-- SUPORTE -->
+  <div style="margin-top:28px;text-align:center">
+    <div style="font-size:13px;color:rgba(255,255,255,.45);margin-bottom:14px">Precisa de ajuda? Fale com a gente 💬</div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <a href="https://wa.me/5584981636405?text=Ol%C3%A1!%20Preciso%20de%20ajuda%20com%20o%20LoveBlast" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:99px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.4);color:#25d366;font-weight:800;font-size:14px;text-decoration:none">
+        <span style="font-size:18px">📱</span> Suporte no WhatsApp
+      </a>
+      <a href="mailto:oi11oi912@gmail.com?subject=Suporte%20LoveBlast" style="display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:99px;background:rgba(255,45,120,.1);border:1px solid rgba(255,45,120,.4);color:#ff7aa9;font-weight:800;font-size:14px;text-decoration:none">
+        <span style="font-size:18px">✉️</span> Suporte por E-mail
+      </a>
+    </div>
+  </div>
+
 </section>
 
 <!-- MODAL -->
@@ -1799,9 +1812,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 2600);
   })();
 
-  // "Ver demonstração" — por enquanto rola até categorias (demo interativa vem na Entrega 2)
+  // "Ver demonstração" — abre retrospectiva de exemplo (modo demo, sem pagamento)
   document.getElementById('verDemoBtn')?.addEventListener('click', () => {
-    document.querySelector('.cat-section')?.scrollIntoView({ behavior:'smooth', block:'start' });
+    const cat = (typeof categoriaSelecionada !== 'undefined' && categoriaSelecionada) ? categoriaSelecionada : 'casal';
+    window.open('/view.html?demo=' + cat, '_blank');
   });
 
   // variáveis de música — declaradas antes do wizard para evitar ReferenceError
