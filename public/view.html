@@ -73,6 +73,22 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
 .p-ab-amigos .ab-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:24px}
 .p-ab-amigos .ab-tag{padding:7px 14px;border:1px solid rgba(157,78,221,.4);border-radius:99px;font-size:12px;font-weight:800;color:#c79dff;background:rgba(157,78,221,.08)}
 
+/* ── MEMÓRIAS AMIGOS (scrapbook) ── */
+.p-mem-amigos{background:linear-gradient(135deg,#12081c,#0a0a18);display:flex;flex-direction:column;justify-content:center;padding:30px 24px;position:relative;overflow:hidden}
+.p-mem-amigos .mem-doodles{position:absolute;inset:0;pointer-events:none;opacity:.4;z-index:0}
+.p-mem-amigos .mem-doodles span{position:absolute;font-size:26px}
+.p-mem-amigos h2{font-family:'Poppins',sans-serif;font-size:clamp(26px,4.5vw,46px);font-weight:900;line-height:1.05;position:relative;z-index:2}
+.p-mem-amigos h2 .hl{background:linear-gradient(90deg,#9d4edd,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.scrap-board{position:relative;z-index:2;margin-top:24px;display:flex;flex-wrap:wrap;gap:14px;justify-content:center}
+.scrap-photo{position:relative;background:#fff;padding:8px 8px 28px;border-radius:3px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+.scrap-photo img{width:150px;height:150px;object-fit:cover;display:block}
+.scrap-photo .tape{position:absolute;top:-10px;left:50%;transform:translateX(-50%) rotate(-3deg);width:60px;height:22px;background:rgba(157,78,221,.45);border:1px dashed rgba(255,255,255,.3)}
+.scrap-photo .cap{font-family:'Caveat','Dancing Script',cursive;font-size:17px;color:#333;text-align:center;margin-top:4px}
+.scrap-photo:nth-child(1){transform:rotate(-5deg)}
+.scrap-photo:nth-child(2){transform:rotate(3deg)}
+.scrap-photo:nth-child(3){transform:rotate(-2deg)}
+.scrap-photo:nth-child(4){transform:rotate(4deg)}
+
 /* FOTO POLAROID */
 .photo-wrap{width:260px;background:#fff;padding:10px 10px 32px;transform:rotate(-3deg);margin:0 auto 28px;box-shadow:0 22px 60px rgba(0,0,0,.6)}
 .photo-wrap img{width:100%;height:230px;object-fit:cover;display:block}
@@ -553,7 +569,7 @@ const THEMES={
     counterLabel:'de amizade há',
     timeline:[['😂','início','Se conheceram e riram muito'],['💬','+1','Conversas infinitas'],['🤝','+2','Parceria de verdade'],['🔥','hoje','Muito mais história à frente']],
     quotes:['Vocês transformaram dias comuns em histórias boas.','A amizade aparece nas piadas, nos conselhos e na presença.','Algumas pessoas chegam e ficam para sempre.'],
-    panels:['abertura_amigos','foto','insights_amigos','galeria','frases','carta_amigos','counter','estrelas','final','share'],
+    panels:['abertura_amigos','foto_amigos','insights_amigos','galeria','frases','carta_amigos','counter','estrelas','final','share'],
     extra:[['😂','Risadas','Muitas'],['💬','Conversas','Infinitas'],['🤝','Parceria','Real'],['🔥','Intensidade','Alta'],['❤️','Amizade','Verdadeira']],
   },
   formatura:{
@@ -798,6 +814,26 @@ function buildPanel(type,data,t,ins,isBasico,isCreator){
             <span class="ab-tag">🔥 Histórias sem fim</span>
           </div>
         </div>
+      </div>`;
+    }
+
+    case 'foto_amigos': {
+      const realPhotos = photos.filter(Boolean);
+      const caps = ['rolê 📸','sempre juntos','que dia 😎','memória top'];
+      const boards = realPhotos.length
+        ? realPhotos.slice(0,4).map((src,i) =>
+            `<div class="scrap-photo"><div class="tape"></div><img src="${src}" onerror="this.closest('.scrap-photo').remove()" alt=""><div class="cap">${caps[i]||'💛'}</div></div>`
+          ).join('')
+        : `<div style="padding:30px;border:2px dashed rgba(157,78,221,.3);border-radius:14px;color:rgba(255,255,255,.4);font-size:14px">📸 Cole aqui as fotos da amizade</div>`;
+      return `<div class="panel p-mem-amigos">
+        <div class="panel-num">02 NOSSAS MEMÓRIAS</div>
+        <div class="mem-doodles">
+          <span style="top:14%;left:8%">✏️</span><span style="top:20%;right:10%">⭐</span>
+          <span style="bottom:18%;left:12%">💛</span><span style="bottom:24%;right:14%">😄</span>
+        </div>
+        <h2>Os <span class="hl">rolês</span> que viraram<br>história 📌</h2>
+        <p style="font-size:14px;margin-top:12px;color:rgba(255,255,255,.5);position:relative;z-index:2">Cada foto, uma lembrança que ninguém tira da gente.</p>
+        <div class="scrap-board">${boards}</div>
       </div>`;
     }
 
