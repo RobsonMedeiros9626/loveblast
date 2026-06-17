@@ -53,6 +53,26 @@ body{font-family:'Montserrat',Arial,sans-serif;background:var(--dark);color:#fff
 .p-abertura .intro{margin-top:24px;font-size:11px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45)}
 .p-abertura .category-badge{display:inline-flex;align-items:center;gap:8px;margin-top:18px;padding:8px 16px;border:1px solid rgba(var(--ac-rgb),.4);border-radius:99px;background:rgba(var(--ac-rgb),.1);font-size:13px;font-weight:900;color:var(--ac)}
 
+/* ── ABERTURA AMIGOS (layout próprio) ── */
+.p-ab-amigos{background:radial-gradient(circle at 30% 20%,rgba(157,78,221,.25),transparent 55%),radial-gradient(circle at 75% 80%,rgba(0,212,255,.2),transparent 55%),linear-gradient(160deg,#0a0512,#0d0818);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;overflow:hidden}
+.p-ab-amigos .float-emojis{position:absolute;inset:0;pointer-events:none;z-index:0}
+.p-ab-amigos .float-emojis span{position:absolute;font-size:34px;opacity:.5;animation:abFloat 6s ease-in-out infinite}
+.p-ab-amigos .float-emojis span:nth-child(1){top:12%;left:12%;animation-delay:0s}
+.p-ab-amigos .float-emojis span:nth-child(2){top:20%;right:14%;animation-delay:1.2s;font-size:28px}
+.p-ab-amigos .float-emojis span:nth-child(3){bottom:24%;left:16%;animation-delay:2.1s;font-size:40px}
+.p-ab-amigos .float-emojis span:nth-child(4){bottom:16%;right:18%;animation-delay:.6s}
+.p-ab-amigos .float-emojis span:nth-child(5){top:46%;left:6%;animation-delay:3s;font-size:24px}
+.p-ab-amigos .float-emojis span:nth-child(6){top:40%;right:7%;animation-delay:1.8s;font-size:30px}
+@keyframes abFloat{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-22px) rotate(6deg)}}
+.p-ab-amigos .ab-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center}
+.p-ab-amigos .ab-emoji-main{font-size:clamp(60px,16vw,110px);line-height:1;margin-bottom:12px;filter:drop-shadow(0 0 24px rgba(157,78,221,.6))}
+.p-ab-amigos .ab-pill{display:inline-block;background:linear-gradient(90deg,#9d4edd,#00d4ff);padding:6px 18px;border-radius:99px;font-size:12px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fff;margin-bottom:20px;box-shadow:0 4px 20px rgba(157,78,221,.5)}
+.p-ab-amigos h1{font-family:'Poppins',sans-serif;font-weight:900;font-size:clamp(38px,8vw,72px);line-height:1;color:#fff;letter-spacing:-.02em}
+.p-ab-amigos h1 .amp{background:linear-gradient(90deg,#9d4edd,#00d4ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.p-ab-amigos .ab-sub{margin-top:18px;font-size:14px;font-weight:600;color:rgba(255,255,255,.6);max-width:440px;line-height:1.5}
+.p-ab-amigos .ab-tags{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:24px}
+.p-ab-amigos .ab-tag{padding:7px 14px;border:1px solid rgba(157,78,221,.4);border-radius:99px;font-size:12px;font-weight:800;color:#c79dff;background:rgba(157,78,221,.08)}
+
 /* FOTO POLAROID */
 .photo-wrap{width:260px;background:#fff;padding:10px 10px 32px;transform:rotate(-3deg);margin:0 auto 28px;box-shadow:0 22px 60px rgba(0,0,0,.6)}
 .photo-wrap img{width:100%;height:230px;object-fit:cover;display:block}
@@ -533,7 +553,7 @@ const THEMES={
     counterLabel:'de amizade há',
     timeline:[['😂','início','Se conheceram e riram muito'],['💬','+1','Conversas infinitas'],['🤝','+2','Parceria de verdade'],['🔥','hoje','Muito mais história à frente']],
     quotes:['Vocês transformaram dias comuns em histórias boas.','A amizade aparece nas piadas, nos conselhos e na presença.','Algumas pessoas chegam e ficam para sempre.'],
-    panels:['abertura','foto','insights_amigos','galeria','frases','carta_amigos','counter','estrelas','final','share'],
+    panels:['abertura_amigos','foto','insights_amigos','galeria','frases','carta_amigos','counter','estrelas','final','share'],
     extra:[['😂','Risadas','Muitas'],['💬','Conversas','Infinitas'],['🤝','Parceria','Real'],['🔥','Intensidade','Alta'],['❤️','Amizade','Verdadeira']],
   },
   formatura:{
@@ -759,6 +779,27 @@ function buildPanel(type,data,t,ins,isBasico,isCreator){
         <p class="intro">${t.intro}</p>
         <div class="category-badge">${t.badgeIcon} ${t.badgeLabel}</div>
       </div>`;
+
+    case 'abertura_amigos': {
+      const nomes = n2 ? `${n1} <span class="amp">&</span> ${n2}` : n1;
+      return `<div class="panel p-ab-amigos" id="painelAbertura">
+        <div class="panel-num">01 ABERTURA</div>
+        <div class="float-emojis">
+          <span>😂</span><span>🎉</span><span>🤝</span><span>🍻</span><span>✨</span><span>💬</span>
+        </div>
+        <div class="ab-content">
+          <div class="ab-emoji-main">🎉</div>
+          <div class="ab-pill">Amizade de verdade</div>
+          <h1>${nomes}</h1>
+          <p class="ab-sub">${t.intro}</p>
+          <div class="ab-tags">
+            <span class="ab-tag">😂 Muitas risadas</span>
+            <span class="ab-tag">🤝 Parceria real</span>
+            <span class="ab-tag">🔥 Histórias sem fim</span>
+          </div>
+        </div>
+      </div>`;
+    }
 
     case 'foto': {
       // Pick real photos or nothing — never show logo fallback here
