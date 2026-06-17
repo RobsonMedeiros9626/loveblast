@@ -1728,7 +1728,21 @@ document.addEventListener('DOMContentLoaded', () => {
     card.addEventListener('click', () => abrirFormulario(card.dataset.category));
   });
   document.querySelectorAll('.js-open-modal').forEach(btn => {
-    btn.addEventListener('click', () => abrirFormulario());
+    btn.addEventListener('click', () => {
+      // Leva a pessoa a escolher a categoria primeiro
+      const sec = document.querySelector('.cat-section');
+      if (sec) {
+        sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // realce rápido pra indicar que é pra escolher
+        sec.querySelectorAll('.cat-card').forEach(c => {
+          c.style.transition = 'box-shadow .4s';
+          c.style.boxShadow = '0 0 0 2px var(--cat-color, #ff2d78)';
+          setTimeout(() => { c.style.boxShadow = ''; }, 1200);
+        });
+      } else {
+        abrirFormulario();
+      }
+    });
   });
   document.getElementById('closeModal')?.addEventListener('click', fecharFormulario);
   modal?.addEventListener('click', e => { if (e.target === modal) fecharFormulario(); });
